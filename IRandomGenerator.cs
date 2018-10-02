@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace DMTools.Dice
 {
-    class Program
+    public interface IRandomGenerator
     {
-        static void Main(string[] args)
-        {
-        }
+        int Generate(int min, int max);
     }
 }

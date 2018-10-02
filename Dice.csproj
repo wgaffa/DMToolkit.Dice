@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{53848598-E521-45F4-A3D5-FBFA812394E2}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Dice</RootNamespace>
+    <RootNamespace>DMTools.Dice</RootNamespace>
     <AssemblyName>Dice</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -42,6 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultRandomGenerator.cs" />
+    <Compile Include="Dice.cs" />
+    <Compile Include="IRandomGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
