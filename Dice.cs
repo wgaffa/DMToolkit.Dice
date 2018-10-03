@@ -8,7 +8,7 @@ namespace DMTools.Dice
 {
     public class Dice
     {
-        public Dice(int sides)
+        public Dice(int sides = 6)
         {
             Sides = sides;
         }
