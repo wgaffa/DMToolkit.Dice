@@ -47,6 +47,7 @@
     <Compile Include="DiceRoller.cs" />
     <Compile Include="Expression\BinaryOperation.cs" />
     <Compile Include="Expression\Constant.cs" />
+    <Compile Include="Expression\DiceExpressionBuilder.cs" />
     <Compile Include="Expression\DiceValue.cs" />
     <Compile Include="Expression\IDiceExpression.cs" />
     <Compile Include="IRandomGenerator.cs" />
