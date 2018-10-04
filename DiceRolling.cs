@@ -26,5 +26,22 @@ namespace DiceTest
 
             Assert.AreEqual(5, d12.Roll());
         }
+
+        [TestMethod]
+        public void RollSeveralDiceString()
+        {
+            DiceRoller diceCup = new DiceRoller("5d12", new MockRandomGenerator());
+
+            CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll());
+        }
+
+        [TestMethod]
+        public void RollSeveralDice()
+        {
+            Dice d12 = new Dice(12, new MockRandomGenerator());
+            DiceRoller diceCup = new DiceRoller(5, d12);
+
+            CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll());
+        }
     }
 }
