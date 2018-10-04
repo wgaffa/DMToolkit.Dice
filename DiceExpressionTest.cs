@@ -56,5 +56,15 @@ namespace DiceTest
 
             Assert.AreEqual(105, oneHundredMultiply.Evaluate());
         }
+
+        [TestMethod]
+        public void DiceExpressionBuilder()
+        {
+            DiceExpressionBuilder builder = new DiceExpressionBuilder();
+            builder.Addition(new DiceValue(new DiceRoller("3d8", new MockRandomGenerator(3)))).Subtract(new Constant(5)).
+                Addition(new DiceValue(new DiceRoller("5d3", new MockRandomGenerator(2))));
+
+            Assert.AreEqual(14, builder.Evaluate());
+        }
     }
 }
