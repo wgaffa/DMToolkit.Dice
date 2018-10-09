@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="DefaultRandomGenerator.cs" />
     <Compile Include="Dice.cs" />
+    <Compile Include="DiceResult.cs" />
     <Compile Include="DiceRoller.cs" />
     <Compile Include="Expression\BinaryOperation.cs" />
     <Compile Include="Expression\Constant.cs" />

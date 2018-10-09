@@ -26,7 +26,7 @@ namespace DMTools.Dice
             Dice = new Dice(int.Parse(diceSplit[1]), _randomGenerator);
         }
 
-        public IEnumerable<int> Roll()
+        public DiceResult Roll()
         {
             List<int> rolls = new List<int>();
 
@@ -35,12 +35,7 @@ namespace DMTools.Dice
                 rolls.Add(Dice.Roll());
             }
 
-            return rolls;
-        }
-
-        public int RollSum()
-        {
-            return Roll().Sum();
+            return new DiceResult(rolls.Sum(), rolls);
         }
 
         public int NumberOfRolls { get; private set; }

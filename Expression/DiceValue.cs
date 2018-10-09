@@ -15,8 +15,7 @@ namespace DMTools.Dice.Expression
 
         public int Evaluate()
         {
-            List<int> rolls = _diceRoller.Roll().ToList();
-            return rolls.Aggregate((lhs, rhs) => lhs + rhs);
+            return _diceRoller.Roll().Result;
         }
 
         private readonly DiceRoller _diceRoller;
