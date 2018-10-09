@@ -32,7 +32,7 @@ namespace DiceTest
         {
             DiceRoller diceCup = new DiceRoller("5d12", new MockRandomGenerator());
 
-            CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll());
+            CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll().ToList());
         }
 
         [TestMethod]
@@ -41,7 +41,7 @@ namespace DiceTest
             Dice d12 = new Dice(12, new MockRandomGenerator());
             DiceRoller diceCup = new DiceRoller(5, d12);
 
-            CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll());
+            CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll().ToList());
         }
     }
 }
