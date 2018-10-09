@@ -45,7 +45,7 @@ namespace DiceTest
 
             var dice = diceParser.Parse("d10");
 
-            CollectionAssert.AreEqual(new List<int> { 5 }, dice.Roll().ToList());
+            CollectionAssert.AreEqual(new List<int> { 5 }, dice.Roll().IndividualRolls);
         }
 
         [TestMethod]
@@ -105,12 +105,18 @@ namespace DiceTest
             Dice twelveSidedDice = new Dice(12, new MockRandomGenerator());
             DiceRoller diceCup = new DiceRoller(3, twelveSidedDice);
 
-            var rollMethod = typeof(DiceRoller).GetMethod("RollSum");
+            var rollMethod = typeof(DiceRoller).GetMethod("Roll");
             Expression instance = Expression.Constant(diceCup);
             Expression rollCall = Expression.Call(instance, rollMethod);
+            ParameterExpression left = Expression.Variable(typeof(DiceResult), "left");
+            Expression assignRoll = Expression.Assign(left, rollCall);
+
+            Expression total = Expression.Property(left, "Result");
+
             Expression constant7 = Expression.Constant(7);
-            Expression addition = Expression.MakeBinary(ExpressionType.Add, rollCall, constant7);
-            LambdaExpression lambda = Expression.Lambda(addition);
+            Expression addition = Expression.MakeBinary(ExpressionType.Add, total, constant7);
+            Expression block = Expression.Block(new[] { left }, assignRoll, addition);
+            LambdaExpression lambda = Expression.Lambda(block);
 
             var expected = (Func<int>)lambda.Compile();
 
