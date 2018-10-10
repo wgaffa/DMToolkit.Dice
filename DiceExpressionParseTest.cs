@@ -108,14 +108,13 @@ namespace DiceTest
             var rollMethod = typeof(DiceRoller).GetMethod("Roll");
             Expression instance = Expression.Constant(diceCup);
             Expression rollCall = Expression.Call(instance, rollMethod);
-            ParameterExpression left = Expression.Variable(typeof(DiceResult), "left");
-            Expression assignRoll = Expression.Assign(left, rollCall);
-
-            Expression total = Expression.Property(left, "Result");
-
+            Expression diceResult = Expression.Property(rollCall, "Result");
+            ParameterExpression left = Expression.Variable(typeof(int), "left");
+            Expression assignRoll = Expression.Assign(left, diceResult);
+            
             Expression constant7 = Expression.Constant(7);
-            Expression addition = Expression.MakeBinary(ExpressionType.Add, total, constant7);
-            Expression block = Expression.Block(new[] { left }, assignRoll, addition);
+            Expression addition = Expression.MakeBinary(ExpressionType.Add, assignRoll, constant7);
+            Expression block = Expression.Block(new[] { left }, addition);
             LambdaExpression lambda = Expression.Lambda(block);
 
             var expected = (Func<int>)lambda.Compile();
