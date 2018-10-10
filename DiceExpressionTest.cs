@@ -12,21 +12,6 @@ namespace DiceTest
     [TestClass]
     public class DiceExpressionTest
     {
-        class MockRandomGenerator : IRandomGenerator
-        {
-            private readonly int _constant;
-
-            public MockRandomGenerator(int constant = 5)
-            {
-                _constant = constant;
-            }
-
-            public int Generate(int min, int max)
-            {
-                return _constant;
-            }
-        }
-
         [TestMethod]
         public void DiceValue()
         {

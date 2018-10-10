@@ -56,8 +56,10 @@
     <Compile Include="DiceExpressionParseTest.cs" />
     <Compile Include="DiceExpressionTest.cs" />
     <Compile Include="DiceRolling.cs" />
+    <Compile Include="MockRandomGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringTest.cs" />
+    <Compile Include="ConceptTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -8,14 +8,6 @@ using DMTools.Dice;
 
 namespace DiceTest
 {
-    class MockRandomGenerator : IRandomGenerator
-    {
-        public int Generate(int min, int max)
-        {
-            return 5;
-        }
-    }
-
     [TestClass]
     public class DiceRolling
     {
