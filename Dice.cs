@@ -1,4 +1,6 @@
-﻿namespace DMTools.Dice
+﻿using System;
+
+namespace DMTools.Dice
 {
     /// <summary>
     /// Represent a physical die with a set number of sides.
@@ -11,7 +13,7 @@
         /// <param name="sides">Number of sides of die</param>
         public Dice(int sides = 6)
         {
-            Sides = sides;
+            Sides = sides < 1 ? throw new ArgumentException("Dice sides must be a positive number") : sides;
         }
 
         /// <summary>
@@ -21,8 +23,8 @@
         /// <param name="randomGen">Random generator to generate random numbers from</param>
         public Dice(int sides, IRandomGenerator randomGen)
         {
-            Sides = sides;
-            randomGenerator = randomGen;
+            Sides = sides < 1 ? throw new ArgumentException("Dice sides must be a positive number") : sides;
+            randomGenerator = randomGen ?? throw new ArgumentNullException("randomGenerator");
         }
 
         /// <summary>

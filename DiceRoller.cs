@@ -23,6 +23,12 @@ namespace DMTools.Dice
 
             string[] diceSplit = diceExpression.Split(new char[] { 'd', 'D' });
             NumberOfRolls = String.IsNullOrEmpty(diceSplit[0]) ? 1 : int.Parse(diceSplit[0]);
+
+            if (NumberOfRolls < 1)
+            {
+                throw new ArgumentException("Number of rolls cannot be less than 1");
+            }
+
             Dice = new Dice(int.Parse(diceSplit[1]), _randomGenerator);
         }
 
