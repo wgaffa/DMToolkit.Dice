@@ -20,11 +20,41 @@ namespace DiceTest
         }
 
         [TestMethod]
+        public void CreateDiceNullRandomGenerator()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new Dice(5, null));
+        }
+
+        [TestMethod]
+        public void CreateNegativeDiceSides()
+        {
+            Assert.ThrowsException<ArgumentException>(() => new Dice(-4, new MockRandomGenerator()));
+        }
+
+        [TestMethod]
+        public void CreateZeroSidedDice()
+        {
+            Assert.ThrowsException<ArgumentException>(() => new Dice(0, new MockRandomGenerator()));
+        }
+
+        [TestMethod]
         public void RollSeveralDiceString()
         {
             DiceRoller diceCup = new DiceRoller("5d12", new MockRandomGenerator());
 
             CollectionAssert.AreEqual(new List<int> { 5, 5, 5, 5, 5 }, diceCup.Roll().IndividualRolls);
+        }
+
+        [TestMethod]
+        public void CreateDiceRollerNegativeAmount()
+        {
+            Assert.ThrowsException<ArgumentException>(() => new DiceRoller("-5d12", new MockRandomGenerator()));
+        }
+
+        [TestMethod]
+        public void CreateDiceRollerNegativeSides()
+        {
+            Assert.ThrowsException<ArgumentException>(() => new DiceRoller("5d-6", new MockRandomGenerator()));
         }
 
         [TestMethod]
