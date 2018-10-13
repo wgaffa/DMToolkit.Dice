@@ -98,5 +98,19 @@ namespace DiceTest
             Assert.AreEqual(18, expr.Compile()());
 
         }
+
+        [TestMethod]
+        public void SimpleArithmeticExpression()
+        {
+            var tokenParser = new DiceExpressionTokenizer();
+            var tok = tokenParser.Tokenize("16 - 5*2");
+
+            var result = DiceExpressionParser.Lambda.Parse(tok);
+            var expr = result.Compile();
+
+            Console.WriteLine(expr());
+
+            Assert.AreEqual(6, expr());
+        }
     }
 }

@@ -49,20 +49,6 @@ namespace DiceTest
         }
 
         [TestMethod]
-        public void SimpleTokenizerConcept()
-        {
-            var tokenParser = new DiceExpressionTokenizer();
-            var tok = tokenParser.Tokenize("16 - 5*2");
-
-            var result = DiceExpressionParser.Lambda.Parse(tok);
-            var expr = result.Compile();
-
-            Console.WriteLine(expr());
-
-            Assert.AreEqual(6, expr());
-        }
-
-        [TestMethod]
         public void ExpressionSimpleConcept()
         {
             Expression constant5 = Expression.Constant(5);
