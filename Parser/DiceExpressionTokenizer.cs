@@ -29,7 +29,30 @@ namespace DMTools.Dice.Parser
             {
                 DiceToken charToken;
 
-                if (Char.IsDigit(next.Value))
+                if (next.Value.ToString().ToLower() == "d")
+                {
+                    StringBuilder diceBuilder = new StringBuilder();
+
+                    var diceStart = next.Location;
+                    diceBuilder.Append(next.Value);
+
+                    // Go past the letter 'd'
+                    next = next.Remainder.ConsumeChar();
+
+                    // Should be a positive number after the letter 'd'
+                    var natural = Numerics.Natural(next.Location);
+
+                    if (!natural.HasValue)
+                    {
+                        yield return Result.Empty<DiceToken>(next.Location, new[] { "number", "operator" });
+                    }
+
+                    diceBuilder.Append(natural.Value);
+
+                    next = natural.Remainder.ConsumeChar();
+                    yield return Result.Value(DiceToken.Dice, diceStart, next.Remainder);
+                }
+                else if (Char.IsDigit(next.Value))
                 {
                     var natural = Numerics.Natural(next.Location);
                     next = natural.Remainder.ConsumeChar();
@@ -48,5 +71,11 @@ namespace DMTools.Dice.Parser
                 next = SkipWhiteSpace(next.Location);
             } while (next.HasValue);
         }
+
+        private TextParser<string> diceParser =
+            from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1"))
+            from _ in Character.In(new[] { 'd', 'D' })
+            from sides in Numerics.Natural
+            select rolls.ToString() + 'd' + sides;
     }
 }

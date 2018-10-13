@@ -6,7 +6,8 @@ namespace DMTools.Dice.Parser
     {
         Undefined,
 
-        //Dice,
+        [Token(Category = "dice")]
+        Dice,
 
         Number,
 
