@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using DMTools.Dice;
+using DMTools.Dice.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Superpower;
 using Superpower.Model;
@@ -50,23 +51,15 @@ namespace DiceTest
         [TestMethod]
         public void SimpleTokenizerConcept()
         {
-            var diceParser =
-                from rolls in Numerics.Natural.Optional()
-                from _ in Character.In(new char[] { 'd', 'D' })
-                from sides in Numerics.Natural
-                select rolls.ToString() + 'd' + sides.ToString();
+            var tokenParser = new DiceExpressionTokenizer();
+            var tok = tokenParser.Tokenize("16 - 5*2");
 
-            var tokenizer = new TokenizerBuilder<DiceToken>()
-                .Ignore(Span.WhiteSpace)
-                .Match(diceParser, DiceToken.Dice)
-                .Match(Character.EqualTo('+'), DiceToken.Plus)
-                .Match(Character.EqualTo('-'), DiceToken.Minus)
-                .Match(Numerics.Natural, DiceToken.Number)
-                .Build();
+            var result = DiceExpressionParser.Lambda.Parse(tok);
+            var expr = result.Compile();
 
-            var tokenList = tokenizer.Tokenize("1d6+5");
+            Console.WriteLine(expr());
 
-            Assert.Fail();
+            Assert.AreEqual(6, expr());
         }
 
         [TestMethod]
