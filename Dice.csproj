@@ -49,13 +49,10 @@
     <Compile Include="Dice.cs" />
     <Compile Include="DiceResult.cs" />
     <Compile Include="DiceRoller.cs" />
-    <Compile Include="Expression\BinaryOperation.cs" />
-    <Compile Include="Expression\Constant.cs" />
-    <Compile Include="Expression\DiceExpressionBuilder.cs" />
-    <Compile Include="Expression\DiceValue.cs" />
-    <Compile Include="Expression\IDiceExpression.cs" />
     <Compile Include="IRandomGenerator.cs" />
     <Compile Include="Parser\DiceExpressionParser.cs" />
+    <Compile Include="Parser\DiceExpressionToken.cs" />
+    <Compile Include="Parser\DiceExpressionTokenizer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
