@@ -54,7 +54,7 @@ namespace DiceTest
             var tokenParser = new DiceExpressionTokenizer();
             var tok = tokenParser.Tokenize("16 - 5*2");
 
-            var result = new DiceExpressionParser(new MockRandomGenerator(11)).Lambda.Parse(tok);
+            var result = DiceExpressionParser.Lambda.Parse(tok);
             var expr = result.Compile();
 
             Console.WriteLine(expr());

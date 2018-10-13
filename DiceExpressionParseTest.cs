@@ -16,14 +16,48 @@ namespace DiceTest
     [TestClass]
     public class DiceExpressionParseTest
     {
+
         [TestMethod]
-        public void ParseSimpleDiceExpression()
+        public void ParseConstant()
         {
-            string input = "1d20";
+            string input = "223";
 
             var tokenizer = new DiceExpressionTokenizer();
             var tokens = tokenizer.Tokenize(input);
-            var expr = new DiceExpressionParser(new MockRandomGenerator(11)).Lambda.Parse(tokens);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
+
+            Assert.AreEqual(223, expr.Compile()());
+        }
+        [TestMethod]
+        public void ParseSingleDiceExpression()
+        {
+            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(57);
+
+            string input = "d100";
+
+            var tokenizer = new DiceExpressionTokenizer();
+            var tokens = tokenizer.Tokenize(input);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
+
+            Assert.AreEqual(57, expr.Compile()());
+        }
+
+        [TestMethod]
+        public void ParseWrongDiceInput()
+        {
+            string input = "d 100";
+
+            Assert.ThrowsException<ParseException>(() => new DiceExpressionTokenizer().Tokenize(input));
+        }
+
+        [TestMethod]
+        public void ParseSimpleDiceExpression()
+        {
+            string input = "5d20";
+
+            var tokenizer = new DiceExpressionTokenizer();
+            var tokens = tokenizer.Tokenize(input);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
 
             Assert.AreEqual(11, expr.Compile()());
         }
@@ -35,7 +69,7 @@ namespace DiceTest
 
             var tokenizer = new DiceExpressionTokenizer();
             var tokens = tokenizer.Tokenize(input);
-            var expr = new DiceExpressionParser(new MockRandomGenerator(3)).Lambda.Parse(tokens);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
 
             Assert.AreEqual(6, expr.Compile()());
         }
@@ -47,7 +81,7 @@ namespace DiceTest
 
             var tokenizer = new DiceExpressionTokenizer();
             var tokens = tokenizer.Tokenize(input);
-            var expr = new DiceExpressionParser(new MockRandomGenerator(6)).Lambda.Parse(tokens);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
 
             Assert.AreEqual(9, expr.Compile()());
         }
@@ -59,7 +93,7 @@ namespace DiceTest
 
             var tokenizer = new DiceExpressionTokenizer();
             var tokens = tokenizer.Tokenize(input);
-            var expr = new DiceExpressionParser(new MockRandomGenerator(6)).Lambda.Parse(tokens);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
 
             Assert.AreEqual(18, expr.Compile()());
 
