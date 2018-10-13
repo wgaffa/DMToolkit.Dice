@@ -12,6 +12,16 @@ namespace DMTools.Dice.Parser
 {
     public class DiceExpressionParser
     {
+        public DiceExpressionParser()
+        {
+
+        }
+
+        public DiceExpressionParser(IRandomGenerator rng)
+        {
+            _randomGenerator = rng ?? throw new ArgumentNullException("randomGenerator");
+        }
+
         static readonly TokenListParser<DiceToken, ExpressionType> Add =
             Token.EqualTo(DiceToken.Plus).Value(ExpressionType.AddChecked);
 
@@ -46,7 +56,9 @@ namespace DMTools.Dice.Parser
         static readonly TokenListParser<DiceToken, Expression> Expr =
             Parse.Chain(Add.Or(Subtract), Term, Expression.MakeBinary);
 
-        public static readonly TokenListParser<DiceToken, Expression<Func<int>>> Lambda =
+        public readonly TokenListParser<DiceToken, Expression<Func<int>>> Lambda =
             Expr.AtEnd().Select(body => Expression.Lambda<Func<int>>(body));
+
+        private IRandomGenerator _randomGenerator = new DefaultRandomGenerator();
     }
 }
