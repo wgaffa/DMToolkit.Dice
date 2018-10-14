@@ -58,7 +58,7 @@ namespace DMTools.Dice.Parser
                     var tokenStart = next.Location;
 
                     // This can be a Number or a Dice token
-                    var natural = Numerics.Natural(next.Location);
+                    var natural = Numerics.Decimal(next.Location);
                     next = natural.Remainder.ConsumeChar();
 
                     if (next.HasValue && (next.Value == 'd' || next.Value == 'D'))

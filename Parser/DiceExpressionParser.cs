@@ -45,13 +45,14 @@ namespace DMTools.Dice.Parser
             Expression diceInstance = Expression.New(constructorInfo, new Expression[] { diceString, randomGeneratorInstance });
             Expression callRoll = Expression.Call(diceInstance, method);
             Expression diceResult = Expression.Property(callRoll, "Result");
+            Expression converToDouble = Expression.Convert(diceResult, typeof(double));
 
-            return diceResult;
+            return converToDouble;
         }
 
         static readonly TokenListParser<DiceToken, Expression> Constant =
             Token.EqualTo(DiceToken.Number)
-            .Apply(Numerics.IntegerInt32)
+            .Apply(Numerics.DecimalDouble)
             .Select(n => (Expression)Expression.Constant(n));
 
         static readonly TokenListParser<DiceToken, Expression> Operand =
@@ -69,8 +70,8 @@ namespace DMTools.Dice.Parser
         static readonly TokenListParser<DiceToken, Expression> DiceExpression =
             Expr.Or(Dice).Or(Constant);
 
-        static public readonly TokenListParser<DiceToken, Expression<Func<int>>> Lambda =
-            DiceExpression.AtEnd().Select(body => Expression.Lambda<Func<int>>(body));
+        static public readonly TokenListParser<DiceToken, Expression<Func<double>>> Lambda =
+            DiceExpression.AtEnd().Select(body => Expression.Lambda<Func<double>>(body));
         
         static private IRandomGenerator _randomGenerator = new DefaultRandomGenerator();
 
