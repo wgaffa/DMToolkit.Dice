@@ -53,18 +53,20 @@ namespace DiceTest
         [TestMethod]
         public void ParseSimpleDiceExpression()
         {
+            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
             string input = "5d20";
 
             var tokenizer = new DiceExpressionTokenizer();
             var tokens = tokenizer.Tokenize(input);
             var expr = DiceExpressionParser.Lambda.Parse(tokens);
 
-            Assert.AreEqual(11, expr.Compile()());
+            Assert.AreEqual(15, expr.Compile()());
         }
 
         [TestMethod]
         public void ParseArithmeticDiceExpression()
         {
+            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
             string input = "1d6 + 1d4";
 
             var tokenizer = new DiceExpressionTokenizer();
@@ -75,8 +77,9 @@ namespace DiceTest
         }
 
         [TestMethod]
-        public void ParseArithmeticDiceConstantExpression()
+        public void ParseArithmeticDiceDecimalExpression()
         {
+            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(6);
             string input = "1d8 * 1.5";
 
             var tokenizer = new DiceExpressionTokenizer();
@@ -89,6 +92,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseArithmeticIntegerExpression()
         {
+            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(6);
             string input = "1d8 * 3";
 
             var tokenizer = new DiceExpressionTokenizer();
