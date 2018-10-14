@@ -28,6 +28,19 @@ namespace DiceTest
 
             Assert.AreEqual(223, expr.Compile()());
         }
+
+        [TestMethod]
+        public void ParseDouble()
+        {
+            string input = "5.2";
+
+            var tokenizer = new DiceExpressionTokenizer();
+            var tokens = tokenizer.Tokenize(input);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
+
+            Assert.AreEqual(5.2, expr.Compile()());
+        }
+
         [TestMethod]
         public void ParseSingleDiceExpression()
         {
