@@ -44,7 +44,7 @@ namespace DMTools.Dice.Parser
 
                     if (!natural.HasValue)
                     {
-                        yield return Result.Empty<DiceToken>(next.Location, new[] { "number", "operator" });
+                        yield return Result.Empty<DiceToken>(next.Location, new[] { "dice" });
                     }
 
                     diceBuilder.Append(natural.Value);
@@ -54,9 +54,36 @@ namespace DMTools.Dice.Parser
                 }
                 else if (Char.IsDigit(next.Value))
                 {
+                    // Keep a location of the start if this is a dice token
+                    var tokenStart = next.Location;
+
+                    // This can be a Number or a Dice token
                     var natural = Numerics.Natural(next.Location);
                     next = natural.Remainder.ConsumeChar();
-                    yield return Result.Value(DiceToken.Number, natural.Location, natural.Remainder);
+
+                    if (next.HasValue && (next.Value == 'd' || next.Value == 'D'))
+                    {
+                        // We are now sure it's a Dice token
+                        StringBuilder diceString = new StringBuilder();
+                        diceString.Append(natural.Value);
+
+                        // Past letter 'd'
+                        next = next.Remainder.ConsumeChar();
+
+                        var sides = Numerics.Natural(next.Location);
+
+                        if (!sides.HasValue)
+                        {
+                            yield return Result.Empty<DiceToken>(next.Location, new[] { "dice" });
+                        }
+
+                        next = sides.Remainder.ConsumeChar();
+                        yield return Result.Value(DiceToken.Dice, tokenStart, sides.Remainder);
+                    }
+                    else
+                    {
+                        yield return Result.Value(DiceToken.Number, natural.Location, natural.Remainder);
+                    }
                 }
                 else if (_operators.TryGetValue(next.Value, out charToken))
                 {

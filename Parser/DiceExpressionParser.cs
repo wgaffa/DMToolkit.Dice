@@ -58,7 +58,7 @@ namespace DMTools.Dice.Parser
             (from sign in Token.EqualTo(DiceToken.Minus)
                 from factor in Constant
                 select (Expression)Expression.Negate(factor))
-            .Or(Constant).Named("expression");
+            .Or(Dice).Or(Constant).Named("expression");
 
         static readonly TokenListParser<DiceToken, Expression> Term =
             Parse.Chain(Multiply.Or(Divide), Operand, Expression.MakeBinary);
@@ -67,7 +67,7 @@ namespace DMTools.Dice.Parser
             Parse.Chain(Add.Or(Subtract), Term, Expression.MakeBinary);
 
         static readonly TokenListParser<DiceToken, Expression> DiceExpression =
-            Dice.Or(Expr).Or(Constant);
+            Expr.Or(Dice).Or(Constant);
 
         static public readonly TokenListParser<DiceToken, Expression<Func<int>>> Lambda =
             DiceExpression.AtEnd().Select(body => Expression.Lambda<Func<int>>(body));
