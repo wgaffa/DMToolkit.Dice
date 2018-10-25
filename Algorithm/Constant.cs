@@ -18,6 +18,11 @@ namespace DMTools.Dice.Algorithm
             return _value;
         }
 
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
+
         private double _value;
     }
 }

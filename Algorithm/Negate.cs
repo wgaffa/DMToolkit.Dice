@@ -16,5 +16,10 @@ namespace DMTools.Dice.Algorithm
         {
             return -_right.Calculate();
         }
+
+        public override string ToString()
+        {
+            return "-" + _right.ToString();
+        }
     }
 }

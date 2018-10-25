@@ -16,5 +16,10 @@ namespace DMTools.Dice.Algorithm
         {
             return _left.Calculate() + _right.Calculate();
         }
+
+        public override string ToString()
+        {
+            return _left.ToString() + " + " + _right.ToString();
+        }
     }
 }

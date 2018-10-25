@@ -18,6 +18,11 @@ namespace DMTools.Dice.Algorithm
             return _rollResult.Result;
         }
 
+        public override string ToString()
+        {
+            return "[" + String.Join(", ", _rollResult.IndividualRolls) + "]";
+        }
+
         private DiceResult _rollResult;
     }
 }
