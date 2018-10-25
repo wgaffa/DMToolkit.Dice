@@ -70,7 +70,7 @@ namespace DiceTest
         public void ResultImmutable()
         {
             List<int> rollList = new List<int>() { 5, 2, 7, 12 };
-            DiceResult diceResult = new DiceResult(rollList.Sum(), rollList);
+            DiceResult diceResult = new DiceResult(rollList);
 
             rollList[2] = 10;
 
