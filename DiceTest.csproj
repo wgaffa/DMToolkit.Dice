@@ -60,6 +60,7 @@
     <Compile Include="StringTest.cs" />
     <Compile Include="ConceptTests.cs" />
     <Compile Include="AlgorithmTest.cs" />
+    <Compile Include="DiceExpressionParserDetailedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
