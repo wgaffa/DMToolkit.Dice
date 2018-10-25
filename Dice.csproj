@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Algorithm\Adder.cs" />
     <Compile Include="Algorithm\BinaryComponent.cs" />
+    <Compile Include="Algorithm\ComponentTypes.cs" />
     <Compile Include="Algorithm\Constant.cs" />
     <Compile Include="Algorithm\DiceComponent.cs" />
     <Compile Include="Algorithm\Divider.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Parser\DiceExpressionParser.cs" />
     <Compile Include="Parser\DiceExpressionToken.cs" />
     <Compile Include="Parser\DiceExpressionTokenizer.cs" />
+    <Compile Include="Parser\DiceExpressionParserDetailed.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
