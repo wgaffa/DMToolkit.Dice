@@ -41,7 +41,7 @@ namespace DMTools.Dice
                 rolls.Add(Dice.Roll());
             }
 
-            return new DiceResult(rolls.Sum(), rolls);
+            return new DiceResult(rolls);
         }
 
         public int NumberOfRolls { get; private set; }

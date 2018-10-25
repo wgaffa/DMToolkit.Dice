@@ -8,17 +8,14 @@ namespace DMTools.Dice
 {
     public class DiceResult
     {
-        public DiceResult(int result, IEnumerable<int> collection)
+        public DiceResult(IEnumerable<int> collection)
         {
-            _result = result;
             _individualRolls = collection.ToList();
         }
 
-        private readonly int _result;
-
         public int Result
         {
-            get { return _result; }
+            get { return _individualRolls.Sum(); }
         }
 
         private readonly List<int> _individualRolls;
