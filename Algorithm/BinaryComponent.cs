@@ -10,9 +10,9 @@ namespace DMTools.Dice.Algorithm
     {
         public BinaryComponent(IComponent left, IComponent right) : base(right)
         {
-            this.left = left;
+            _left = left;
         }
 
-        protected IComponent left;
+        protected IComponent _left;
     }
 }

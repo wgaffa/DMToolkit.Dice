@@ -10,11 +10,11 @@ namespace DMTools.Dice.Algorithm
     {
         public UnaryComponent(IComponent right)
         {
-            this.right = right;
+            _right = right;
         }
 
         public abstract double Calculate();
 
-        protected IComponent right;
+        protected IComponent _right;
     }
 }

@@ -10,14 +10,14 @@ namespace DMTools.Dice.Algorithm
     {
         public DiceComponent(DiceRoller diceExpression)
         {
-            rollResult = diceExpression.Roll();
+            _rollResult = diceExpression.Roll();
         }
 
         public double Calculate()
         {
-            return rollResult.Result;
+            return _rollResult.Result;
         }
 
-        private DiceResult rollResult;
+        private DiceResult _rollResult;
     }
 }

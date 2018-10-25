@@ -14,7 +14,7 @@ namespace DMTools.Dice.Algorithm
 
         public override double Calculate()
         {
-            return left.Calculate() + right.Calculate();
+            return _left.Calculate() + _right.Calculate();
         }
     }
 }

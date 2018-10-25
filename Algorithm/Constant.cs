@@ -8,16 +8,16 @@ namespace DMTools.Dice.Algorithm
 {
     public class Constant : IComponent
     {
-        public Constant(double constant)
+        public Constant(double value)
         {
-            value = constant;
+            _value = value;
         }
 
         public double Calculate()
         {
-            return value;
+            return _value;
         }
 
-        private double value;
+        private double _value;
     }
 }
