@@ -117,5 +117,27 @@ namespace DiceTest
 
             Assert.AreEqual(12, expr.Calculate());
         }
+
+        [TestMethod]
+        public void DiceOutputString()
+        {
+            string input = "3d6 + 1d4";
+            DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(3));
+
+            IComponent expr = parser.ParseString(input);
+
+            Assert.AreEqual("[3, 3, 3] + [3]", expr.ToString());
+        }
+
+        [TestMethod]
+        public void ComplexAlgorithmToString()
+        {
+            string input = "5 * 3 + 12 / 4 - 1";
+            DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
+
+            IComponent expr = parser.ParseString(input);
+
+            Assert.AreEqual("5 * 3 + 12 / 4 - 1", expr.ToString());
+        }
     }
 }
