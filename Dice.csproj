@@ -45,6 +45,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm\Adder.cs" />
+    <Compile Include="Algorithm\BinaryComponent.cs" />
+    <Compile Include="Algorithm\Constant.cs" />
+    <Compile Include="Algorithm\DiceComponent.cs" />
+    <Compile Include="Algorithm\Divider.cs" />
+    <Compile Include="Algorithm\IComponent.cs" />
+    <Compile Include="Algorithm\Multiplier.cs" />
+    <Compile Include="Algorithm\Negate.cs" />
+    <Compile Include="Algorithm\Subtracter.cs" />
+    <Compile Include="Algorithm\UnaryComponent.cs" />
     <Compile Include="DefaultRandomGenerator.cs" />
     <Compile Include="Dice.cs" />
     <Compile Include="DiceResult.cs" />
@@ -60,5 +70,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
