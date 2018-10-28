@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DMTools.Dice
+namespace DMTools.Core
 {
     /// <summary>
     /// Represent a physical die with a set number of sides.

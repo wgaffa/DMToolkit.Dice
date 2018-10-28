@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Dice
+namespace DMTools.Core
 {
     /// <summary>
     /// Interface for generating a random number

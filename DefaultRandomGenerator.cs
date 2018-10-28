@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DMTools.Dice
+namespace DMTools.Core
 {
     public class DefaultRandomGenerator : IRandomGenerator
     {

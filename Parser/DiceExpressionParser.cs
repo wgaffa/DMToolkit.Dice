@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Dice.Parser
+namespace DMTools.Core.Parser
 {
     public class DiceExpressionParser
     {

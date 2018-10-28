@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Dice.Algorithm
+namespace DMTools.Core.Algorithm
 {
     public class DiceComponent : IComponent
     {
