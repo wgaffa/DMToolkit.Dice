@@ -77,6 +77,19 @@ namespace DiceTest
         }
 
         [TestMethod]
+        public void ParseManyDicesExpression()
+        {
+            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
+            string input = "15d20";
+
+            var tokenizer = new DiceExpressionTokenizer();
+            var tokens = tokenizer.Tokenize(input);
+            var expr = DiceExpressionParser.Lambda.Parse(tokens);
+
+            Assert.AreEqual(45, expr.Compile()());
+        }
+
+        [TestMethod]
         public void ParseArithmeticDiceExpression()
         {
             DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
