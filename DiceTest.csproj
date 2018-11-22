@@ -66,6 +66,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{faf09947-0992-4da4-92b3-72579890aec7}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dice\Dice.csproj">
       <Project>{53848598-e521-45f4-a3d5-fbfa812394e2}</Project>
       <Name>Dice</Name>
