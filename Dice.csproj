@@ -59,7 +59,6 @@
     <Compile Include="Algorithm\Negate.cs" />
     <Compile Include="Algorithm\Subtracter.cs" />
     <Compile Include="Algorithm\UnaryComponent.cs" />
-    <Compile Include="DefaultRandomGenerator.cs" />
     <Compile Include="Dice.cs" />
     <Compile Include="DiceResult.cs" />
     <Compile Include="DiceRoller.cs" />
@@ -67,7 +66,6 @@
     <Compile Include="Parser\DiceExpressionToken.cs" />
     <Compile Include="Parser\DiceExpressionTokenizer.cs" />
     <Compile Include="Parser\DiceExpressionParserDetailed.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
