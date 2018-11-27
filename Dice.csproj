@@ -7,7 +7,7 @@
     <ProjectGuid>{53848598-E521-45F4-A3D5-FBFA812394E2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>DMTools.Core</RootNamespace>
-    <AssemblyName>Dice</AssemblyName>
+    <AssemblyName>DMTools.Dice</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

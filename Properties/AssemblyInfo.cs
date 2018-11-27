@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DM Tools Dice roller")]
+[assembly: AssemblyTitle("DMTools.Dice")]
 [assembly: AssemblyDescription("A dice roller for tabletop rpg games")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Patrik Maunus")]
