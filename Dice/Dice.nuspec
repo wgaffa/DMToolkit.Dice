@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <projectUrl>https://github.com/wgaffa/dmtoolkit</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright 2018</copyright>
+    <tags>Utility</tags>
+
+    <dependencies>
+	    <dependency id="DMTools.Core" version="0.1" />
+    </dependencies>
+  </metadata>
+</package>
