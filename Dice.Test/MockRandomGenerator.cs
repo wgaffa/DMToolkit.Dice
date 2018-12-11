@@ -1,4 +1,4 @@
-﻿using DMTools.Core;
+﻿using DMTools.Die;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using DMTools.Core;
-using DMTools.Core.Parser;
+using DMTools.Die;
+using DMTools.Die.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Superpower;
 using Superpower.Model;

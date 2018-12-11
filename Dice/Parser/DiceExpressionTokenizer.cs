@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Core.Parser
+namespace DMTools.Die.Parser
 {
     public class DiceExpressionTokenizer : Tokenizer<DiceToken>
     {

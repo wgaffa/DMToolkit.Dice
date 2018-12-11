@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DMTools.Core.DiceTerm
+namespace DMTools.Die.DiceTerm
 {
     public class DropLowestPreserveOrderingTerm : IDiceTerm
     {

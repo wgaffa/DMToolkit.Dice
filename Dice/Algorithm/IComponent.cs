@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Core.Algorithm
+namespace DMTools.Die.Algorithm
 {
     public interface IComponent
     {

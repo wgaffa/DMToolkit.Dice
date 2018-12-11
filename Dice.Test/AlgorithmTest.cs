@@ -1,6 +1,6 @@
 ﻿using System;
-using DMTools.Core;
-using DMTools.Core.Algorithm;
+using DMTools.Die;
+using DMTools.Die.Algorithm;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DiceTest

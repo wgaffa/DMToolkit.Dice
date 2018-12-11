@@ -1,6 +1,6 @@
 ﻿using Superpower.Display;
 
-namespace DMTools.Core.Parser
+namespace DMTools.Die.Parser
 {
     public enum DiceToken
     {

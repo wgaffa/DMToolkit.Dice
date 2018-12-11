@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DMTools.Core;
-using DMTools.Core.DiceTerm;
+using DMTools.Die;
+using DMTools.Die.DiceTerm;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DiceTest

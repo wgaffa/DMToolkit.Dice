@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{53848598-E521-45F4-A3D5-FBFA812394E2}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>DMTools.Core</RootNamespace>
+    <RootNamespace>DMTools.Die</RootNamespace>
     <AssemblyName>DMTools.Dice</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using DMTools.Core.DiceTerm;
+using DMTools.Die.DiceTerm;
 
-namespace DMTools.Core
+namespace DMTools.Die
 {
     /// <summary>
     /// Represent a physical die with a set number of sides.

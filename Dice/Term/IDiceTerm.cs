@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Core.DiceTerm
+namespace DMTools.Die.DiceTerm
 {
     public interface IDiceTerm
     {

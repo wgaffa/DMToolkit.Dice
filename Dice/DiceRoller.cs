@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DMTools.Core
+namespace DMTools.Die
 {
     /// <summary>
     /// Rolls several dices of one type, eg. 5d12 rolls a d12 5 times.
