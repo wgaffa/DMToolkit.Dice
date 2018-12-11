@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="DiceExpressionParseTest.cs" />
     <Compile Include="DiceRolling.cs" />
+    <Compile Include="DiceTermTests.cs" />
     <Compile Include="MockRandomGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringTest.cs" />

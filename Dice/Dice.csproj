@@ -62,11 +62,17 @@
     <Compile Include="Dice.cs" />
     <Compile Include="DiceResult.cs" />
     <Compile Include="DiceRoller.cs" />
+    <Compile Include="Term\DropLowestPreserveOrderingTerm.cs" />
+    <Compile Include="Term\DropLowestTerm.cs" />
     <Compile Include="Parser\DiceExpressionParser.cs" />
     <Compile Include="Parser\DiceExpressionToken.cs" />
     <Compile Include="Parser\DiceExpressionTokenizer.cs" />
     <Compile Include="Parser\DiceExpressionParserDetailed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Term\IDiceTerm.cs" />
+    <Compile Include="Term\TakeHighestPreserveOrderingTerm.cs" />
+    <Compile Include="Term\TakeHighestTerm.cs" />
+    <Compile Include="Term\TimesTerm.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using DMTools.Core.DiceTerm;
 
 namespace DMTools.Core
 {
     /// <summary>
     /// Represent a physical die with a set number of sides.
     /// </summary>
-    public class Dice
+    public class Dice : IDiceTerm
     {
         /// <summary>
         /// Constructor to create a die with DefaultRandomGenerator for randomizing
@@ -34,6 +36,11 @@ namespace DMTools.Core
         public int Roll()
         {
             return randomGenerator.Generate(1, Sides + 1);
+        }
+
+        public IEnumerable<int> GetResults()
+        {
+            yield return Roll();
         }
 
         /// <summary>
