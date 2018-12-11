@@ -21,6 +21,9 @@ namespace DMTools.Die.Term
 
             for (int i = 0; i < _dropAmount; i++)
             {
+                if (takenResults.Count == 0)
+                    break;
+
                 takenResults.Remove(takenResults.Min());
             }
 

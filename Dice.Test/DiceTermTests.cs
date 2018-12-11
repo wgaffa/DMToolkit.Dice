@@ -125,5 +125,31 @@ namespace DiceTest
 
             CollectionAssert.AreEqual(expected, actual);
         }
+
+        [TestMethod]
+        public void DropLowestPreservingOrderWhenDroppingAlot()
+        {
+            Dice dice = new Dice(6, new MockRandomGenerator());
+            TimesTerm timesFive = new TimesTerm(dice, 5);
+            DropLowestPreserveOrderingTerm dropLowest = new DropLowestPreserveOrderingTerm(timesFive, 1000);
+
+            List<int> expected = new List<int>();
+            List<int> actual = dropLowest.GetResults().ToList();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TakeHighestPreservingOrderWhenTakingAlot()
+        {
+            Dice dice = new Dice(6, new MockRandomGenerator());
+            TimesTerm timesFive = new TimesTerm(dice, 5);
+            TakeHighestPreserveOrderingTerm takeHighest = new TakeHighestPreserveOrderingTerm(timesFive, 1000);
+
+            List<int> expected = new List<int>() { 5, 5, 5, 5, 5 };
+            List<int> actual = takeHighest.GetResults().ToList();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
     }
 }
