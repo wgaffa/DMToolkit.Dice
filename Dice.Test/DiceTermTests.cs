@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DMTools.Die;
-using DMTools.Die.DiceTerm;
+using DMTools.Die.Term;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DiceTest

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using DMTools.Die.DiceTerm;
+using DMTools.Die.Term;
 
 namespace DMTools.Die
 {

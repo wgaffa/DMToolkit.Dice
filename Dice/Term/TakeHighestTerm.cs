@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DMTools.Die.DiceTerm
+namespace DMTools.Die.Term
 {
     public class TakeHighestTerm : IDiceTerm
     {
