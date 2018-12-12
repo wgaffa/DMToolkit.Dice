@@ -1,6 +1,7 @@
 ﻿using System;
 using DMTools.Die;
 using DMTools.Die.Algorithm;
+using DMTools.Die.Term;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DiceTest
@@ -26,7 +27,8 @@ namespace DiceTest
         public void SimpleDiceAlgorithm()
         {
             IComponent expr = new Multiplier(
-                new DiceComponent(new DiceRoller("3d6", new MockRandomGenerator(3))),
+                new DiceComponent(new TimesTerm(
+                    new Dice(6, new MockRandomGenerator(3)), 3)),
                 new Constant(1.5)
                 );
 
@@ -37,7 +39,7 @@ namespace DiceTest
         public void NegateTest()
         {
             IComponent expr = new Adder(
-                new DiceComponent(new DiceRoller("d8", new MockRandomGenerator(4))),
+                new DiceComponent(new Dice(8, new MockRandomGenerator(4))),
                 new Negate(
                     new Constant(2)
                     )

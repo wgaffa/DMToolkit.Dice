@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DMTools.Die.Term;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,21 +9,21 @@ namespace DMTools.Die.Algorithm
 {
     public class DiceComponent : IComponent
     {
-        public DiceComponent(DiceRoller diceExpression)
+        public DiceComponent(IDiceTerm diceTerm)
         {
-            _rollResult = diceExpression.Roll();
+            _diceTerm = diceTerm ?? throw new ArgumentNullException(nameof(diceTerm));
         }
 
         public double Calculate()
         {
-            return _rollResult.Result;
+            return _diceTerm.GetResults().Sum();
         }
 
         public override string ToString()
         {
-            return "[" + String.Join(", ", _rollResult.IndividualRolls) + "]";
+            return "[" + String.Join(", ", _diceTerm.GetResults()) + "]";
         }
 
-        private DiceResult _rollResult;
+        private IDiceTerm _diceTerm;
     }
 }

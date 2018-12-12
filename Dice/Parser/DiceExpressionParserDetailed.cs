@@ -1,4 +1,5 @@
 ﻿using DMTools.Die.Algorithm;
+using DMTools.Die.Term;
 using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
@@ -20,7 +21,12 @@ namespace DMTools.Die.Parser
             _dice =
                 Token.EqualTo(DiceToken.Dice)
                 .Apply(_diceParser)
-                .Select(n => (IComponent)new DiceComponent(new DiceRoller(n, _randomGenerator)));
+                .Select(n => (IComponent)new DiceComponent(
+                    new TimesTerm(
+                        new Dice(n.sidesOfDie, randomGenerator)
+                        , n.timesToRoll
+                        ))
+                    );
 
             _operand =
                 (from sign in Token.EqualTo(DiceToken.Minus)
@@ -46,11 +52,11 @@ namespace DMTools.Die.Parser
             return _expression.Parse(tokenlist);
         }
 
-        private readonly TextParser<string> _diceParser =
+        private readonly TextParser<(int timesToRoll, int sidesOfDie)> _diceParser =
             from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1"))
             from _ in Character.In(new[] { 'd', 'D' })
             from sides in Numerics.Natural
-            select rolls.ToString() + 'd' + sides.ToString();
+            select (Convert.ToInt32(rolls.ToStringValue()), Convert.ToInt32(sides.ToStringValue()));
 
         private readonly TokenListParser<DiceToken, OperatorType> _add =
             Token.EqualTo(DiceToken.Plus).Value(OperatorType.Addition);
