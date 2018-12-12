@@ -23,7 +23,7 @@ namespace DMTools.Die.Parser
                 .Apply(_diceParser)
                 .Select(n => (IComponent)new DiceComponent(
                     new TimesTerm(
-                        new Dice(n.sidesOfDie, randomGenerator)
+                        new Dice(n.sidesOfDie, _randomGenerator)
                         , n.timesToRoll
                         ))
                     );
