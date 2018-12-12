@@ -1,4 +1,5 @@
-﻿using DMTools.Die.Term;
+﻿using DMTools.Die.Rollers;
+using DMTools.Die.Term;
 using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
@@ -33,7 +34,7 @@ namespace DMTools.Die.Parser
             .Apply(diceParser)
             .Select(d => (Expression)Expression.Constant((double)
                 new TimesTerm(
-                    new Dice(d.sidesOfDie, _randomGenerator)
+                    new Dice(d.sidesOfDie, DiceRoller)
                         , d.timesToRoll)
                         .GetResults().Sum()
                 ));
@@ -60,15 +61,7 @@ namespace DMTools.Die.Parser
 
         static public readonly TokenListParser<DiceToken, Expression<Func<double>>> Lambda =
             DiceExpression.AtEnd().Select(body => Expression.Lambda<Func<double>>(body));
-        
-        static private IRandomGenerator _randomGenerator = new DefaultRandomGenerator();
 
-        public static IRandomGenerator RandomGenerator {
-            get => _randomGenerator;
-            set
-            {
-                _randomGenerator = value ?? throw new ArgumentNullException("randomGenerator");
-            }
-        }
+        public static IDiceRoller DiceRoller { get; set; }
     }
 }

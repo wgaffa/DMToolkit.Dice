@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using DMTools.Die.Rollers;
 using DMTools.Die.Term;
 
 namespace DMTools.Die
@@ -23,11 +24,11 @@ namespace DMTools.Die
         /// Constructor to create a die
         /// </summary>
         /// <param name="sides">Number of sides of die</param>
-        /// <param name="randomGen">Random generator to generate random numbers from</param>
-        public Dice(int sides, IRandomGenerator randomGen)
+        /// <param name="diceRoller">Random generator to generate random numbers from</param>
+        public Dice(int sides, IDiceRoller diceRoller)
         {
             Sides = sides < 1 ? throw new ArgumentException("Dice sides must be a positive number") : sides;
-            randomGenerator = randomGen ?? throw new ArgumentNullException("randomGenerator");
+            _diceRoller = diceRoller ?? throw new ArgumentNullException(nameof(diceRoller));
         }
 
         /// <summary>
@@ -36,7 +37,7 @@ namespace DMTools.Die
         /// <returns>Random number between 1 and Sides</returns>
         public int Roll()
         {
-            return randomGenerator.Generate(1, Sides + 1);
+            return _diceRoller.RollDice(Sides);
         }
 
         public IEnumerable<int> GetResults()
@@ -57,6 +58,6 @@ namespace DMTools.Die
         /// <summary>
         /// Random number generator when rolling die
         /// </summary>
-        private readonly IRandomGenerator randomGenerator = new DefaultRandomGenerator();
+        private readonly IDiceRoller _diceRoller = new StandardDiceRoller();
     }
 }

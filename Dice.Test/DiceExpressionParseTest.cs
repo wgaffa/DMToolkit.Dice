@@ -44,7 +44,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseSingleDiceExpression()
         {
-            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(57);
+            DiceExpressionParser.DiceRoller = new MockRandomGenerator(57);
 
             string input = "d100";
 
@@ -66,7 +66,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseSimpleDiceExpression()
         {
-            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
+            DiceExpressionParser.DiceRoller = new MockRandomGenerator(3);
             string input = "5d20";
 
             var tokenizer = new DiceExpressionTokenizer();
@@ -79,7 +79,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseManyDicesExpression()
         {
-            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
+            DiceExpressionParser.DiceRoller = new MockRandomGenerator(3);
             string input = "15d20";
 
             var tokenizer = new DiceExpressionTokenizer();
@@ -92,7 +92,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseArithmeticDiceExpression()
         {
-            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(3);
+            DiceExpressionParser.DiceRoller = new MockRandomGenerator(3);
             string input = "1d6 + 1d4";
 
             var tokenizer = new DiceExpressionTokenizer();
@@ -105,7 +105,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseArithmeticDiceDecimalExpression()
         {
-            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(6);
+            DiceExpressionParser.DiceRoller = new MockRandomGenerator(6);
             string input = "1d8 * 1.5";
 
             var tokenizer = new DiceExpressionTokenizer();
@@ -118,7 +118,7 @@ namespace DiceTest
         [TestMethod]
         public void ParseArithmeticIntegerExpression()
         {
-            DiceExpressionParser.RandomGenerator = new MockRandomGenerator(6);
+            DiceExpressionParser.DiceRoller = new MockRandomGenerator(6);
             string input = "1d8 * 3";
 
             var tokenizer = new DiceExpressionTokenizer();

@@ -1,21 +1,19 @@
 ﻿using DMTools.Die.Algorithm;
+using DMTools.Die.Rollers;
 using DMTools.Die.Term;
 using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DMTools.Die.Parser
 {
     public class DiceExpressionParserDetailed
     {
-        public DiceExpressionParserDetailed(IRandomGenerator randomGenerator)
+        public DiceExpressionParserDetailed(IDiceRoller diceRoller)
         {
-            _randomGenerator = randomGenerator ?? throw new ArgumentNullException("randomGenerator");
+            _diceRoller = diceRoller ?? throw new ArgumentNullException(nameof(diceRoller));
 
             // Have to set the parsers in here or set all fields to static
             _dice =
@@ -23,7 +21,7 @@ namespace DMTools.Die.Parser
                 .Apply(_diceParser)
                 .Select(n => (IComponent)new DiceComponent(
                     new TimesTerm(
-                        new Dice(n.sidesOfDie, _randomGenerator)
+                        new Dice(n.sidesOfDie, _diceRoller)
                         , n.timesToRoll
                         ))
                     );
@@ -84,7 +82,6 @@ namespace DMTools.Die.Parser
         private readonly TokenListParser<DiceToken, IComponent> _expr;
 
         private readonly TokenListParser<DiceToken, IComponent> _expression;
-
-        private IRandomGenerator _randomGenerator = new DefaultRandomGenerator();
+        private readonly IDiceRoller _diceRoller;
     }
 }
