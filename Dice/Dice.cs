@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using DMTools.Die.Term;
 
 namespace DMTools.Die
@@ -41,6 +42,11 @@ namespace DMTools.Die
         public IEnumerable<int> GetResults()
         {
             yield return Roll();
+        }
+
+        public Expression ToExpression()
+        {
+            return Expression.Constant(Roll());
         }
 
         /// <summary>

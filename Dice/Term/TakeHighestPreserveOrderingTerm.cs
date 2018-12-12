@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DMTools.Die.Term
 {
-    public class TakeHighestPreserveOrderingTerm
+    public class TakeHighestPreserveOrderingTerm : IDiceTerm
     {
         private IDiceTerm _diceTerm;
         private int _takeAmount;

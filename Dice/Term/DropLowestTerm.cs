@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DMTools.Die.Term
 {
-    public class DropLowestTerm
+    public class DropLowestTerm : IDiceTerm
     {
         private IDiceTerm _diceTerm;
         private int _dropAmount;

@@ -1,23 +1,20 @@
-﻿using Superpower;
+﻿using DMTools.Die.Term;
+using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DMTools.Die.Parser
 {
     public class DiceExpressionParser
     {
-        static readonly TextParser<string> diceParser =
+        static readonly TextParser<(int timesToRoll, int sidesOfDie)> diceParser =
             from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1"))
             from _ in Character.In(new[] { 'd', 'D' })
             from sides in Numerics.Natural
-            select rolls.ToString() + 'd' + sides.ToString();
+            select (Convert.ToInt32(rolls.ToStringValue()), Convert.ToInt32(sides.ToStringValue()));
 
         static readonly TokenListParser<DiceToken, ExpressionType> Add =
             Token.EqualTo(DiceToken.Plus).Value(ExpressionType.AddChecked);
@@ -34,21 +31,12 @@ namespace DMTools.Die.Parser
         static readonly TokenListParser<DiceToken, Expression> Dice =
             Token.EqualTo(DiceToken.Dice)
             .Apply(diceParser)
-            .Select(d => CreateDiceExpression(d));
-
-        private static Expression CreateDiceExpression(string d)
-        {
-            var method = typeof(DiceRoller).GetMethod("Roll", BindingFlags.Instance | BindingFlags.Public);
-            var constructorInfo = typeof(DiceRoller).GetConstructor(new Type[] { typeof(string), typeof(IRandomGenerator) });
-            Expression randomGeneratorInstance = Expression.Constant(RandomGenerator);
-            Expression diceString = Expression.Constant(d);
-            Expression diceInstance = Expression.New(constructorInfo, new Expression[] { diceString, randomGeneratorInstance });
-            Expression callRoll = Expression.Call(diceInstance, method);
-            Expression diceResult = Expression.Property(callRoll, "Result");
-            Expression converToDouble = Expression.Convert(diceResult, typeof(double));
-
-            return converToDouble;
-        }
+            .Select(d => (Expression)Expression.Constant((double)
+                new TimesTerm(
+                    new Dice(d.sidesOfDie, _randomGenerator)
+                        , d.timesToRoll)
+                        .GetResults().Sum()
+                ));
 
         static readonly TokenListParser<DiceToken, Expression> Constant =
             Token.EqualTo(DiceToken.Number)
