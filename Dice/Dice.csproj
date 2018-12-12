@@ -63,8 +63,6 @@
     <Compile Include="Algorithm\Subtracter.cs" />
     <Compile Include="Algorithm\UnaryComponent.cs" />
     <Compile Include="Dice.cs" />
-    <Compile Include="DiceResult.cs" />
-    <Compile Include="DiceRoller.cs" />
     <Compile Include="Term\DropLowestPreserveOrderingTerm.cs" />
     <Compile Include="Term\DropLowestTerm.cs" />
     <Compile Include="Parser\DiceExpressionParser.cs" />
