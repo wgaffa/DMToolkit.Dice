@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceTest", "Dice.Test\DiceT
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E967EFDA-4271-4046-A22A-42A00E07CF7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "CoreModule\core\Core.csproj", "{FAF09947-0992-4DA4-92B3-72579890AEC7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,10 +23,6 @@ Global
 		{CAB6C1B7-8E16-429A-B405-F521B673CACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAB6C1B7-8E16-429A-B405-F521B673CACA}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{CAB6C1B7-8E16-429A-B405-F521B673CACA}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{FAF09947-0992-4DA4-92B3-72579890AEC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FAF09947-0992-4DA4-92B3-72579890AEC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FAF09947-0992-4DA4-92B3-72579890AEC7}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{FAF09947-0992-4DA4-92B3-72579890AEC7}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
