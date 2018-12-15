@@ -14,7 +14,7 @@ namespace DiceTest
             string input = "5.3";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(3));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(5.3, expr.Calculate());
         }
@@ -25,7 +25,7 @@ namespace DiceTest
             string input = "5.3 + 2";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(7.3, expr.Calculate());
         }
@@ -36,7 +36,7 @@ namespace DiceTest
             string input = "5.3 - 2";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(3.3, expr.Calculate());
         }
@@ -47,7 +47,7 @@ namespace DiceTest
             string input = "5.3 * 2";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(10.6, expr.Calculate());
         }
@@ -58,7 +58,7 @@ namespace DiceTest
             string input = "5.4 / 2";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(2.7, expr.Calculate());
         }
@@ -69,7 +69,7 @@ namespace DiceTest
             string input = "5.3 + -2";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(3.3, expr.Calculate());
         }
@@ -80,7 +80,7 @@ namespace DiceTest
             string input = "5 * 3 + 12 / 4 - 1";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(17, expr.Calculate());
         }
@@ -91,7 +91,7 @@ namespace DiceTest
             string input = "d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(1));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(1, expr.Calculate());
         }
@@ -102,7 +102,7 @@ namespace DiceTest
             string input = "5d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(2));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(10, expr.Calculate());
         }
@@ -113,7 +113,7 @@ namespace DiceTest
             string input = "3d6 + 1d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(3));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(12, expr.Calculate());
         }
@@ -124,7 +124,7 @@ namespace DiceTest
             string input = "3d6 + 1d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(3));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual("[3, 3, 3] + [3]", expr.ToString());
         }
@@ -135,7 +135,7 @@ namespace DiceTest
             string input = "5 * 3 + 12 / 4 - 1";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(5));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual("5 * 3 + 12 / 4 - 1", expr.ToString());
         }
@@ -146,7 +146,7 @@ namespace DiceTest
             string input = "d%";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(75));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(75, expr.Calculate());
         }
@@ -157,7 +157,7 @@ namespace DiceTest
             string input = "5d%";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(10));
 
-            IComponent expr = parser.ParseString(input);
+            IDiceExpression expr = parser.ParseString(input);
 
             Assert.AreEqual(50, expr.Calculate());
         }

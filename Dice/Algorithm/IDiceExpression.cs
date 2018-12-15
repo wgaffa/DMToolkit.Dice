@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public interface IComponent
+    public interface IDiceExpression
     {
         double Calculate();
     }

@@ -25,7 +25,7 @@ namespace DMTools.Die.Parser
             _dice =
                 Token.EqualTo(DiceToken.Dice)
                 .Apply(_diceParser)
-                .Select(n => (IComponent)new DiceComponent(
+                .Select(n => (IDiceExpression)new DiceTermExpression(
                     new TimesTerm(
                         new Dice(n.sidesOfDie, _diceRoller)
                         , n.timesToRoll
@@ -35,20 +35,20 @@ namespace DMTools.Die.Parser
             _operand =
                 (from sign in Token.EqualTo(DiceToken.Minus)
                  from factor in _constant
-                 select (IComponent)new Negate(factor)
+                 select (IDiceExpression)new Negate(factor)
                  ).Or(_dice).Or(_constant).Named("expression");
 
             _term =
-                Parse.Chain(_multiply.Or(_divide), _operand, BinaryComponent.MakeBinary);
+                Parse.Chain(_multiply.Or(_divide), _operand, BinaryExpression.MakeBinary);
 
             _expr =
-                Parse.Chain(_add.Or(_subtract), _term, BinaryComponent.MakeBinary);
+                Parse.Chain(_add.Or(_subtract), _term, BinaryExpression.MakeBinary);
 
             _expression =
                 _expr.Or(_dice).Or(_constant);
         }
 
-        public IComponent ParseString(string input)
+        public IDiceExpression ParseString(string input)
         {
             DiceExpressionTokenizer tokenizer = new DiceExpressionTokenizer();
             var tokenlist = tokenizer.Tokenize(input);
@@ -74,20 +74,20 @@ namespace DMTools.Die.Parser
         private readonly TokenListParser<DiceToken, OperatorType> _divide =
             Token.EqualTo(DiceToken.Divide).Value(OperatorType.Division);
 
-        private readonly TokenListParser<DiceToken, IComponent> _constant =
+        private readonly TokenListParser<DiceToken, IDiceExpression> _constant =
             Token.EqualTo(DiceToken.Number)
             .Apply(Numerics.DecimalDouble)
-            .Select(n => (IComponent)new Constant(n));
+            .Select(n => (IDiceExpression)new Constant(n));
 
-        private readonly TokenListParser<DiceToken, IComponent> _dice;
+        private readonly TokenListParser<DiceToken, IDiceExpression> _dice;
 
-        private readonly TokenListParser<DiceToken, IComponent> _operand;
+        private readonly TokenListParser<DiceToken, IDiceExpression> _operand;
 
-        private readonly TokenListParser<DiceToken, IComponent> _term;
+        private readonly TokenListParser<DiceToken, IDiceExpression> _term;
 
-        private readonly TokenListParser<DiceToken, IComponent> _expr;
+        private readonly TokenListParser<DiceToken, IDiceExpression> _expr;
 
-        private readonly TokenListParser<DiceToken, IComponent> _expression;
+        private readonly TokenListParser<DiceToken, IDiceExpression> _expression;
         private readonly IDiceRoller _diceRoller;
     }
 }

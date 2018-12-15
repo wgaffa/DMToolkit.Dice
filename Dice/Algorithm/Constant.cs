@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public class Constant : IComponent
+    public class Constant : IDiceExpression
     {
         public Constant(double value)
         {

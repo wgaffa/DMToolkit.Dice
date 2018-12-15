@@ -12,7 +12,7 @@ namespace DiceTest
         [TestMethod]
         public void SimpleAlgorithm()
         {
-            IComponent expr = new Adder(
+            IDiceExpression expr = new Adder(
                 new Constant(5.3),
                 new Multiplier(
                     new Constant(3.2),
@@ -26,8 +26,8 @@ namespace DiceTest
         [TestMethod]
         public void SimpleDiceAlgorithm()
         {
-            IComponent expr = new Multiplier(
-                new DiceComponent(new TimesTerm(
+            IDiceExpression expr = new Multiplier(
+                new DiceTermExpression(new TimesTerm(
                     new Dice(6, new MockRandomGenerator(3)), 3)),
                 new Constant(1.5)
                 );
@@ -38,8 +38,8 @@ namespace DiceTest
         [TestMethod]
         public void NegateTest()
         {
-            IComponent expr = new Adder(
-                new DiceComponent(new Dice(8, new MockRandomGenerator(4))),
+            IDiceExpression expr = new Adder(
+                new DiceTermExpression(new Dice(8, new MockRandomGenerator(4))),
                 new Negate(
                     new Constant(2)
                     )

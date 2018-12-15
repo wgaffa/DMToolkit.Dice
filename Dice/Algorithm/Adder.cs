@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public class Adder : BinaryComponent
+    public class Adder : BinaryExpression
     {
-        public Adder(IComponent left, IComponent right) : base(left, right)
+        public Adder(IDiceExpression left, IDiceExpression right) : base(left, right)
         {
         }
 

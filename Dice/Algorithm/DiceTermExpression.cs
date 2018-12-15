@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public class DiceComponent : IComponent
+    public class DiceTermExpression : IDiceExpression
     {
-        public DiceComponent(IDiceTerm diceTerm)
+        public DiceTermExpression(IDiceTerm diceTerm)
         {
             _diceTerm = diceTerm ?? throw new ArgumentNullException(nameof(diceTerm));
             _currentRoll = _diceTerm.GetResults().ToList();

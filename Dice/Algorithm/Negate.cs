@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public class Negate : UnaryComponent
+    public class Negate : UnaryExpression
     {
-        public Negate(IComponent right) : base(right)
+        public Negate(IDiceExpression right) : base(right)
         {
         }
         

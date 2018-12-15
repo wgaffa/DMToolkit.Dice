@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public abstract class UnaryComponent : IComponent
+    public abstract class UnaryExpression : IDiceExpression
     {
-        public UnaryComponent(IComponent right)
+        public UnaryExpression(IDiceExpression right)
         {
             _right = right;
         }
 
         public abstract double Calculate();
 
-        protected IComponent _right;
+        protected IDiceExpression _right;
     }
 }

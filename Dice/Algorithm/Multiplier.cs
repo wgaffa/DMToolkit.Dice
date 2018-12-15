@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public class Multiplier : BinaryComponent
+    public class Multiplier : BinaryExpression
     {
-        public Multiplier(IComponent left, IComponent right) : base(left, right)
+        public Multiplier(IDiceExpression left, IDiceExpression right) : base(left, right)
         {
         }
 

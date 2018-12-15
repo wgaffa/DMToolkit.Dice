@@ -52,22 +52,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithm\Adder.cs" />
-    <Compile Include="Algorithm\BinaryComponent.cs" />
-    <Compile Include="Algorithm\ComponentTypes.cs" />
+    <Compile Include="Algorithm\BinaryExpression.cs" />
     <Compile Include="Algorithm\Constant.cs" />
-    <Compile Include="Algorithm\DiceComponent.cs" />
+    <Compile Include="Algorithm\DiceTermExpression.cs" />
     <Compile Include="Algorithm\Divider.cs" />
-    <Compile Include="Algorithm\IComponent.cs" />
+    <Compile Include="Algorithm\IDiceExpression.cs" />
     <Compile Include="Algorithm\Multiplier.cs" />
     <Compile Include="Algorithm\Negate.cs" />
+    <Compile Include="Algorithm\OperatorTypes.cs" />
     <Compile Include="Algorithm\Subtracter.cs" />
-    <Compile Include="Algorithm\UnaryComponent.cs" />
+    <Compile Include="Algorithm\UnaryExpression.cs" />
     <Compile Include="Dice.cs" />
     <Compile Include="Rollers\IDiceRoller.cs" />
     <Compile Include="Rollers\StandardDiceRoller.cs" />
     <Compile Include="Term\DropLowestPreserveOrderingTerm.cs" />
     <Compile Include="Term\DropLowestTerm.cs" />
-    <Compile Include="Parser\DiceExpressionParser.cs" />
     <Compile Include="Parser\DiceExpressionToken.cs" />
     <Compile Include="Parser\DiceExpressionTokenizer.cs" />
     <Compile Include="Parser\DiceExpressionParserDetailed.cs" />

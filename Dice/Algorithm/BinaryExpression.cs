@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace DMTools.Die.Algorithm
 {
-    public abstract class BinaryComponent : UnaryComponent
+    public abstract class BinaryExpression : UnaryExpression
     {
-        public BinaryComponent(IComponent left, IComponent right) : base(right)
+        public BinaryExpression(IDiceExpression left, IDiceExpression right) : base(right)
         {
             _left = left;
         }
 
-        public static IComponent MakeBinary(OperatorType op, IComponent left, IComponent right)
+        public static IDiceExpression MakeBinary(OperatorType op, IDiceExpression left, IDiceExpression right)
         {
-            IComponent result = null;
+            IDiceExpression result = null;
 
             switch (op)
             {
@@ -38,6 +38,6 @@ namespace DMTools.Die.Algorithm
             return result;
         }
 
-        protected IComponent _left;
+        protected IDiceExpression _left;
     }
 }
