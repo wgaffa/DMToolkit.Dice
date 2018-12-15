@@ -31,10 +31,7 @@ namespace DMTools.Die.Parser
 
                 if (next.Value.ToString().ToLower() == "d")
                 {
-                    StringBuilder diceBuilder = new StringBuilder();
-
                     var diceStart = next.Location;
-                    diceBuilder.Append(next.Value);
 
                     // Go past the letter 'd'
                     next = next.Remainder.ConsumeChar();
@@ -46,8 +43,6 @@ namespace DMTools.Die.Parser
                     {
                         yield return Result.Empty<DiceToken>(next.Location, new[] { "dice" });
                     }
-
-                    diceBuilder.Append(natural.Value);
 
                     next = natural.Remainder.ConsumeChar();
                     yield return Result.Value(DiceToken.Dice, diceStart, next.Remainder);
@@ -101,18 +96,12 @@ namespace DMTools.Die.Parser
 
         private Result<TextSpan> ParseDiceSides(ref Result<char> next)
         {
-            return hundredSidedDieParser
+            return _hundredSidedDieParser
                                     .Select(s => s.EqualsValue("%") ? new TextSpan("100") : s)
                                     .TryParse(next.Location.ToStringValue());
         }
 
-        private TextParser<string> diceParser =
-            from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1"))
-            from _ in Character.In(new[] { 'd', 'D' })
-            from sides in Numerics.Natural
-            select rolls.ToString() + 'd' + sides;
-
-        private TextParser<TextSpan> hundredSidedDieParser =
+        private TextParser<TextSpan> _hundredSidedDieParser =
                         from sides in Numerics.Natural.Or(Span.MatchedBy(Character.In('%')))
                         select sides;
     }
