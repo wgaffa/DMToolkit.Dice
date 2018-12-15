@@ -139,5 +139,27 @@ namespace DiceTest
 
             Assert.AreEqual("5 * 3 + 12 / 4 - 1", expr.ToString());
         }
+
+        [TestMethod]
+        public void D100WithPercentCharacter()
+        {
+            string input = "d%";
+            DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(75));
+
+            IComponent expr = parser.ParseString(input);
+
+            Assert.AreEqual(75, expr.Calculate());
+        }
+
+        [TestMethod]
+        public void D100FiveTimesWithPercentCharacter()
+        {
+            string input = "5d%";
+            DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(new MockRandomGenerator(10));
+
+            IComponent expr = parser.ParseString(input);
+
+            Assert.AreEqual(50, expr.Calculate());
+        }
     }
 }

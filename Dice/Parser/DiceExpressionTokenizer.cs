@@ -40,7 +40,7 @@ namespace DMTools.Die.Parser
                     next = next.Remainder.ConsumeChar();
 
                     // Should be a positive number after the letter 'd'
-                    var natural = Numerics.Natural(next.Location);
+                    Result<TextSpan> natural = ParseDiceSides(ref next);
 
                     if (!natural.HasValue)
                     {
@@ -70,7 +70,7 @@ namespace DMTools.Die.Parser
                         // Past letter 'd'
                         next = next.Remainder.ConsumeChar();
 
-                        var sides = Numerics.Natural(next.Location);
+                        var sides = ParseDiceSides(ref next);
 
                         if (!sides.HasValue)
                         {
@@ -99,10 +99,21 @@ namespace DMTools.Die.Parser
             } while (next.HasValue);
         }
 
+        private Result<TextSpan> ParseDiceSides(ref Result<char> next)
+        {
+            return hundredSidedDieParser
+                                    .Select(s => s.EqualsValue("%") ? new TextSpan("100") : s)
+                                    .TryParse(next.Location.ToStringValue());
+        }
+
         private TextParser<string> diceParser =
             from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1"))
             from _ in Character.In(new[] { 'd', 'D' })
             from sides in Numerics.Natural
             select rolls.ToString() + 'd' + sides;
+
+        private TextParser<TextSpan> hundredSidedDieParser =
+                        from sides in Numerics.Natural.Or(Span.MatchedBy(Character.In('%')))
+                        select sides;
     }
 }
