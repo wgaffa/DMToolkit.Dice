@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DMTools.Die;
+using Moq;
 
 namespace DiceTest
 {
@@ -22,7 +23,9 @@ namespace DiceTest
         [TestMethod]
         public void CreateDiceNullRandomGenerator()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new Dice(5, null));
+            Dice standardDice = new Dice(6, null);
+
+            Assert.IsTrue(standardDice.Roll() < 7);
         }
 
         [TestMethod]

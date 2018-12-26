@@ -11,6 +11,8 @@ namespace DMTools.Die
     /// </summary>
     public class Dice : IDiceTerm
     {
+        private static IDiceRoller DefaultDiceRoller = new StandardDiceRoller();
+
         /// <summary>
         /// Constructor to create a die with DefaultRandomGenerator for randomizing
         /// </summary>
@@ -28,7 +30,7 @@ namespace DMTools.Die
         public Dice(int sides, IDiceRoller diceRoller)
         {
             Sides = sides < 1 ? throw new ArgumentException("Dice sides must be a positive number") : sides;
-            _diceRoller = diceRoller ?? throw new ArgumentNullException(nameof(diceRoller));
+            _diceRoller = diceRoller ?? DefaultDiceRoller;
         }
 
         /// <summary>
