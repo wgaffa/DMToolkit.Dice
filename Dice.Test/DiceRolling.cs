@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DMTools.Die;
 using Moq;
+using DMTools.Die.Rollers;
 
 namespace DiceTest
 {
@@ -15,7 +16,9 @@ namespace DiceTest
         [TestMethod]
         public void RollDice()
         {
-            Dice d12 = new Dice(12, new MockRandomGenerator());
+            var mockRandom = new Mock<IDiceRoller>();
+            mockRandom.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice d12 = new Dice(12, mockRandom.Object);
 
             Assert.AreEqual(5, d12.Roll());
         }
@@ -31,13 +34,13 @@ namespace DiceTest
         [TestMethod]
         public void CreateNegativeDiceSides()
         {
-            Assert.ThrowsException<ArgumentException>(() => new Dice(-4, new MockRandomGenerator()));
+            Assert.ThrowsException<ArgumentException>(() => new Dice(-4, null));
         }
 
         [TestMethod]
         public void CreateZeroSidedDice()
         {
-            Assert.ThrowsException<ArgumentException>(() => new Dice(0, new MockRandomGenerator()));
+            Assert.ThrowsException<ArgumentException>(() => new Dice(0, null));
         }
     }
 }

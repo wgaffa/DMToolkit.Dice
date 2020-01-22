@@ -4,7 +4,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using DMTools.Die;
 using DMTools.Die.Parser;
+using DMTools.Die.Rollers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
@@ -50,7 +52,9 @@ namespace DiceTest
         [TestMethod]
         public void ExpressionCallObjectConcept()
         {
-            Dice sixSidedDice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice sixSidedDice = new Dice(6, mockRoller.Object);
 
             //Expression<Func<int>> expr = () => sixSidedDice.Roll();
 

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using DMTools.Die;
+using DMTools.Die.Rollers;
 using DMTools.Die.Term;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace DiceTest
 {
@@ -13,7 +15,9 @@ namespace DiceTest
         [TestMethod]
         public void CoreDice()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
 
             Assert.AreEqual(5, dice.GetResults().First());
         }
@@ -21,7 +25,9 @@ namespace DiceTest
         [TestMethod]
         public void DiceTimesFive()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
 
             List<int> expected = new List<int>() { 5, 5, 5, 5, 5 };
@@ -39,7 +45,9 @@ namespace DiceTest
         [TestMethod]
         public void DiceTimesGivenZeroTimes()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesZero = new TimesTerm(dice, 0);
 
             List<int> expected = new List<int>() { 5 };
@@ -51,7 +59,9 @@ namespace DiceTest
         [TestMethod]
         public void DiceTimesGivenNegative()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesZero = new TimesTerm(dice, -25);
 
             List<int> expected = new List<int>() { 5 };
@@ -63,7 +73,9 @@ namespace DiceTest
         [TestMethod]
         public void DiceDropLowestTwo()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             DropLowestTerm dropLowest = new DropLowestTerm(timesFive, 2);
 
@@ -76,7 +88,14 @@ namespace DiceTest
         [TestMethod]
         public void DiceDropLowestPreserveOrdering()
         {
-            Dice dice = new Dice(6, new MockListGenerator(new int[] { 2, 5, 3, 4, 5 }));
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollDice(It.IsAny<int>()))
+                .Returns(2)
+                .Returns(5)
+                .Returns(3)
+                .Returns(4)
+                .Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             DropLowestPreserveOrderingTerm dropLowest = new DropLowestPreserveOrderingTerm(timesFive, 2);
 
@@ -89,7 +108,14 @@ namespace DiceTest
         [TestMethod]
         public void DropLowestPreserveOrderingMinAtEnd()
         {
-            Dice dice = new Dice(6, new MockListGenerator(new int[] { 2, 5, 4, 5, 1 }));
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollDice(It.IsAny<int>()))
+                .Returns(2)
+                .Returns(5)
+                .Returns(4)
+                .Returns(5)
+                .Returns(1);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             DropLowestPreserveOrderingTerm dropLowest = new DropLowestPreserveOrderingTerm(timesFive, 2);
 
@@ -102,7 +128,14 @@ namespace DiceTest
         [TestMethod]
         public void DiceTakeHighestThreePreserveOrdering()
         {
-            Dice dice = new Dice(6, new MockListGenerator(new int[] { 2, 5, 3, 4, 6 }));
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollDice(It.IsAny<int>()))
+                .Returns(2)
+                .Returns(5)
+                .Returns(3)
+                .Returns(4)
+                .Returns(6);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             TakeHighestPreserveOrderingTerm takeHighest = new TakeHighestPreserveOrderingTerm(timesFive, 3);
 
@@ -115,8 +148,14 @@ namespace DiceTest
         [TestMethod]
         public void DiceTakeHighestThree()
         {
-
-            Dice dice = new Dice(6, new MockListGenerator(new int[] { 2, 5, 3, 4, 6 }));
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollDice(It.IsAny<int>()))
+                .Returns(2)
+                .Returns(5)
+                .Returns(3)
+                .Returns(4)
+                .Returns(6);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             TakeHighestTerm takeHighest = new TakeHighestTerm(timesFive, 3);
 
@@ -129,7 +168,9 @@ namespace DiceTest
         [TestMethod]
         public void DropLowestPreservingOrderWhenDroppingAlot()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             DropLowestPreserveOrderingTerm dropLowest = new DropLowestPreserveOrderingTerm(timesFive, 1000);
 
@@ -142,7 +183,9 @@ namespace DiceTest
         [TestMethod]
         public void TakeHighestPreservingOrderWhenTakingAlot()
         {
-            Dice dice = new Dice(6, new MockRandomGenerator());
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            Dice dice = new Dice(6, mockRoller.Object);
             TimesTerm timesFive = new TimesTerm(dice, 5);
             TakeHighestPreserveOrderingTerm takeHighest = new TakeHighestPreserveOrderingTerm(timesFive, 1000);
 

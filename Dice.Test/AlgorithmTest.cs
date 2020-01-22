@@ -1,8 +1,10 @@
 ﻿using System;
 using DMTools.Die;
 using DMTools.Die.Algorithm;
+using DMTools.Die.Rollers;
 using DMTools.Die.Term;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace DiceTest
 {
@@ -26,9 +28,11 @@ namespace DiceTest
         [TestMethod]
         public void SimpleDiceAlgorithm()
         {
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(3);
             IDiceExpression expr = new Multiplier(
                 new DiceTermExpression(new TimesTerm(
-                    new Dice(6, new MockRandomGenerator(3)), 3)),
+                    new Dice(6, mockRoller.Object), 3)),
                 new Constant(1.5)
                 );
 
@@ -38,6 +42,8 @@ namespace DiceTest
         [TestMethod]
         public void NegateTest()
         {
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(4);
             IDiceExpression expr = new Adder(
                 new DiceTermExpression(new Dice(8, new MockRandomGenerator(4))),
                 new Negate(
