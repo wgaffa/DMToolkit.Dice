@@ -10,11 +10,11 @@ namespace DMTools.Die.Algorithm
     {
         public UnaryExpression(IDiceExpression right)
         {
-            _right = right;
+            Right = right;
         }
 
         public abstract double Calculate();
 
-        protected IDiceExpression _right;
+        protected IDiceExpression Right { get; set; }
     }
 }

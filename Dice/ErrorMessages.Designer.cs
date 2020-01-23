@@ -61,6 +61,15 @@ namespace DMTools.Die {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid operator.
+        /// </summary>
+        internal static string InvalidOperator {
+            get {
+                return ResourceManager.GetString("InvalidOperator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Must be a positive integer.
         /// </summary>
         internal static string InvalidPositiveInteger {

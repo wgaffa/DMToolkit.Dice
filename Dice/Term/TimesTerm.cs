@@ -6,8 +6,8 @@ namespace DMTools.Die.Term
 {
     public class TimesTerm : IDiceTerm
     {
-        private IDiceTerm _dice;
-        private int _numberOfRolls;
+        private readonly IDiceTerm _dice;
+        private readonly int _numberOfRolls;
 
         public TimesTerm(IDiceTerm dice, int numberOfRolls = 1)
         {

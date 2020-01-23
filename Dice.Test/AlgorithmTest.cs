@@ -29,7 +29,7 @@ namespace DiceTest
         public void SimpleDiceAlgorithm()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(3);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(3);
             IDiceExpression expr = new Multiplier(
                 new DiceTermExpression(new TimesTerm(
                     new Dice(6, mockRoller.Object), 3)),
@@ -43,7 +43,7 @@ namespace DiceTest
         public void NegateTest()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(4);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(4);
             IDiceExpression expr = new Adder(
                 new DiceTermExpression(new Dice(8, mockRoller.Object)),
                 new Negate(

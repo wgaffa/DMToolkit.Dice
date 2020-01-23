@@ -4,6 +4,7 @@
     <RootNamespace>DMTools.Die</RootNamespace>
     <AssemblyName>DMTools.Dice</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">

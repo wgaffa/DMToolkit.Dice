@@ -53,7 +53,7 @@ namespace DiceTest
         public void ExpressionCallObjectConcept()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(5);
             Dice sixSidedDice = new Dice(6, mockRoller.Object);
 
             //Expression<Func<int>> expr = () => sixSidedDice.Roll();

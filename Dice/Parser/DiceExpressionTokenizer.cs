@@ -3,6 +3,7 @@ using Superpower.Model;
 using Superpower.Parsers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,9 +28,8 @@ namespace DMTools.Die.Parser
 
             do
             {
-                DiceToken charToken;
 
-                if (next.Value.ToString().ToLower() == "d")
+                if (next.Value.ToString(CultureInfo.InvariantCulture).ToUpperInvariant() == "D")
                 {
                     var diceStart = next.Location;
 
@@ -80,7 +80,7 @@ namespace DMTools.Die.Parser
                         yield return Result.Value(DiceToken.Number, natural.Location, natural.Remainder);
                     }
                 }
-                else if (_operators.TryGetValue(next.Value, out charToken))
+                else if (_operators.TryGetValue(next.Value, out DiceToken charToken))
                 {
                     yield return Result.Value(charToken, next.Location, next.Remainder);
                     next = next.Remainder.ConsumeChar();
@@ -101,7 +101,7 @@ namespace DMTools.Die.Parser
                                     .TryParse(next.Location.ToStringValue());
         }
 
-        private TextParser<TextSpan> _hundredSidedDieParser =
+        private readonly TextParser<TextSpan> _hundredSidedDieParser =
                         from sides in Numerics.Natural.Or(Span.MatchedBy(Character.In('%')))
                         select sides;
     }

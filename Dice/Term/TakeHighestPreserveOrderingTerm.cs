@@ -6,8 +6,8 @@ namespace DMTools.Die.Term
 {
     public class TakeHighestPreserveOrderingTerm : IDiceTerm
     {
-        private IDiceTerm _diceTerm;
-        private int _takeAmount;
+        private readonly IDiceTerm _diceTerm;
+        private readonly int _takeAmount;
 
         public TakeHighestPreserveOrderingTerm(IDiceTerm diceTerm, int takeAmount = 1)
         {

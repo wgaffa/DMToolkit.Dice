@@ -1,4 +1,5 @@
 ﻿using System;
+using DMTools.Die;
 using DMTools.Die.Algorithm;
 using DMTools.Die.Parser;
 using DMTools.Die.Rollers;
@@ -92,7 +93,7 @@ namespace DiceTest
         public void ComplexAlgorithm()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(5);
             string input = "5 * 3 + 12 / 4 - 1";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -105,7 +106,7 @@ namespace DiceTest
         public void OneDice()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(1);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(1);
             string input = "d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -118,7 +119,7 @@ namespace DiceTest
         public void SeveralDice()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(2);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(2);
             string input = "5d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -131,7 +132,7 @@ namespace DiceTest
         public void DiceExpression()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(3);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(3);
             string input = "3d6 + 1d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -144,7 +145,7 @@ namespace DiceTest
         public void DiceOutputString()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(3);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(3);
             string input = "3d6 + 1d4";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -157,7 +158,7 @@ namespace DiceTest
         public void ComplexAlgorithmToString()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(5);
             string input = "5 * 3 + 12 / 4 - 1";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -170,7 +171,7 @@ namespace DiceTest
         public void D100WithPercentCharacter()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(75);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(75);
             string input = "d%";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 
@@ -183,7 +184,7 @@ namespace DiceTest
         public void D100FiveTimesWithPercentCharacter()
         {
             var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(10);
+            mockRoller.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(10);
             string input = "5d%";
             DiceExpressionParserDetailed parser = new DiceExpressionParserDetailed(mockRoller.Object);
 

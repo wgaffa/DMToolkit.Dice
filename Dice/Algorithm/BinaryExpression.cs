@@ -10,13 +10,12 @@ namespace DMTools.Die.Algorithm
     {
         public BinaryExpression(IDiceExpression left, IDiceExpression right) : base(right)
         {
-            _left = left;
+            Left = left;
         }
 
         public static IDiceExpression MakeBinary(OperatorType op, IDiceExpression left, IDiceExpression right)
         {
-            IDiceExpression result = null;
-
+            IDiceExpression result;
             switch (op)
             {
                 case OperatorType.Addition:
@@ -32,12 +31,12 @@ namespace DMTools.Die.Algorithm
                     result = new Divider(left, right);
                     break;
                 default:
-                    throw new ArgumentException("operator type not supported", "op");
+                    throw new ArgumentException(ErrorMessages.InvalidOperator, nameof(op));
             }
 
             return result;
         }
 
-        protected IDiceExpression _left;
+        protected IDiceExpression Left { get; }
     }
 }

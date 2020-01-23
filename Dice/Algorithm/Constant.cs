@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +21,9 @@ namespace DMTools.Die.Algorithm
 
         public override string ToString()
         {
-            return _value.ToString();
+            return _value.ToString(CultureInfo.CurrentCulture);
         }
 
-        private double _value;
+        private readonly double _value;
     }
 }

@@ -39,7 +39,7 @@ namespace DMTools.Die
         /// <returns>Random number between 1 and Sides</returns>
         public int Roll()
         {
-            return _diceRoller.RollDice((int)Sides);
+            return _diceRoller.RollDice(Sides);
         }
 
         public IEnumerable<int> GetResults()

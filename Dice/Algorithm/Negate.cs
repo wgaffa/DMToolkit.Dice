@@ -14,12 +14,12 @@ namespace DMTools.Die.Algorithm
         
         public override double Calculate()
         {
-            return -_right.Calculate();
+            return -Right.Calculate();
         }
 
         public override string ToString()
         {
-            return "-" + _right.ToString();
+            return "-" + Right.ToString();
         }
     }
 }

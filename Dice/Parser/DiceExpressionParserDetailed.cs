@@ -5,6 +5,7 @@ using Superpower;
 using Superpower.Model;
 using Superpower.Parsers;
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace DMTools.Die.Parser
@@ -16,7 +17,8 @@ namespace DMTools.Die.Parser
             _diceRoller = diceRoller ?? throw new ArgumentNullException(nameof(diceRoller));
 
             _diceParser =
-            from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1")).Select(s => Convert.ToInt32(s.ToStringValue()))
+            from rolls in Numerics.Natural.OptionalOrDefault(new TextSpan("1"))
+                .Select(s => Convert.ToInt32(s.ToStringValue(), CultureInfo.CurrentCulture))
             from _ in Character.In(new[] { 'd', 'D' })
             from sides in _diceSidesParser
             select (rolls, sides);
@@ -58,7 +60,7 @@ namespace DMTools.Die.Parser
 
         private readonly TextParser<int> _diceSidesParser =
                         from sides in Numerics.Natural.Or(Span.MatchedBy(Character.In('%')))
-                        select sides.EqualsValue("%") ? 100 : Convert.ToInt32(sides.ToStringValue());
+                        select sides.EqualsValue("%") ? 100 : Convert.ToInt32(sides.ToStringValue(), CultureInfo.CurrentCulture);
 
         private readonly TextParser<(int timesToRoll, int sidesOfDie)> _diceParser;
 

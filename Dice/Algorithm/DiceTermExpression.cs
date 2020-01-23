@@ -28,7 +28,7 @@ namespace DMTools.Die.Algorithm
             return "[" + String.Join(", ", _currentRoll) + "]";
         }
 
-        private IDiceTerm _diceTerm;
-        private List<int> _currentRoll;
+        private readonly IDiceTerm _diceTerm;
+        private readonly List<int> _currentRoll;
     }
 }

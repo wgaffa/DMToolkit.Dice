@@ -16,6 +16,6 @@ namespace DMTools.Die.Rollers
         /// </summary>
         /// <param name="sides">Number of sides on the die.</param>
         /// <returns>Random number between [1, <paramref name="sides"/>]</returns>
-        int RollDice(int sides);
+        int RollDice(PositiveInteger sides);
     }
 }

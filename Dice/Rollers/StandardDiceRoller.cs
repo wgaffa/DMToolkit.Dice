@@ -21,9 +21,9 @@ namespace DMTools.Die.Rollers
             _random = random ?? throw new ArgumentNullException(nameof(random));
         }
 
-        public int RollDice(int sides)
+        public int RollDice(PositiveInteger sides)
         {
-            return _random.Next(1, sides + 1);
+            return _random.Next(1, (int)sides + 1);
         }
     }
 }

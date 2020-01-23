@@ -17,7 +17,7 @@ namespace DiceTest
         public void RollDice()
         {
             var mockRandom = new Mock<IDiceRoller>();
-            mockRandom.Setup(x => x.RollDice(It.IsAny<int>())).Returns(5);
+            mockRandom.Setup(x => x.RollDice(It.IsAny<PositiveInteger>())).Returns(5);
             Dice d12 = new Dice(12, mockRandom.Object);
 
             Assert.AreEqual(5, d12.Roll());

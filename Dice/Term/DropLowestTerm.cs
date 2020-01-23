@@ -6,8 +6,8 @@ namespace DMTools.Die.Term
 {
     public class DropLowestTerm : IDiceTerm
     {
-        private IDiceTerm _diceTerm;
-        private int _dropAmount;
+        private readonly IDiceTerm _diceTerm;
+        private readonly int _dropAmount;
 
         public DropLowestTerm(IDiceTerm diceTerm, int dropAmount = 1)
         {
