@@ -45,7 +45,7 @@ namespace DiceTest
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.Setup(x => x.RollDice(It.IsAny<int>())).Returns(4);
             IDiceExpression expr = new Adder(
-                new DiceTermExpression(new Dice(8, new MockRandomGenerator(4))),
+                new DiceTermExpression(new Dice(8, mockRoller.Object)),
                 new Negate(
                     new Constant(2)
                     )

@@ -11,15 +11,15 @@ namespace DMTools.Die
     /// </summary>
     public class Dice : IDiceTerm
     {
-        private static IDiceRoller DefaultDiceRoller = new StandardDiceRoller();
+        private static readonly IDiceRoller DefaultDiceRoller = new StandardDiceRoller();
 
         /// <summary>
         /// Constructor to create a die with DefaultRandomGenerator for randomizing
         /// </summary>
         /// <param name="sides">Number of sides of die</param>
-        public Dice(int sides = 6)
+        public Dice(PositiveInteger sides)
+            : this(sides, null)
         {
-            Sides = sides < 1 ? throw new ArgumentException("Dice sides must be a positive number") : sides;
         }
 
         /// <summary>
@@ -27,9 +27,9 @@ namespace DMTools.Die
         /// </summary>
         /// <param name="sides">Number of sides of die</param>
         /// <param name="diceRoller">Random generator to generate random numbers from</param>
-        public Dice(int sides, IDiceRoller diceRoller)
+        public Dice(PositiveInteger sides, IDiceRoller diceRoller)
         {
-            Sides = sides < 1 ? throw new ArgumentException("Dice sides must be a positive number") : sides;
+            Sides = sides;
             _diceRoller = diceRoller ?? DefaultDiceRoller;
         }
 
@@ -39,7 +39,7 @@ namespace DMTools.Die
         /// <returns>Random number between 1 and Sides</returns>
         public int Roll()
         {
-            return _diceRoller.RollDice(Sides);
+            return _diceRoller.RollDice((int)Sides);
         }
 
         public IEnumerable<int> GetResults()
@@ -55,7 +55,7 @@ namespace DMTools.Die
         /// <summary>
         /// Number of sides of the die
         /// </summary>
-        public int Sides { get; private set; }
+        public PositiveInteger Sides { get; }
 
         /// <summary>
         /// Random number generator when rolling die
