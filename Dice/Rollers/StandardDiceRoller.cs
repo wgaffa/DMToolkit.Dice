@@ -22,9 +22,9 @@ namespace DMTools.Die.Rollers
             _random = random ?? throw new ArgumentNullException(nameof(random));
         }
 
-        public int RollDice(PositiveInteger sides)
+        public int RollDice(Dice dice)
         {
-            return _random.Next(1, (int)sides + 1);
+            return _random.Next(1, (int)dice.Sides + 1);
         }
     }
 }
