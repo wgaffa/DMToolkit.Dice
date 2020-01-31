@@ -24,7 +24,7 @@ namespace DMTools.Die.Rollers
 
         public int RollDice(Dice dice)
         {
-            return _random.Next(1, (int)dice.Sides + 1);
+            return _random.Next(1, dice.Sides + 1);
         }
     }
 }
