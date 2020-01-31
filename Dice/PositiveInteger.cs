@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DMTools.Die;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace DMTools.Die
+namespace Wgaffa.DMToolkit
 {
     public class PositiveInteger : ValueObject<PositiveInteger>
     {

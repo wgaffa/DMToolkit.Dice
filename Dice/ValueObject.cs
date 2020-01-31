@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace DMTools
+namespace Wgaffa.DMToolkit
 {
     public abstract class ValueObject<T> : IEquatable<T> where T : class
     {

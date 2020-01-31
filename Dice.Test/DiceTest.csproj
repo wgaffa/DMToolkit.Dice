@@ -52,12 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiceRolling.cs" />
-    <Compile Include="DiceTermTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StringTest.cs" />
-    <Compile Include="ConceptTests.cs" />
-    <Compile Include="AlgorithmTest.cs" />
-    <Compile Include="DiceExpressionParserDetailedTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dice\Dice.csproj">

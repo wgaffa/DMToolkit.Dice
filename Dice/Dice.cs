@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using DMTools.Die.Rollers;
 
-namespace DMTools.Die
+namespace Wgaffa.DMToolkit
 {
     /// <summary>
     /// Represent a physical die with a set number of sides.
