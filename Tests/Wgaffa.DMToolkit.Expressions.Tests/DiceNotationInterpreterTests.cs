@@ -36,7 +36,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var fivePointThree = new NumberExpression(5.3f);
 
-            var result = _interpreter.Visit(fivePointThree);
+            var result = _interpreter.Interpret(fivePointThree);
 
             Assert.That(result, Is.EqualTo(5.3f));
         }
@@ -47,7 +47,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var five = new NumberExpression(5);
             var negateFive = new NegateExpression(five);
 
-            var result = _interpreter.Visit(negateFive);
+            var result = _interpreter.Interpret(negateFive);
 
             Assert.That(result, Is.EqualTo(-5));
         }
@@ -58,7 +58,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var number = new NumberExpression(3.7f);
             var negativeNumber = new NegateExpression(new NegateExpression(number));
 
-            var result = _interpreter.Visit(negativeNumber);
+            var result = _interpreter.Interpret(negativeNumber);
 
             Assert.That(result, Is.EqualTo(3.7f));
         }
@@ -68,7 +68,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var expression = new DiceExpression(new Dice(6), 3);
 
-            var result = _interpreter.Visit(expression);
+            var result = _interpreter.Interpret(expression);
 
             Assert.That(result, Is.EqualTo(8f));
         }
@@ -79,7 +79,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var dice = new DiceExpression(new Dice(6), 2);
             var critical = new RepeatExpression(dice, 2);
 
-            var result = _interpreter.Visit(critical);
+            var result = _interpreter.Interpret(critical);
 
             Assert.That(result, Is.EqualTo(14f));
         }
@@ -87,7 +87,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldThrowArgumentNullException_GivenNull()
         {
-            Assert.That(() => _interpreter.Visit((RepeatExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((RepeatExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var three = new NumberExpression(3);
             var five = new NumberExpression(5);
 
-            var result = _interpreter.Visit(new AdditionExpression(three, five));
+            var result = _interpreter.Interpret(new AdditionExpression(three, five));
 
             Assert.That(result, Is.EqualTo(8f));
         }
@@ -104,13 +104,13 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldThrowArgumentNullException_GivenNullAdditionExpression()
         {
-            Assert.That(() => _interpreter.Visit((AdditionExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((AdditionExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
         public void Visit_ShouldThrowArgumentNullException_GivenNullSubtractionExpression()
         {
-            Assert.That(() => _interpreter.Visit((SubtractionExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((SubtractionExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -119,7 +119,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var three = new NumberExpression(3);
             var five = new NumberExpression(5);
 
-            var result = _interpreter.Visit(new SubtractionExpression(three, five));
+            var result = _interpreter.Interpret(new SubtractionExpression(three, five));
 
             Assert.That(result, Is.EqualTo(-2f));
         }
@@ -127,7 +127,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldThrowArgumentNullException_GivenNullMultiplicationExpression()
         {
-            Assert.That(() => _interpreter.Visit((MultiplicationExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((MultiplicationExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -136,7 +136,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var three = new NumberExpression(3);
             var five = new NumberExpression(5);
 
-            var result = _interpreter.Visit(new MultiplicationExpression(three, five));
+            var result = _interpreter.Interpret(new MultiplicationExpression(three, five));
 
             Assert.That(result, Is.EqualTo(15f));
         }
@@ -144,7 +144,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldThrowArgumentNullException_GivenNullDivitionExpression()
         {
-            Assert.That(() => _interpreter.Visit((DivisionExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((DivisionExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -153,7 +153,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var three = new NumberExpression(5);
             var five = new NumberExpression(2);
 
-            var result = _interpreter.Visit(new DivisionExpression(three, five));
+            var result = _interpreter.Interpret(new DivisionExpression(three, five));
 
             Assert.That(result, Is.EqualTo(2.5f));
         }
@@ -161,7 +161,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldThrowArgumentNullException_GivenNullNumberListExpression()
         {
-            Assert.That(() => _interpreter.Visit((NumberListExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((NumberListExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -169,9 +169,48 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var expression = new NumberListExpression(new float[] { 3.5f, 2, 7 });
 
-            var result = _interpreter.Visit(expression);
+            var result = _interpreter.Interpret(expression);
 
             Assert.That(result, Is.EqualTo(12.5f));
+        }
+
+        [Test]
+        public void Interpret_ShouldThrowArgumentNullException_GivenNullContext()
+        {
+            Assert.That(() => _interpreter.Interpret((DiceNotationContext)null), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void DiceNotationContext_ShouldThrowArgumentNullException_GivenNullExpression()
+        {
+            Assert.That(() => new DiceNotationContext(null), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void Interpret_ShouldReturnCalculatedResult_GivenExpression()
+        {
+            // 5 * 2 + 3.2
+            var multiplication = new MultiplicationExpression(new NumberExpression(5), new NumberExpression(2));
+            var addition = new AdditionExpression(multiplication, new NumberExpression(3.2f));
+
+            var result = _interpreter.Interpret(new DiceNotationContext(addition));
+
+            Assert.That(result, Is.EqualTo(13.2f));
+        }
+
+        [Test]
+        public void Interpret_ShouldSetContextResult_GivenExpression()
+        {
+            var dice = new DiceExpression(new Dice(6), 3);
+            var addThree = new AdditionExpression(dice, new NumberExpression(3));
+
+            var context = new DiceNotationContext(addThree);
+            _ = _interpreter.Interpret(context);
+
+            var expected = new float[] { 2, 4, 2 };
+            AdditionExpression result = (AdditionExpression)context.Result;
+            NumberListExpression list = (NumberListExpression)result.Left;
+            Assert.That(list.Values, Is.EquivalentTo(expected));
         }
     }
 }

@@ -2,6 +2,7 @@
 using DMTools.Die.Rollers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Wgaffa.DMToolkit.Expressions;
@@ -11,6 +12,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreter
     {
         private readonly IDiceRoller _diceRoller;
+        private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
 
         public DiceNotationInterpreter()
         {
@@ -24,75 +26,136 @@ namespace Wgaffa.DMToolkit.Interpreters
             _diceRoller = diceRoller;
         }
 
-        #region Terminal expressions
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used by other members in class")]
-        public float Visit(NumberExpression number)
+        #region Public API
+        public float Interpret(DiceNotationContext context)
         {
-            Guard.Against.Null(number, nameof(number));
+            Guard.Against.Null(context, nameof(context));
+
+            Debug.Assert(_expressionStack.Count == 0);
+
+            float total = Visit((dynamic)context.Expression);
+            context.Result = _expressionStack.Pop();
+
+            Debug.Assert(_expressionStack.Count == 0);
+
+            return total;
+        }
+
+        public float Interpret(IExpression expression)
+        {
+            Guard.Against.Null(expression, nameof(expression));
+
+            Debug.Assert(_expressionStack.Count == 0);
+
+            float total = Visit((dynamic)expression);
+            _ = _expressionStack.Pop();
+
+            Debug.Assert(_expressionStack.Count == 0);
+
+            return total;
+        }
+        #endregion
+
+        #region Terminal expressions
+        private float Visit(NumberExpression number)
+        {
+            _expressionStack.Push(number);
 
             return number.Value;
         }
 
-        public float Visit(NumberListExpression list)
+        private float Visit(NumberListExpression list)
         {
-            Guard.Against.Null(list, nameof(list));
+            _expressionStack.Push(list);
 
             return list.Values.Sum();
         }
 
-        public float Visit(DiceExpression dice)
+        private float Visit(DiceExpression dice)
         {
-            Guard.Against.Null(dice, nameof(dice));
-
-            return Enumerable
+            var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
-                .Aggregate(0, (acc, _) => acc + _diceRoller.RollDice(dice.Dice));
+                .Select(_ => (float)_diceRoller.RollDice(dice.Dice))
+                .ToList();
+
+            _expressionStack.Push(new NumberListExpression(rolls));
+
+            return rolls.Sum();
         }
         #endregion
 
-        public float Visit(NegateExpression negate)
+        private float Visit(NegateExpression negate)
         {
-            Guard.Against.Null(negate, nameof(negate));
+            float result = -Visit((dynamic)negate.Right);
 
-            return -Visit((dynamic)negate.Right);
+            _expressionStack.Push(new NegateExpression(_expressionStack.Pop()));
+
+            return result;
         }
 
-        public float Visit(RepeatExpression repeat)
+        private float Visit(RepeatExpression repeat)
         {
-            Guard.Against.Null(repeat, nameof(repeat));
-
-            return Enumerable
+            float result = Enumerable
                 .Range(0, repeat.RepeatTimes)
                 .Aggregate(0f, (acc, _) => acc + Visit((dynamic)repeat.Right));
+
+            var list = Enumerable
+                .Range(0, repeat.RepeatTimes)
+                .Select(_ => _expressionStack.Pop())
+                .ToList();
+
+            _expressionStack.Push(new ListExpression(list));
+
+            return result;
         }
 
         #region Binary Expressions
-        public float Visit(AdditionExpression addition)
+        private float Visit(AdditionExpression addition)
         {
-            Guard.Against.Null(addition, nameof(addition));
+            float result = Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right);
 
-            return Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right);
+            var right = _expressionStack.Pop();
+            var left = _expressionStack.Pop();
+
+            _expressionStack.Push(new AdditionExpression(left, right));
+
+            return result;
         }
 
-        public float Visit(SubtractionExpression subtraction)
+        private float Visit(SubtractionExpression subtraction)
         {
-            Guard.Against.Null(subtraction, nameof(subtraction));
+            float result = Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right);
 
-            return Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right);
+            var right = _expressionStack.Pop();
+            var left = _expressionStack.Pop();
+
+            _expressionStack.Push(new SubtractionExpression(left, right));
+
+            return result;
         }
 
-        public float Visit(MultiplicationExpression multiplication)
+        private float Visit(MultiplicationExpression multiplication)
         {
-            Guard.Against.Null(multiplication, nameof(multiplication));
+            float result = Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right);
 
-            return Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right);
+            var right = _expressionStack.Pop();
+            var left = _expressionStack.Pop();
+
+            _expressionStack.Push(new MultiplicationExpression(left, right));
+
+            return result;
         }
 
-        public float Visit(DivisionExpression divition)
+        private float Visit(DivisionExpression divition)
         {
-            Guard.Against.Null(divition, nameof(divition));
+            float result = Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right);
 
-            return Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right);
+            var right = _expressionStack.Pop();
+            var left = _expressionStack.Pop();
+
+            _expressionStack.Push(new DivisionExpression(left, right));
+
+            return result;
         }
         #endregion
     }
