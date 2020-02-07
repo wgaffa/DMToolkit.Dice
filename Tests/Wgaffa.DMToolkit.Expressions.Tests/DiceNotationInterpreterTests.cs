@@ -1,13 +1,7 @@
 ﻿using DMTools.Die.Rollers;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -159,15 +153,21 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         [Test]
-        public void Visit_ShouldThrowArgumentNullException_GivenNullNumberListExpression()
+        public void Visit_ShouldThrowArgumentNullException_GivenNullListExpression()
         {
-            Assert.That(() => _interpreter.Interpret((NumberListExpression)null), Throws.ArgumentNullException);
+            Assert.That(() => _interpreter.Interpret((ListExpression)null), Throws.ArgumentNullException);
         }
 
         [Test]
-        public void Visit_ShouldReturnSumOfList_GivenNumberListExpression()
+        public void Visit_ShouldReturnSumOfList_GivenListExpression()
         {
-            var expression = new NumberListExpression(new float[] { 3.5f, 2, 7 });
+            var numbers = new List<IExpression>()
+            {
+                new NumberExpression(3.5f),
+                new NumberExpression(2),
+                new NumberExpression(7)
+            };
+            var expression = new ListExpression(numbers);
 
             var result = _interpreter.Interpret(expression);
 
@@ -207,10 +207,15 @@ namespace Wgaffa.DMToolkit.Interpreters
             var context = new DiceNotationContext(addThree);
             _ = _interpreter.Interpret(context);
 
-            var expected = new float[] { 2, 4, 2 };
+            var expected = new List<IExpression>
+            {
+                new NumberExpression(2),
+                new NumberExpression(4),
+                new NumberExpression(2)
+            };
             AdditionExpression result = (AdditionExpression)context.Result;
-            NumberListExpression list = (NumberListExpression)result.Left;
-            Assert.That(list.Values, Is.EquivalentTo(expected));
+            ListExpression list = (ListExpression)result.Left;
+            Assert.That(list.Expressions, Is.EquivalentTo(expected));
         }
     }
 }

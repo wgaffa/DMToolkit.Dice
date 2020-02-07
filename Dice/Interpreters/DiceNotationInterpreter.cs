@@ -64,11 +64,18 @@ namespace Wgaffa.DMToolkit.Interpreters
             return number.Value;
         }
 
-        private float Visit(NumberListExpression list)
+        private float Visit(ListExpression list)
         {
-            _expressionStack.Push(list);
+            float sumOfList = list.Expressions.Aggregate(0f, (acc, expr) => acc + Visit((dynamic)expr));
 
-            return list.Values.Sum();
+            var expressionList = Enumerable
+                .Range(0, list.Expressions.Count)
+                .Select(_ => _expressionStack.Pop())
+                .ToList();
+
+            _expressionStack.Push(new ListExpression(expressionList));
+
+            return sumOfList;
         }
 
         private float Visit(DiceExpression dice)
@@ -78,7 +85,8 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Select(_ => (float)_diceRoller.RollDice(dice.Dice))
                 .ToList();
 
-            _expressionStack.Push(new NumberListExpression(rolls));
+            var rollsExpressions = rolls.Select(x => new NumberExpression(x));
+            _expressionStack.Push(new ListExpression(rollsExpressions));
 
             return rolls.Sum();
         }

@@ -107,17 +107,28 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void NumberListExpression_ShouldThrowArgumentNullException_GivenNullSequence()
         {
-            Assert.That(() => new NumberListExpression(null), Throws.ArgumentNullException);
+            Assert.That(() => new ListExpression(null), Throws.ArgumentNullException);
         }
 
         [Test]
-        public void NumberListExpression_ShouldSetSequence()
+        public void ListExpression_ShouldSetSequence()
         {
-            var listExpression = new NumberListExpression(new float[] { 2, 3.5f, 3 });
+            var numbers = new List<IExpression>
+            {
+                new NumberExpression(2),
+                new NumberExpression(3.5f),
+                new NumberExpression(3)
+            };
+            var listExpression = new ListExpression(numbers);
 
-            var expected = new float[] { 2, 3.5f, 3 };
+            var expected = new List<IExpression>
+            {
+                new NumberExpression(2),
+                new NumberExpression(3.5f),
+                new NumberExpression(3)
+            };
 
-            Assert.That(listExpression.Values, Is.EquivalentTo(expected));
+            Assert.That(listExpression.Expressions, Is.EquivalentTo(expected));
         }
     }
 }
