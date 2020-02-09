@@ -88,7 +88,7 @@ namespace Wgaffa.DMTools.Tests
 
             var addition = new AdditionExpression(left, right);
 
-            var expected = new NumberExpression(3);
+            var expected = left;
             Assert.That(addition.Left, Is.EqualTo(expected));
         }
 
@@ -121,12 +121,7 @@ namespace Wgaffa.DMTools.Tests
             };
             var listExpression = new ListExpression(numbers);
 
-            var expected = new List<IExpression>
-            {
-                new NumberExpression(2),
-                new NumberExpression(3.5f),
-                new NumberExpression(3)
-            };
+            var expected = new List<IExpression>(numbers);
 
             Assert.That(listExpression.Expressions, Is.EquivalentTo(expected));
         }

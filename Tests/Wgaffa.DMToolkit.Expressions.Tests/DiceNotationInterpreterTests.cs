@@ -2,6 +2,7 @@
 using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -207,15 +208,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             var context = new DiceNotationContext(addThree);
             _ = _interpreter.Interpret(context);
 
-            var expected = new List<IExpression>
-            {
-                new NumberExpression(2),
-                new NumberExpression(4),
-                new NumberExpression(2)
-            };
+            var expected = new List<float> { 2, 4, 2 };
             AdditionExpression result = (AdditionExpression)context.Result;
-            ListExpression list = (ListExpression)result.Left;
-            Assert.That(list.Expressions, Is.EquivalentTo(expected));
+            ListExpression listExpr = (ListExpression)result.Left;
+            var values = listExpr.Expressions.Cast<NumberExpression>().Select(x => x.Value);
+            Assert.That(values, Is.EquivalentTo(expected));
         }
     }
 }
