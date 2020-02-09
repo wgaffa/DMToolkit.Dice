@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using DMTools.Die.Rollers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Wgaffa.DMToolkit.Expressions
     {
         public Dice Dice { get; }
         public int NumberOfRolls { get; }
+        public IDiceRoller DiceRoller { get; } = new StandardDiceRoller();
 
         public DiceExpression(Dice dice, int numberOfRolls = 1)
         {
@@ -19,6 +21,14 @@ namespace Wgaffa.DMToolkit.Expressions
 
             Dice = dice;
             NumberOfRolls = numberOfRolls;
+        }
+
+        public DiceExpression(IDiceRoller diceRoller, Dice dice, int numberOfRolls)
+            : this(dice, numberOfRolls)
+        {
+            Guard.Against.Null(diceRoller, nameof(diceRoller));
+
+            DiceRoller = diceRoller;
         }
     }
 }

@@ -11,19 +11,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 {
     public class DiceNotationInterpreter
     {
-        private readonly IDiceRoller _diceRoller;
         private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
 
         public DiceNotationInterpreter()
         {
-            _diceRoller = new StandardDiceRoller();
-        }
-
-        public DiceNotationInterpreter(IDiceRoller diceRoller)
-        {
-            Guard.Against.Null(diceRoller, nameof(diceRoller));
-
-            _diceRoller = diceRoller;
         }
 
         #region Public API
@@ -82,7 +73,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
-                .Select(_ => (float)_diceRoller.RollDice(dice.Dice))
+                .Select(_ => (float)dice.DiceRoller.RollDice(dice.Dice))
                 .ToList();
 
             var rollsExpressions = rolls.Select(x => new NumberExpression(x));

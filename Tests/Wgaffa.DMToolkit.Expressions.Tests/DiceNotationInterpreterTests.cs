@@ -11,19 +11,20 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreterTests
     {
         private DiceNotationInterpreter _interpreter;
+        private Mock<IDiceRoller> _mockRoller;
 
         [SetUp]
         public void Setup()
         {
-            var mockRoller = new Mock<IDiceRoller>();
-            mockRoller.SetupSequence(d => d.RollDice(It.IsAny<Dice>()))
+            _mockRoller = new Mock<IDiceRoller>();
+            _mockRoller.SetupSequence(d => d.RollDice(It.IsAny<Dice>()))
                 .Returns(2)
                 .Returns(4)
                 .Returns(2)
                 .Returns(6)
                 .Returns(1);
 
-            _interpreter = new DiceNotationInterpreter(mockRoller.Object);
+            _interpreter = new DiceNotationInterpreter();
         }
 
         [Test]
@@ -61,7 +62,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldReturnRolledNumber_GivenDiceExpression()
         {
-            var expression = new DiceExpression(new Dice(6), 3);
+            var expression = new DiceExpression(_mockRoller.Object, new Dice(6), 3);
 
             var result = _interpreter.Interpret(expression);
 
@@ -71,7 +72,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Visit_ShouldReturnSumOfExpression_GivenRepeatExpression()
         {
-            var dice = new DiceExpression(new Dice(6), 2);
+            var dice = new DiceExpression(_mockRoller.Object, new Dice(6), 2);
             var critical = new RepeatExpression(dice, 2);
 
             var result = _interpreter.Interpret(critical);
@@ -202,7 +203,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         [Test]
         public void Interpret_ShouldSetContextResult_GivenExpression()
         {
-            var dice = new DiceExpression(new Dice(6), 3);
+            var dice = new DiceExpression(_mockRoller.Object, new Dice(6), 3);
             var addThree = new AdditionExpression(dice, new NumberExpression(3));
 
             var context = new DiceNotationContext(addThree);

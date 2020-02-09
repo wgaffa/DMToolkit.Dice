@@ -3,6 +3,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DMTools.Die.Rollers;
+using Moq;
 using NUnit.Framework;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.Expressions;
@@ -124,6 +126,16 @@ namespace Wgaffa.DMTools.Tests
             var expected = new List<IExpression>(numbers);
 
             Assert.That(listExpression.Expressions, Is.EquivalentTo(expected));
+        }
+
+        [Test]
+        public void DiceExpression_ShouldSetDiceRoller()
+        {
+            var mockRoller = new Mock<IDiceRoller>();
+
+            var expr = new DiceExpression(mockRoller.Object, new Dice(6), 2);
+
+            Assert.That(expr.DiceRoller, Is.SameAs(mockRoller.Object));
         }
     }
 }
