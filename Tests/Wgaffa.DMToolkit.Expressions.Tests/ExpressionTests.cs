@@ -3,10 +3,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using DMTools.Die.Rollers;
 using Moq;
 using NUnit.Framework;
 using Wgaffa.DMToolkit;
+using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMTools.Tests

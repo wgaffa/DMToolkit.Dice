@@ -1,8 +1,8 @@
-﻿using DMTools.Die.Rollers;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters

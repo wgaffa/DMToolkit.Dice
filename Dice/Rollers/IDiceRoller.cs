@@ -1,6 +1,6 @@
 ﻿using Wgaffa.DMToolkit;
 
-namespace DMTools.Die.Rollers
+namespace Wgaffa.DMToolkit.DiceRollers
 {
     /// <summary>
     /// Interface for generating a random number when rolling a dice.
