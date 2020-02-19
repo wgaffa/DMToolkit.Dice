@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -46,27 +48,29 @@ namespace Wgaffa.DMToolkit.Interpreters
         #region Binary NonTerminal
         private string Visit(AdditionExpression addition)
         {
-            string leftString;
-            switch (addition.Left)
+            var leftHandGroupPredicates = new List<Func<IExpression, bool>>()
             {
-                case NegateExpression _ when _position > 0:
-                case NumberExpression number when number.Value < 0 && _position > 0:
-                    leftString = $"({Visit((dynamic)addition.Left)})";
-                    break;
-                default:
-                    leftString = $"{Visit((dynamic)addition.Left)}";
-                    break;
-            }
+                (expr) => expr is NegateExpression && _position > 0,
+                (expr) => expr is NumberExpression number && number.Value < 0 && _position > 0
+            };
+
+            Func<IExpression, string> literal = (expr) => $"{Visit((dynamic)expr)}";
+            Func<IExpression, string> group = (expr) => $"({literal(expr)})";
+
+            string leftString;
+            if (leftHandGroupPredicates.Any((f) => f(addition.Left)))
+                leftString = group(addition.Left);
+            else
+                leftString = literal(addition.Left);
 
             _position++;
-            switch (addition.Right)
-            {
-                case NumberExpression number when number.Value < 0:
-                case NegateExpression _:
-                    return $"{leftString}+({Visit((dynamic)addition.Right)})";
-                default:
-                    return $"{leftString}+{Visit((dynamic)addition.Right)}";
-            }
+            string rightString;
+            if (leftHandGroupPredicates.Any((f) => f(addition.Right)))
+                rightString = group(addition.Right);
+            else
+                rightString = literal(addition.Right);
+
+            return $"{leftString}+{rightString}";
         }
         #endregion
     }
