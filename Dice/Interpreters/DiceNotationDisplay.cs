@@ -39,14 +39,13 @@ namespace Wgaffa.DMToolkit.Interpreters
                 () => negate.Right is NumberExpression number && number.Value < 0
             };
 
-            Func<IExpression, string> negateLiteral = (expr) => $"-{Literal(expr)}";
-            Func<IExpression, string> negateGroup = (expr) => OpenGroup(() => $"-({Literal(expr)})");
-
             _position++;
-            if (groupPredicates.Any((f) => f()))
-                return negateGroup(negate.Right);
-            else
-                return negateLiteral(negate.Right);
+            return groupPredicates.Any((f) => f())
+                ? negateGroup(negate.Right)
+                : negateLiteral(negate.Right);
+
+            string negateLiteral(IExpression expr) => $"-{Literal(expr)}";
+            string negateGroup(IExpression expr) => OpenGroup(() => $"-({Literal(expr)})");
         }
         #endregion
 
@@ -59,18 +58,14 @@ namespace Wgaffa.DMToolkit.Interpreters
                 (expr) => expr is NumberExpression number && number.Value < 0 && _position > 0
             };
 
-            string leftString;
-            if (leftHandGroupPredicates.Any((f) => f(addition.Left)))
-                leftString = Group(addition.Left);
-            else
-                leftString = Literal(addition.Left);
+            string leftString = leftHandGroupPredicates.Any((f) => f(addition.Left))
+                ? Group(addition.Left)
+                : Literal(addition.Left);
 
             _position++;
-            string rightString;
-            if (leftHandGroupPredicates.Any((f) => f(addition.Right)))
-                rightString = Group(addition.Right);
-            else
-                rightString = Literal(addition.Right);
+            string rightString = leftHandGroupPredicates.Any((f) => f(addition.Right))
+                ? Group(addition.Right)
+                : Literal(addition.Right);
 
             return $"{leftString}+{rightString}";
         }
