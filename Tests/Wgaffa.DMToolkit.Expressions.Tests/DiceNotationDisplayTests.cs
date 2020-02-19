@@ -163,6 +163,25 @@ namespace Wgaffa.DMTools.Tests
                                 new NumberExpression(2),
                                 new NumberExpression(1)))))
                     .Returns("3+(-(2+1))");
+                yield return new TestCaseData(
+                    new AdditionExpression(
+                        new NegateExpression(
+                            new AdditionExpression(
+                                new NumberExpression(-1),
+                                new NumberExpression(7))),
+                        new NumberExpression(10)))
+                    .Returns("-(-1+7)+10");
+                yield return new TestCaseData(
+                    new AdditionExpression(
+                        new NegateExpression(
+                            new AdditionExpression(
+                                new NumberExpression(9),
+                                new NegateExpression(
+                                    new AdditionExpression(
+                                        new NumberExpression(-2),
+                                        new NumberExpression(8))))),
+                        new NumberExpression(21)))
+                    .Returns("-(9+(-(-2+8)))+21");
             }
         }
 
