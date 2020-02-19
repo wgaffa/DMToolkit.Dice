@@ -33,6 +33,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             _position++;
             switch (negate.Right)
             {
+                case AdditionExpression _:
                 case NumberExpression number when number.Value < 0:
                 case NegateExpression _:
                     return $"-({Visit((dynamic)negate.Right)})";
@@ -53,7 +54,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                     leftString = $"({Visit((dynamic)addition.Left)})";
                     break;
                 default:
-                    leftString = $"{addition.Left}";
+                    leftString = $"{Visit((dynamic)addition.Left)}";
                     break;
             }
 

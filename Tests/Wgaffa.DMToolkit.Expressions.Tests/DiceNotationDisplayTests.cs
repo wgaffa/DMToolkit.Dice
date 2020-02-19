@@ -62,6 +62,12 @@ namespace Wgaffa.DMTools.Tests
                     new NegateExpression(
                         new DiceExpression(Dice.d20, 3)))
                     .Returns("-3d20");
+                yield return new TestCaseData(
+                    new NegateExpression(
+                        new AdditionExpression(
+                            new NumberExpression(1),
+                            new NumberExpression(2))))
+                    .Returns("-(1+2)");
             }
         }
 
@@ -141,6 +147,22 @@ namespace Wgaffa.DMTools.Tests
                                 new NumberExpression(15)),
                             new NumberExpression(-7))))
                     .Returns("1+(-15)+(-7)");
+                yield return new TestCaseData(
+                    new AdditionExpression(
+                        new NegateExpression(
+                            new AdditionExpression(
+                                new NumberExpression(1),
+                                new NumberExpression(2))),
+                        new NumberExpression(3)))
+                    .Returns("-(1+2)+3");
+                yield return new TestCaseData(
+                    new AdditionExpression(
+                        new NumberExpression(3),
+                        new NegateExpression(
+                            new AdditionExpression(
+                                new NumberExpression(2),
+                                new NumberExpression(1)))))
+                    .Returns("3+(-(2+1))");
             }
         }
 
