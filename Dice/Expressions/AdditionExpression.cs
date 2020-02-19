@@ -1,4 +1,6 @@
-﻿namespace Wgaffa.DMToolkit.Expressions
+﻿using System.Text;
+
+namespace Wgaffa.DMToolkit.Expressions
 {
     public class AdditionExpression : BinaryExpression
     {

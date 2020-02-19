@@ -11,8 +11,16 @@ namespace Wgaffa.DMToolkit
     /// </summary>
     public class Dice : ValueObject<Dice>
     {
+        public static readonly Dice d4 = new Dice(4);
+        public static readonly Dice d6 = new Dice(6);
+        public static readonly Dice d8 = new Dice(8);
+        public static readonly Dice d10 = new Dice(10);
+        public static readonly Dice d12 = new Dice(12);
+        public static readonly Dice d20 = new Dice(20);
+        public static readonly Dice d100 = new Dice(100);
+
         /// <summary>
-        /// Constructor to create a die with DefaultRandomGenerator for randomizing
+        /// Constructor to create a die
         /// </summary>
         /// <param name="sides">Number of sides of die</param>
         public Dice(int sides)
