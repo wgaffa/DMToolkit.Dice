@@ -39,17 +39,12 @@ namespace Wgaffa.DMToolkit.Interpreters
                 () => negate.Right is NumberExpression number && number.Value < 0
             };
 
-            Func<IExpression, string> literal = (expr) => $"{Visit((dynamic)expr)}";
-            Func<IExpression, string> negateLiteral = (expr) => $"-{literal(expr)}";
-            Func<int, Action> restorePosition = (x) => () => _position = x;
-            Action resetPosition = () => _position = 0;
-            Func<Action> storePosition = () => { var point = restorePosition(_position); resetPosition(); return point; };
-            Func<Func<string>, string> openGroup = (func) => { var restorePoint = storePosition(); string r = func(); restorePoint(); return r; };
-            Func<IExpression, string> group = (expr) => openGroup(() => $"-({literal(expr)})");
+            Func<IExpression, string> negateLiteral = (expr) => $"-{Literal(expr)}";
+            Func<IExpression, string> negateGroup = (expr) => OpenGroup(() => $"-({Literal(expr)})");
 
             _position++;
             if (groupPredicates.Any((f) => f()))
-                return group(negate.Right);
+                return negateGroup(negate.Right);
             else
                 return negateLiteral(negate.Right);
         }
@@ -64,28 +59,39 @@ namespace Wgaffa.DMToolkit.Interpreters
                 (expr) => expr is NumberExpression number && number.Value < 0 && _position > 0
             };
 
-            Func<IExpression, string> literal = (expr) => $"{Visit((dynamic)expr)}";
-            Func<int, Action> restorePosition = (x) => () => _position = x;
-            Action resetPosition = () => _position = 0;
-            Func<Action> storePosition = () => { var point = restorePosition(_position); resetPosition(); return point; };
-            Func<Func<string>, string> openGroup = (func) => { var restorePoint = storePosition(); string r = func(); restorePoint(); return r; };
-            Func<IExpression, string> group = (expr) => openGroup(() => $"({literal(expr)})");
-
             string leftString;
             if (leftHandGroupPredicates.Any((f) => f(addition.Left)))
-                leftString = group(addition.Left);
+                leftString = Group(addition.Left);
             else
-                leftString = literal(addition.Left);
+                leftString = Literal(addition.Left);
 
             _position++;
             string rightString;
             if (leftHandGroupPredicates.Any((f) => f(addition.Right)))
-                rightString = group(addition.Right);
+                rightString = Group(addition.Right);
             else
-                rightString = literal(addition.Right);
+                rightString = Literal(addition.Right);
 
             return $"{leftString}+{rightString}";
         }
+        #endregion
+
+        #region Private Functors
+        private string Group(IExpression expr) => OpenGroup(() => $"({Literal(expr)})");
+        private Action RestorePosition(int x) => () => _position = x;
+        private Action StorePosition() => RestorePosition(_position);
+        private void ResetPosition() => _position = 0;
+
+        private string OpenGroup(Func<string> func)
+        {
+            var restorePosition = StorePosition();
+            ResetPosition();
+            string result = func();
+            restorePosition();
+            return result;
+        }
+
+        private string Literal(IExpression expr) => $"{Visit((dynamic)expr)}";
         #endregion
     }
 }
