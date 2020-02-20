@@ -40,9 +40,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             };
 
             _position++;
-            return groupPredicates.Any((f) => f())
-                ? negateGroup(negate.Right)
-                : negateLiteral(negate.Right);
+            return GroupIfNecessary(negate.Right, groupPredicates, negateGroup, negateLiteral);
 
             string negateLiteral(IExpression expr) => $"-{Literal(expr)}";
             string negateGroup(IExpression expr) => OpenGroup(() => $"-({Literal(expr)})");
@@ -52,26 +50,35 @@ namespace Wgaffa.DMToolkit.Interpreters
         #region Binary NonTerminal
         private string Visit(AdditionExpression addition)
         {
-            var leftHandGroupPredicates = new List<Func<IExpression, bool>>()
+            var groupPredicates = new List<Func<IExpression, bool>>()
             {
                 (expr) => expr is NegateExpression && _position > 0,
                 (expr) => expr is NumberExpression number && number.Value < 0 && _position > 0
             };
 
-            string leftString = leftHandGroupPredicates.Any((f) => f(addition.Left))
-                ? Group(addition.Left)
-                : Literal(addition.Left);
+            return BinaryDisplay(addition.Left, addition.Right, groupPredicates, "+");
+        }
 
-            _position++;
-            string rightString = leftHandGroupPredicates.Any((f) => f(addition.Right))
-                ? Group(addition.Right)
-                : Literal(addition.Right);
+        private string Visit(SubtractionExpression subtract)
+        {
+            var groupPredicates = new List<Func<IExpression, bool>>()
+            {
+                (expr) => expr is NegateExpression && _position > 0,
+                (expr) => expr is NumberExpression number && number.Value < 0 && _position > 0
+            };
 
-            return $"{leftString}+{rightString}";
+            return BinaryDisplay(subtract.Left, subtract.Right, groupPredicates, "-");
         }
         #endregion
 
         #region Private Functors
+        private string GroupIfNecessary(IExpression expr, IEnumerable<Func<bool>> predicates) =>
+            GroupIfNecessary(expr, predicates, Group, Literal);
+        private string GroupIfNecessary(IExpression expr, IEnumerable<Func<bool>> predicates, Func<IExpression, string> group, Func<IExpression, string> literal) =>
+            predicates.Any(p => p())
+            ? group(expr)
+            : literal(expr);
+
         private string Group(IExpression expr) => OpenGroup(() => $"({Literal(expr)})");
         private Action RestorePosition(int x) => () => _position = x;
         private Action StorePosition() => RestorePosition(_position);
@@ -87,6 +94,17 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         private string Literal(IExpression expr) => $"{Visit((dynamic)expr)}";
+
+        private string BinaryDisplay(IExpression left, IExpression right, IEnumerable<Func<IExpression, bool>> predicates, string between)
+        {
+            Func<string> increasePosition = () => { _position++; return between; };
+            return GroupIfNecessary(left, TransformPredicate(left, predicates))
+                + increasePosition()
+                + GroupIfNecessary(right, TransformPredicate(right, predicates));
+        }
+
+        IEnumerable<Func<bool>> TransformPredicate(IExpression expr, IEnumerable<Func<IExpression, bool>> predicates) =>
+            predicates.Select<Func<IExpression, bool>, Func<bool>>(f => () => f(expr));
         #endregion
     }
 }
