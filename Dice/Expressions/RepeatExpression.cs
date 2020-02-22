@@ -13,5 +13,10 @@ namespace Wgaffa.DMToolkit.Expressions
 
             RepeatTimes = repeatTimes;
         }
+
+        public override string ToString()
+        {
+            return $"{RepeatTimes}x({Right})";
+        }
     }
 }

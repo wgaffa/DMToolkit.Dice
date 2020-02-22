@@ -7,5 +7,10 @@ namespace Wgaffa.DMToolkit.Expressions
         public AdditionExpression(IExpression left, IExpression right) : base(left, right)
         {
         }
+
+        public override string ToString()
+        {
+            return $"+({Left}, {Right})";
+        }
     }
 }

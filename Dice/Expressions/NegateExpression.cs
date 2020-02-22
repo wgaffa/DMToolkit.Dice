@@ -6,5 +6,10 @@
             : base(right)
         {
         }
+
+        public override string ToString()
+        {
+            return $"-({Right})";
+        }
     }
 }
