@@ -79,6 +79,17 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         [Test]
+        public void Evaluate_ShouldReturnZero_GivenNullSymbolTableAndVariableExpression()
+        {
+            var expression = new VariableExpression("BAB");
+            var context = new DiceNotationContext(expression);
+
+            var result = _interpreter.Interpret(context);
+
+            Assert.That(result, Is.EqualTo(0));
+        }
+
+        [Test]
         public void Visit_ShouldSetValue_WhenVisitingNumberExpression()
         {
             var fivePointThree = new NumberExpression(5.3f);
