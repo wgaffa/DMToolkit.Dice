@@ -12,6 +12,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreter
     {
         private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
+        private ISymbolTable _symbolTable;
 
         public DiceNotationInterpreter()
         {
@@ -24,10 +25,13 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             Debug.Assert(_expressionStack.Count == 0);
 
+            _symbolTable = context.SymbolTable;
             float total = Visit((dynamic)context.Expression);
             context.Result = _expressionStack.Pop();
 
             Debug.Assert(_expressionStack.Count == 0);
+
+            _symbolTable = null;
 
             return total;
         }
@@ -80,6 +84,15 @@ namespace Wgaffa.DMToolkit.Interpreters
             _expressionStack.Push(new ListExpression(rollsExpressions));
 
             return rolls.Sum();
+        }
+
+        private float Visit(VariableExpression variable)
+        {
+            var evaluated = _symbolTable[variable.Symbol];
+
+            float result = Visit((dynamic)evaluated);
+
+            return result;
         }
         #endregion
 

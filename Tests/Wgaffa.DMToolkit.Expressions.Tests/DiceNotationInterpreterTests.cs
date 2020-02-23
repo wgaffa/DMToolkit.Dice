@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.DiceRollers;
@@ -10,6 +11,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     [TestFixture]
     public class DiceNotationInterpreterTests
     {
+        private Mock<ISymbolTable> _symbolTable;
         private DiceNotationInterpreter _interpreter;
         private Mock<IDiceRoller> _mockRoller;
 
@@ -24,7 +26,56 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Returns(6)
                 .Returns(1);
 
+            _symbolTable = new Mock<ISymbolTable>();
+            _symbolTable
+                .SetupGet(s => s["BAB"])
+                .Returns(new NumberExpression(6));
+            _symbolTable
+                .SetupGet(s => s["StrMod"])
+                .Returns(new NumberExpression(2));
+            _symbolTable
+                .SetupGet(s => s["Size"])
+                .Returns(new NumberExpression(-1));
+
             _interpreter = new DiceNotationInterpreter();
+        }
+
+        public class VariableTestCaseData : IEnumerable
+        {
+            private readonly Mock<IDiceRoller> _mockRoller;
+
+            public VariableTestCaseData()
+            {
+                _mockRoller = new Mock<IDiceRoller>();
+
+                _mockRoller
+                    .Setup(x => x.RollDice(It.IsAny<Dice>()))
+                    .Returns(4);
+            }
+
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData(
+                    new AdditionExpression(
+                        new AdditionExpression(
+                            new AdditionExpression(
+                                new DiceExpression(_mockRoller.Object, Dice.d20),
+                                new VariableExpression("BAB")),
+                            new VariableExpression("StrMod")),
+                        new VariableExpression("Size")))
+                    .Returns(11);
+            }
+        }
+
+        [TestCaseSource(typeof(VariableTestCaseData))]
+        public float Evaluate_ShouldReturnResult(IExpression expression)
+        {
+            var context = new DiceNotationContext(expression)
+            {
+                SymbolTable = _symbolTable.Object
+            };
+
+            return _interpreter.Interpret(context);
         }
 
         [Test]

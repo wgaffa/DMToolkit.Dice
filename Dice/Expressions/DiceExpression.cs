@@ -24,7 +24,7 @@ namespace Wgaffa.DMToolkit.Expressions
             NumberOfRolls = numberOfRolls;
         }
 
-        public DiceExpression(IDiceRoller diceRoller, Dice dice, int numberOfRolls)
+        public DiceExpression(IDiceRoller diceRoller, Dice dice, int numberOfRolls = 1)
             : this(dice, numberOfRolls)
         {
             Guard.Against.Null(diceRoller, nameof(diceRoller));
