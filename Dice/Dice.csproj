@@ -5,6 +5,7 @@
     <AssemblyName>DMTools.Dice</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NeutralLanguage>en</NeutralLanguage>
+    <DebutType>Full</DebutType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="1.3.3" />

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wgaffa.DMToolkit.Extensions;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
@@ -18,6 +19,14 @@ namespace Wgaffa.DMToolkit.Expressions
             Guard.Against.Null(expressions, nameof(expressions));
 
             _expressions = expressions.ToList();
+        }
+
+        public override string ToString()
+        {
+            return _expressions
+                .Select(expr => expr.ToString())
+                .StringJoin(", ")
+                .SurroundWith("[]");
         }
     }
 }
