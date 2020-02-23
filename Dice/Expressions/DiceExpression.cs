@@ -31,5 +31,10 @@ namespace Wgaffa.DMToolkit.Expressions
 
             DiceRoller = diceRoller;
         }
+
+        public override string ToString()
+        {
+            return $"{(NumberOfRolls > 1 ? NumberOfRolls.ToString() : string.Empty)}d{Dice.Sides}";
+        }
     }
 }
