@@ -39,6 +39,25 @@ namespace Wgaffa.DMTools.Tests
             }
         }
 
+        public class VariableTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData(
+                    new VariableExpression("STR"))
+                    .Returns("STR");
+                yield return new TestCaseData(
+                    new AdditionExpression(
+                        new AdditionExpression(
+                            new AdditionExpression(
+                                new DiceExpression(Dice.d20),
+                                new VariableExpression("BAB")),
+                            new VariableExpression("STRMOD")),
+                        new VariableExpression("Size")))
+                    .Returns("d20+BAB+STRMOD+Size");
+            }
+        }
+
         public class NegateTestCaseData : IEnumerable
         {
             public IEnumerator GetEnumerator()
@@ -427,6 +446,7 @@ namespace Wgaffa.DMTools.Tests
         [TestCaseSource(typeof(DivisionTestCaseData))]
         [TestCaseSource(typeof(ListTestCaseData))]
         [TestCaseSource(typeof(RepeatTestCaseData))]
+        [TestCaseSource(typeof(VariableTestCaseData))]
         public string Evaluate_ShouldReturnString(IExpression expression)
         {
             return _display.Evaluate(expression);

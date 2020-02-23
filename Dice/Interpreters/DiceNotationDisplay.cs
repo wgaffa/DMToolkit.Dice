@@ -29,6 +29,12 @@ namespace Wgaffa.DMToolkit.Interpreters
             _position++;
             return $"{dice}";
         }
+
+        private string Visit(VariableExpression variable)
+        {
+            _position++;
+            return $"{variable}";
+        }
         #endregion
 
         #region Unary NonTerminal
