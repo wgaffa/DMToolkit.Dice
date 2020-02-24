@@ -1,10 +1,8 @@
 ﻿using Ardalis.GuardClauses;
-using DMTools.Die.Rollers;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -13,10 +11,6 @@ namespace Wgaffa.DMToolkit.Interpreters
     {
         private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
 
-        public DiceNotationInterpreter()
-        {
-        }
-
         #region Public API
         public float Interpret(DiceNotationContext context)
         {
@@ -24,7 +18,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             Debug.Assert(_expressionStack.Count == 0);
 
-            float total = Visit((dynamic)context.Expression);
+            float total = Visit((dynamic)context.Expression, context);
             context.Result = _expressionStack.Pop();
 
             Debug.Assert(_expressionStack.Count == 0);
@@ -38,7 +32,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             Debug.Assert(_expressionStack.Count == 0);
 
-            float total = Visit((dynamic)expression);
+            float total = Visit((dynamic)expression, new DiceNotationContext(expression));
             _ = _expressionStack.Pop();
 
             Debug.Assert(_expressionStack.Count == 0);
@@ -48,16 +42,16 @@ namespace Wgaffa.DMToolkit.Interpreters
         #endregion
 
         #region Terminal expressions
-        private float Visit(NumberExpression number)
+        private float Visit(NumberExpression number, DiceNotationContext _)
         {
             _expressionStack.Push(number);
 
             return number.Value;
         }
 
-        private float Visit(ListExpression list)
+        private float Visit(ListExpression list, DiceNotationContext context)
         {
-            float sumOfList = list.Expressions.Aggregate(0f, (acc, expr) => acc + Visit((dynamic)expr));
+            float sumOfList = list.Expressions.Aggregate(0f, (acc, expr) => acc + Visit((dynamic)expr, context));
 
             var expressionList = Enumerable
                 .Range(0, list.Expressions.Count)
@@ -69,7 +63,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return sumOfList;
         }
 
-        private float Visit(DiceExpression dice)
+        private float Visit(DiceExpression dice, DiceNotationContext context)
         {
             var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
@@ -81,22 +75,35 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return rolls.Sum();
         }
+
+        private float Visit(VariableExpression variable, DiceNotationContext context)
+        {
+            if (context.SymbolTable is null)
+                throw new SymbolTableUndefinedException("No symbol table is set");
+
+            var symbolValue = context.SymbolTable[variable.Symbol]
+                ?? throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
+
+            float result = Visit((dynamic)symbolValue, context);
+
+            return result;
+        }
         #endregion
 
-        private float Visit(NegateExpression negate)
+        private float Visit(NegateExpression negate, DiceNotationContext context)
         {
-            float result = -Visit((dynamic)negate.Right);
+            float result = -Visit((dynamic)negate.Right, context);
 
             _expressionStack.Push(new NegateExpression(_expressionStack.Pop()));
 
             return result;
         }
 
-        private float Visit(RepeatExpression repeat)
+        private float Visit(RepeatExpression repeat, DiceNotationContext context)
         {
             float result = Enumerable
                 .Range(0, repeat.RepeatTimes)
-                .Aggregate(0f, (acc, _) => acc + Visit((dynamic)repeat.Right));
+                .Aggregate(0f, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
 
             var list = Enumerable
                 .Range(0, repeat.RepeatTimes)
@@ -109,9 +116,9 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         #region Binary Expressions
-        private float Visit(AdditionExpression addition)
+        private float Visit(AdditionExpression addition, DiceNotationContext context)
         {
-            float result = Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right);
+            float result = Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -121,9 +128,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private float Visit(SubtractionExpression subtraction)
+        private float Visit(SubtractionExpression subtraction, DiceNotationContext context)
         {
-            float result = Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right);
+            float result = Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -133,9 +140,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private float Visit(MultiplicationExpression multiplication)
+        private float Visit(MultiplicationExpression multiplication, DiceNotationContext context)
         {
-            float result = Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right);
+            float result = Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -145,9 +152,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private float Visit(DivisionExpression divition)
+        private float Visit(DivisionExpression divition, DiceNotationContext context)
         {
-            float result = Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right);
+            float result = Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();

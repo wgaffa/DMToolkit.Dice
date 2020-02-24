@@ -7,6 +7,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     {
         public IExpression Expression { get; }
         public IExpression Result { get; set; }
+        public ISymbolTable SymbolTable { get; set; }
 
         public DiceNotationContext(IExpression expression)
         {

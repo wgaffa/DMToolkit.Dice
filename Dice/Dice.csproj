@@ -8,7 +8,7 @@
     <DebutType>Full</DebutType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Ardalis.GuardClauses" Version="1.3.3" />
+    <PackageReference Include="Ardalis.GuardClauses" Version="1.4.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>

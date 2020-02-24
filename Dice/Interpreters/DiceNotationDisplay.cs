@@ -29,6 +29,12 @@ namespace Wgaffa.DMToolkit.Interpreters
             _position++;
             return $"{dice}";
         }
+
+        private string Visit(VariableExpression variable)
+        {
+            _position++;
+            return $"{variable}";
+        }
         #endregion
 
         #region Unary NonTerminal
@@ -160,13 +166,14 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private string BinaryDisplay(IExpression left, IExpression right, IEnumerable<Func<IExpression, bool>> predicates, string between)
         {
-            Func<string> increasePosition = () => { _position++; return between; };
             return GroupIfNecessary(left, TransformPredicate(left, predicates))
                 + increasePosition()
                 + GroupIfNecessary(right, TransformPredicate(right, predicates));
+
+            string increasePosition() { _position++; return between; }
         }
 
-        IEnumerable<Func<bool>> TransformPredicate(IExpression expr, IEnumerable<Func<IExpression, bool>> predicates) =>
+        private IEnumerable<Func<bool>> TransformPredicate(IExpression expr, IEnumerable<Func<IExpression, bool>> predicates) =>
             predicates.Select<Func<IExpression, bool>, Func<bool>>(f => () => f(expr));
         #endregion
     }

@@ -10,5 +10,10 @@ namespace Wgaffa.DMToolkit.Expressions
         {
             Value = value;
         }
+
+        public override string ToString()
+        {
+            return $"{Value:0.##}";
+        }
     }
 }
