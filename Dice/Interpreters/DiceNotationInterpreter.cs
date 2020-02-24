@@ -78,8 +78,11 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private float Visit(VariableExpression variable, DiceNotationContext context)
         {
-            var symbolValue = context.SymbolTable?[variable.Symbol]
-                ?? throw new VariableNotDefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
+            if (context.SymbolTable is null)
+                throw new SymbolTableUndefinedException("No symbol table is set");
+
+            var symbolValue = context.SymbolTable[variable.Symbol]
+                ?? throw new VariablUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
 
             float result = Visit((dynamic)symbolValue, context);
 
