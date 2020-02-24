@@ -85,7 +85,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var expression = new VariableExpression("BAB");
             var context = new DiceNotationContext(expression);
 
-            Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<VariableNotDefinedException>());
+            Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<VariableUndefinedException>());
         }
 
         [Test]

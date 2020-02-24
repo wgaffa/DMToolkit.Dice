@@ -82,7 +82,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 throw new SymbolTableUndefinedException("No symbol table is set");
 
             var symbolValue = context.SymbolTable[variable.Symbol]
-                ?? throw new VariablUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
+                ?? throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
 
             float result = Visit((dynamic)symbolValue, context);
 

@@ -5,26 +5,26 @@ namespace Wgaffa.DMToolkit.Exceptions
 {
 
     [Serializable]
-    public class VariableNotDefinedException : Exception
+    public class VariableUndefinedException : Exception
     {
         public string Variable { get; } = string.Empty;
 
-        public VariableNotDefinedException(string variable)
+        public VariableUndefinedException(string variable)
         {
             Variable = variable;
         }
 
-        public VariableNotDefinedException(string variable, string message) : base(message)
+        public VariableUndefinedException(string variable, string message) : base(message)
         {
             Variable = variable;
         }
 
-        public VariableNotDefinedException(string variable, string message, Exception inner) : base(message, inner)
+        public VariableUndefinedException(string variable, string message, Exception inner) : base(message, inner)
         {
             Variable = variable;
         }
 
-        protected VariableNotDefinedException(
+        protected VariableUndefinedException(
           SerializationInfo info,
           StreamingContext context) : base(info, context)
         {
@@ -34,11 +34,11 @@ namespace Wgaffa.DMToolkit.Exceptions
             }
         }
 
-        public VariableNotDefinedException() : base()
+        public VariableUndefinedException() : base()
         {
         }
 
-        public VariableNotDefinedException(string message, Exception innerException) : base(message, innerException)
+        public VariableUndefinedException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
