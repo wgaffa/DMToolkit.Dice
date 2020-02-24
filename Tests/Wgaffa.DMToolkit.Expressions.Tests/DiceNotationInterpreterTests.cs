@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.DiceRollers;
+using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -79,14 +80,12 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         [Test]
-        public void Evaluate_ShouldReturnZero_GivenNullSymbolTableAndVariableExpression()
+        public void Evaluate_ShouldThrowVariableNotDefinedException_GivenNullSymbolTableAndVariableExpression()
         {
             var expression = new VariableExpression("BAB");
             var context = new DiceNotationContext(expression);
 
-            var result = _interpreter.Interpret(context);
-
-            Assert.That(result, Is.EqualTo(0));
+            Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<VariableNotDefinedException>());
         }
 
         [Test]

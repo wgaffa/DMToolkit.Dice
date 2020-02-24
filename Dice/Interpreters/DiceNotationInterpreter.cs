@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -77,7 +78,8 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private float Visit(VariableExpression variable, DiceNotationContext context)
         {
-            var symbolValue = context.SymbolTable?[variable.Symbol] ?? new NumberExpression(0);
+            var symbolValue = context.SymbolTable?[variable.Symbol]
+                ?? throw new VariableNotDefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
 
             float result = Visit((dynamic)symbolValue, context);
 
