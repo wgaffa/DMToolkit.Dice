@@ -7,9 +7,9 @@ namespace Wgaffa.DMToolkit.Parser
 {
     public class DiceNotationTokenizer : Tokenizer<DiceNotationToken>
     {
-        private readonly TextParser<TextSpan> _diceParser = Span.Regex("\\d*d\\d+");
+        private readonly static TextParser<TextSpan> _diceParser = Span.Regex("\\d*d\\d+");
 
-        private readonly Dictionary<char, DiceNotationToken> _operators = new Dictionary<char, DiceNotationToken>()
+        private readonly static Dictionary<char, DiceNotationToken> _operators = new Dictionary<char, DiceNotationToken>()
         {
             ['+'] = DiceNotationToken.Plus,
             ['-'] = DiceNotationToken.Minus,
@@ -78,7 +78,8 @@ namespace Wgaffa.DMToolkit.Parser
         private static bool IsDelimiter(Result<char> next)
         {
             return !next.HasValue
-                || char.IsWhiteSpace(next.Value);
+                || char.IsWhiteSpace(next.Value)
+                || _operators.ContainsKey(next.Value);
         }
     }
 }

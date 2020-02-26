@@ -21,6 +21,7 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("5.2").Returns(1);
                 yield return new TestCaseData("+ 3 -2 * /").Returns(6);
                 yield return new TestCaseData("+ 3.2 -7 * /").Returns(6);
+                yield return new TestCaseData("3+5").Returns(3);
             }
         }
 
