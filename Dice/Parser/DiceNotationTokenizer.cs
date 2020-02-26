@@ -29,38 +29,53 @@ namespace Wgaffa.DMToolkit.Parser
 
                 if (ch >= '0' && ch <= '9')
                 {
-                    var beginNumber = next.Location;
-                    var natural = Numerics.Natural(next.Location);
-                    next = natural.Remainder.ConsumeChar();
+                    var diceParser = Span.Regex("\\d*d\\d+");
+                    var dice = diceParser(next.Location);
 
-                    if (next.HasValue && next.Value == 'd')
+                    if (dice.HasValue)
                     {
-                        next = next.Remainder.ConsumeChar();
-                        var sides = Numerics.Natural(next.Location);
-                        next = sides.Remainder.ConsumeChar();
-                        yield return Result.Value(DiceNotationToken.Dice, beginNumber, sides.Remainder);
-                    }
-                    else if (next.HasValue && next.Value == '.')
-                    {
-                        next = next.Remainder.ConsumeChar();
-                        var decimals = Numerics.Natural(next.Location);
-                        next = decimals.Remainder.ConsumeChar();
-                        yield return Result.Value(DiceNotationToken.Number, beginNumber, decimals.Remainder);
+                        yield return Result.Value(DiceNotationToken.Dice, dice.Location, dice.Remainder);
+                        next = dice.Remainder.ConsumeChar();
                     }
                     else
                     {
-                        yield return Result.Value(DiceNotationToken.Number, natural.Location, natural.Remainder);
+                        var beginNumber = next.Location;
+                        var natural = Numerics.Natural(next.Location);
+                        next = natural.Remainder.ConsumeChar();
+
+                        if (next.HasValue && next.Value == '.')
+                        {
+                            next = next.Remainder.ConsumeChar();
+                            var decimals = Numerics.Natural(next.Location);
+
+                            yield return Result.Value(DiceNotationToken.Number, beginNumber, decimals.Remainder);
+                            next = next.Remainder.ConsumeChar();
+                        }
+                        else
+                        {
+                            yield return Result.Value(DiceNotationToken.Number, beginNumber, next.Location);
+                        }
                     }
+
+                    if (!IsDelimiter(next))
+                        yield return Result.Empty<DiceNotationToken>(next.Location);
                 }
                 else if (ch == 'd')
                 {
                     var beginDice = next.Location;
-                    next = next.Remainder.ConsumeChar(); // consume 'd'
+                    next = next.Remainder.ConsumeChar();
 
                     var natural = Numerics.Natural(next.Location);
+
+                    if (natural.HasValue)
+                        yield return Result.Value(DiceNotationToken.Dice, beginDice, natural.Remainder);
+                    else
+                        yield return Result.Empty<DiceNotationToken>(natural.Location, new[] { "dice" });
+
                     next = natural.Remainder.ConsumeChar();
 
-                    yield return Result.Value(DiceNotationToken.Dice, beginDice, natural.Remainder);
+                    if (!IsDelimiter(next))
+                        yield return Result.Empty<DiceNotationToken>(next.Location);
                 }
                 else if (_operators.TryGetValue(ch, out var charToken))
                 {
@@ -69,11 +84,17 @@ namespace Wgaffa.DMToolkit.Parser
                 }
                 else
                 {
-                    yield return Result.Empty<DiceNotationToken>(next.Location, new[] { "number", "operator" });
+                    yield return Result.Empty<DiceNotationToken>(next.Location, new[] { "number", "operator", "dice" });
                 }
 
                 next = SkipWhiteSpace(next.Location);
             } while (next.HasValue);
+        }
+
+        private static bool IsDelimiter(Result<char> next)
+        {
+            return !next.HasValue
+                || char.IsWhiteSpace(next.Value);
         }
     }
 }
