@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Parser
         {
             ['+'] = DiceNotationToken.Plus,
             ['-'] = DiceNotationToken.Minus,
-            ['*'] = DiceNotationToken.Times,
+            ['*'] = DiceNotationToken.Multiplication,
             ['/'] = DiceNotationToken.Divide,
             ['('] = DiceNotationToken.LParen,
             [')'] = DiceNotationToken.RParen

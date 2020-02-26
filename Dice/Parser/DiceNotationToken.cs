@@ -18,7 +18,7 @@ namespace Wgaffa.DMToolkit.Parser
 		Minus,
 
 		[Token(Category = "operator", Example = "*")]
-		Times,
+		Multiplication,
 
 		[Token(Category = "operator", Example = "/")]
 		Divide,
@@ -29,7 +29,7 @@ namespace Wgaffa.DMToolkit.Parser
 		[Token(Example = ")")]
 		RParen,
 
-		[Token(Category = "dice", Example = "2d8")]
+		[Token(Example = "2d8")]
 		Dice
 	}
 }
