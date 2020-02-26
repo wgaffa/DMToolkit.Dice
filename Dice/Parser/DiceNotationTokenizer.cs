@@ -7,6 +7,8 @@ namespace Wgaffa.DMToolkit.Parser
 {
     public class DiceNotationTokenizer : Tokenizer<DiceNotationToken>
     {
+        private readonly TextParser<TextSpan> _diceParser = Span.Regex("\\d*d\\d+");
+
         private readonly Dictionary<char, DiceNotationToken> _operators = new Dictionary<char, DiceNotationToken>()
         {
             ['+'] = DiceNotationToken.Plus,
@@ -27,52 +29,34 @@ namespace Wgaffa.DMToolkit.Parser
             {
                 var ch = next.Value;
 
-                if (ch >= '0' && ch <= '9')
+                var dice = _diceParser(next.Location);
+
+                if (dice.HasValue)
                 {
-                    var diceParser = Span.Regex("\\d*d\\d+");
-                    var dice = diceParser(next.Location);
-
-                    if (dice.HasValue)
-                    {
-                        yield return Result.Value(DiceNotationToken.Dice, dice.Location, dice.Remainder);
-                        next = dice.Remainder.ConsumeChar();
-                    }
-                    else
-                    {
-                        var beginNumber = next.Location;
-                        var natural = Numerics.Natural(next.Location);
-                        next = natural.Remainder.ConsumeChar();
-
-                        if (next.HasValue && next.Value == '.')
-                        {
-                            next = next.Remainder.ConsumeChar();
-                            var decimals = Numerics.Natural(next.Location);
-
-                            yield return Result.Value(DiceNotationToken.Number, beginNumber, decimals.Remainder);
-                            next = next.Remainder.ConsumeChar();
-                        }
-                        else
-                        {
-                            yield return Result.Value(DiceNotationToken.Number, beginNumber, next.Location);
-                        }
-                    }
+                    yield return Result.Value(DiceNotationToken.Dice, dice.Location, dice.Remainder);
+                    next = dice.Remainder.ConsumeChar();
 
                     if (!IsDelimiter(next))
                         yield return Result.Empty<DiceNotationToken>(next.Location);
                 }
-                else if (ch == 'd')
+                else if (ch >= '0' && ch <= '9')
                 {
-                    var beginDice = next.Location;
-                    next = next.Remainder.ConsumeChar();
-
+                    var beginNumber = next.Location;
                     var natural = Numerics.Natural(next.Location);
-
-                    if (natural.HasValue)
-                        yield return Result.Value(DiceNotationToken.Dice, beginDice, natural.Remainder);
-                    else
-                        yield return Result.Empty<DiceNotationToken>(natural.Location, new[] { "dice" });
-
                     next = natural.Remainder.ConsumeChar();
+
+                    if (next.HasValue && next.Value == '.')
+                    {
+                        next = next.Remainder.ConsumeChar();
+                        var decimals = Numerics.Natural(next.Location);
+
+                        yield return Result.Value(DiceNotationToken.Number, beginNumber, decimals.Remainder);
+                        next = next.Remainder.ConsumeChar();
+                    }
+                    else
+                    {
+                        yield return Result.Value(DiceNotationToken.Number, beginNumber, next.Location);
+                    }
 
                     if (!IsDelimiter(next))
                         yield return Result.Empty<DiceNotationToken>(next.Location);
