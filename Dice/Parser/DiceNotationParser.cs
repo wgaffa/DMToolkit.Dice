@@ -47,8 +47,17 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
             Number.Or(DiceExpression);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Operand =
+            (
+            from _ in Token.EqualTo(DiceNotationToken.Minus)
+            from factor in Constant
+            select (IExpression)new NegateExpression(factor)
+            )
+            .Or(Constant)
+            .Named("expression");
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Term =
-            Parse.Chain(Multiplication.Or(Division), Constant, MakeBinary);
+            Parse.Chain(Multiplication.Or(Division), Operand, MakeBinary);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
             Parse.Chain(Addition.Or(Subtraction), Term, MakeBinary);
