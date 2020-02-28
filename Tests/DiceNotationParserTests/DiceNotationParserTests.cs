@@ -21,6 +21,18 @@ namespace DiceNotationParserTests
                     .Returns(typeof(DiceExpression));
                 yield return new TestCaseData("d6")
                     .Returns(typeof(DiceExpression));
+                yield return new TestCaseData("5 + 2d6")
+                    .Returns(typeof(AdditionExpression));
+                yield return new TestCaseData("7 - 3")
+                    .Returns(typeof(SubtractionExpression));
+                yield return new TestCaseData("2 * 3")
+                    .Returns(typeof(MultiplicationExpression));
+                yield return new TestCaseData("10/2")
+                    .Returns(typeof(DivisionExpression));
+                yield return new TestCaseData("5 * 2 + 3")
+                    .Returns(typeof(AdditionExpression));
+                yield return new TestCaseData("3 + 5 * 2")
+                    .Returns(typeof(AdditionExpression));
             }
         }
 
