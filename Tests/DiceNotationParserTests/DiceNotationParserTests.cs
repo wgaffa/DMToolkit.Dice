@@ -39,6 +39,10 @@ namespace DiceNotationParserTests
                     .Returns(typeof(MultiplicationExpression));
                 yield return new TestCaseData("(5+3)*2")
                     .Returns(typeof(MultiplicationExpression));
+                yield return new TestCaseData("2x3d4")
+                    .Returns(typeof(RepeatExpression));
+                yield return new TestCaseData("2x(2+3)")
+                    .Returns(typeof(RepeatExpression));
             }
         }
 

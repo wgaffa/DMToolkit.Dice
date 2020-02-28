@@ -23,6 +23,11 @@ namespace Wgaffa.DMToolkit.Parser
             from sides in Numerics.IntegerInt32
             select (IExpression)new DiceExpression(new Dice(sides), rolls);
 
+        private static readonly TextParser<int> RepeatParser =
+            from repeat in Numerics.IntegerInt32
+            from _ in Character.EqualTo('x')
+            select repeat;
+
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Addition =
             Token.EqualTo(DiceNotationToken.Plus).Value(OperatorType.Addition);
 
@@ -49,10 +54,16 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Factor =
             (from lparen in Token.EqualTo(DiceNotationToken.LParen)
-            from expr in Parse.Ref(() => Expr)
-            from rparen in Token.EqualTo(DiceNotationToken.RParen)
-            select expr)
+             from expr in Parse.Ref(() => Expr)
+             from rparen in Token.EqualTo(DiceNotationToken.RParen)
+             select expr)
             .Or(Constant);
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Repeat =
+            Token.EqualTo(DiceNotationToken.Repeat)
+            .Apply(RepeatParser)
+            .Then(x => Factor.Select(f => (IExpression)new RepeatExpression(f, x)))
+            .Named("repeat");
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Operand =
             (
@@ -60,6 +71,7 @@ namespace Wgaffa.DMToolkit.Parser
             from factor in Factor
             select (IExpression)new NegateExpression(factor)
             )
+            .Or(Repeat)
             .Or(Factor)
             .Named("expression");
 
