@@ -14,19 +14,20 @@ namespace Wgaffa.DMToolkit.Parser
             from sides in Numerics.IntegerInt32
             select (IExpression)new DiceExpression(new Dice(sides), rolls);
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
-            Token.EqualTo(DiceNotationToken.Number)
-            .Apply(Numerics.DecimalDouble)
-            .Select(n => (IExpression)new NumberExpression((float)n))
-            .Named("constant");
-
         private static readonly TokenListParser<DiceNotationToken, IExpression> DiceExpression =
             Token.EqualTo(DiceNotationToken.Dice)
-            .Apply(DiceParser)
-            .Named("dice");
+            .Apply(DiceParser);
 
-        public static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
-            DiceExpression.Or(Constant);
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
+            Token.EqualTo(DiceNotationToken.Number)
+            .Apply(Numerics.DecimalDouble)
+            .Select(n => (IExpression)new NumberExpression((float)n));
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
+            Number.Or(DiceExpression);
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
+            Constant;
 
         public static TokenListParser<DiceNotationToken, IExpression> Notation =
             Expr.AtEnd();
