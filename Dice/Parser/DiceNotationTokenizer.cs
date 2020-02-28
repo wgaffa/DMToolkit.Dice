@@ -8,6 +8,7 @@ namespace Wgaffa.DMToolkit.Parser
     public class DiceNotationTokenizer : Tokenizer<DiceNotationToken>
     {
         private readonly static TextParser<TextSpan> _diceParser = Span.Regex("\\d*d\\d+");
+        private readonly static TextParser<TextSpan> _repeatParser = Span.Regex("\\d+x");
 
         private readonly static Dictionary<char, DiceNotationToken> _operators = new Dictionary<char, DiceNotationToken>()
         {
@@ -30,6 +31,7 @@ namespace Wgaffa.DMToolkit.Parser
                 var ch = next.Value;
 
                 var dice = _diceParser(next.Location);
+                var repeat = _repeatParser(next.Location);
 
                 if (dice.HasValue)
                 {
@@ -38,6 +40,11 @@ namespace Wgaffa.DMToolkit.Parser
 
                     if (!IsDelimiter(next))
                         yield return Result.Empty<DiceNotationToken>(next.Location);
+                }
+                else if (repeat.HasValue)
+                {
+                    yield return Result.Value(DiceNotationToken.Repeat, repeat.Location, repeat.Remainder);
+                    next = repeat.Remainder.ConsumeChar();
                 }
                 else if (ch >= '0' && ch <= '9')
                 {

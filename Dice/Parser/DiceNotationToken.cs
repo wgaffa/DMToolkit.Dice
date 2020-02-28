@@ -30,6 +30,9 @@ namespace Wgaffa.DMToolkit.Parser
 		RParen,
 
 		[Token(Example = "2d8")]
-		Dice
+		Dice,
+
+		[Token(Example = "3x")]
+		Repeat
 	}
 }
