@@ -37,6 +37,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(AdditionExpression));
                 yield return new TestCaseData("7 * -3")
                     .Returns(typeof(MultiplicationExpression));
+                yield return new TestCaseData("(5+3)*2")
+                    .Returns(typeof(MultiplicationExpression));
             }
         }
 
