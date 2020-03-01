@@ -23,10 +23,9 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return _expressions
+            return "List" + _expressions
                 .Select(expr => expr.ToString())
-                .StringJoin(", ")
-                .SurroundWith("[]");
+                .StringJoin(", ");
         }
     }
 }

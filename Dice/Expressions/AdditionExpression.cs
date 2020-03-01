@@ -10,7 +10,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"+({Left}, {Right})";
+            return $"Add {Left}, {Right}";
         }
     }
 }

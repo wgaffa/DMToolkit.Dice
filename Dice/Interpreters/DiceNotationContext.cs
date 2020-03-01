@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Expressions;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -8,6 +9,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         public IExpression Expression { get; }
         public IExpression Result { get; set; }
         public ISymbolTable SymbolTable { get; set; }
+        public IDiceRoller DiceRoller { get; set; }
 
         public DiceNotationContext(IExpression expression)
         {

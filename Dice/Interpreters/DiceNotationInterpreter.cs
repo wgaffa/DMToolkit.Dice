@@ -65,9 +65,11 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private float Visit(DiceExpression dice, DiceNotationContext context)
         {
+            var diceRoller = context.DiceRoller ?? dice.DiceRoller;
+
             var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
-                .Select(_ => (float)dice.DiceRoller.RollDice(dice.Dice))
+                .Select(_ => (float)diceRoller.RollDice(dice.Dice))
                 .ToList();
 
             var rollsExpressions = rolls.Select(x => new NumberExpression(x));
