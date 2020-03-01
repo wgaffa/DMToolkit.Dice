@@ -35,9 +35,12 @@ namespace Wgaffa.DMToolkit.Parser
 		[Token(Example = "]")]
 		RBracket,
 
+		[Token(Example = ",")]
+		Comma,
+
 		Dice,
 
 		[Token(Category = "repeat")]
-		Repeat
+		Repeat,
 	}
 }
