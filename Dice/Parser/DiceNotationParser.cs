@@ -69,7 +69,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Repeat =
             Token.EqualTo(DiceNotationToken.Repeat)
             .Apply(RepeatParser)
-            .Then(x => Factor.Select(f => (IExpression)new RepeatExpression(f, x)))
+            .Then(x => List.Or(Factor).Select(f => (IExpression)new RepeatExpression(f, x)))
             .Named("repeat");
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Operand =

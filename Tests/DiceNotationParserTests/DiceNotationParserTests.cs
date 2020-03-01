@@ -2,6 +2,7 @@
 using Superpower;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Parser;
 
@@ -45,6 +46,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(RepeatExpression));
                 yield return new TestCaseData("[2+5, -3, 2d4 + 2]")
                     .Returns(typeof(ListExpression));
+                yield return new TestCaseData("2x[5, 2d8]")
+                    .Returns(typeof(RepeatExpression));
             }
         }
 
@@ -55,6 +58,25 @@ namespace DiceNotationParserTests
             var result = DiceNotationParser.Notation.Parse(tokens);
 
             return result.GetType();
+        }
+
+
+        private static readonly List<string> InvalidSyntaxTestCaseData = new List<string>()
+        {
+            "5 + +",
+            "* 2d8",
+            "5 + []",
+            "[3, 13,]",
+            "2x",
+        };
+
+        [TestCaseSource(nameof(InvalidSyntaxTestCaseData))]
+        public void InvalidSyntax_ShouldThrowParseException(string input)
+        {
+            var tokenizer = new DiceNotationTokenizer();
+            var tokenlist = tokenizer.Tokenize(input);
+
+            Assert.That(() => DiceNotationParser.Notation.Parse(tokenlist), Throws.TypeOf<ParseException>());
         }
     }
 }
