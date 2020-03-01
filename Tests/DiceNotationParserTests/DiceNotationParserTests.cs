@@ -43,6 +43,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(RepeatExpression));
                 yield return new TestCaseData("2x(2+3)")
                     .Returns(typeof(RepeatExpression));
+                yield return new TestCaseData("[2+5, -3, 2d4 + 2]")
+                    .Returns(typeof(ListExpression));
             }
         }
 

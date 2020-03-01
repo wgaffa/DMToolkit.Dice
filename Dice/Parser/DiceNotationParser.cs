@@ -59,6 +59,13 @@ namespace Wgaffa.DMToolkit.Parser
              select expr)
             .Or(Constant);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> List =
+            (from lbracket in Token.EqualTo(DiceNotationToken.LBracket)
+             from expr in Parse.Ref(() => Expr).AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+             from rbracket in Token.EqualTo(DiceNotationToken.RBracket)
+             select (IExpression)new ListExpression(expr))
+            .Named("list");
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Repeat =
             Token.EqualTo(DiceNotationToken.Repeat)
             .Apply(RepeatParser)
@@ -71,6 +78,7 @@ namespace Wgaffa.DMToolkit.Parser
             from factor in Factor
             select (IExpression)new NegateExpression(factor)
             )
+            .Or(List)
             .Or(Repeat)
             .Or(Factor)
             .Named("expression");
