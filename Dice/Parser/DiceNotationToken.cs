@@ -29,6 +29,12 @@ namespace Wgaffa.DMToolkit.Parser
 		[Token(Example = ")")]
 		RParen,
 
+		[Token(Example = "[")]
+		LBracket,
+
+		[Token(Example = "]")]
+		RBracket,
+
 		Dice,
 
 		[Token(Category = "repeat")]

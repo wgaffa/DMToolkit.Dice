@@ -17,7 +17,9 @@ namespace Wgaffa.DMToolkit.Parser
             ['*'] = DiceNotationToken.Multiplication,
             ['/'] = DiceNotationToken.Divide,
             ['('] = DiceNotationToken.LParen,
-            [')'] = DiceNotationToken.RParen
+            [')'] = DiceNotationToken.RParen,
+            ['['] = DiceNotationToken.LBracket,
+            [']'] = DiceNotationToken.RBracket,
         };
 
         protected override IEnumerable<Result<DiceNotationToken>> Tokenize(TextSpan span)
