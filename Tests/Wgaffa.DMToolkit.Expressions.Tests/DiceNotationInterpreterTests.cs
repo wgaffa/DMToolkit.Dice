@@ -270,10 +270,10 @@ namespace Wgaffa.DMToolkit.Interpreters
             var context = new DiceNotationContext(addThree);
             _ = _interpreter.Interpret(context);
 
-            var expected = new List<float> { 2, 4, 2 };
+            var expected = new List<int> { 2, 4, 2 };
             AdditionExpression result = (AdditionExpression)context.Result;
-            ListExpression listExpr = (ListExpression)result.Left;
-            var values = listExpr.Expressions.Cast<NumberExpression>().Select(x => x.Value);
+            RollResultExpression listExpr = (RollResultExpression)result.Left;
+            var values = listExpr.Keep;
             Assert.That(values, Is.EquivalentTo(expected));
         }
     }

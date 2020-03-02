@@ -1,4 +1,5 @@
 ﻿using Ardalis.GuardClauses;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -69,11 +70,11 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
-                .Select(_ => (float)diceRoller.RollDice(dice.Dice))
+                .Select(_ => diceRoller.RollDice(dice.Dice))
                 .ToList();
 
             var rollsExpressions = rolls.Select(x => new NumberExpression(x));
-            _expressionStack.Push(new ListExpression(rollsExpressions));
+            _expressionStack.Push(new RollResultExpression(rolls));
 
             return rolls.Sum();
         }

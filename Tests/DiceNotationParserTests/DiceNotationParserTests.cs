@@ -62,7 +62,6 @@ namespace DiceNotationParserTests
             return result.GetType();
         }
 
-
         private static readonly List<string> InvalidSyntaxTestCaseData = new List<string>()
         {
             "5 + +",
