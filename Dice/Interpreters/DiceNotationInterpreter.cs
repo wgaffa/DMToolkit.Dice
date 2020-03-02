@@ -93,6 +93,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
         #endregion
 
+        #region Unary Expressions
         private float Visit(NegateExpression negate, DiceNotationContext context)
         {
             float result = -Visit((dynamic)negate.Right, context);
@@ -101,6 +102,25 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return result;
         }
+
+        private float Visit(DropExpression drop, DiceNotationContext context)
+        {
+            float result = Visit((dynamic)drop.Right, context);
+
+            var lastResult = _expressionStack.Pop();
+            if (lastResult is RollResultExpression roll)
+            {
+                var minimumRoll = roll.Keep.Min();
+                _expressionStack.Push(new RollResultExpression(
+                    roll.Keep.Where(x => x > minimumRoll),
+                    roll.Discard.Append(minimumRoll)));
+
+                return result - minimumRoll;
+            }
+
+            throw new InvalidOperationException();
+        }
+        #endregion
 
         private float Visit(RepeatExpression repeat, DiceNotationContext context)
         {

@@ -88,6 +88,36 @@ namespace Wgaffa.DMToolkit.Interpreters
             Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<SymbolTableUndefinedException>());
         }
 
+        public class ResultTestCaseData : IEnumerable
+        {
+            private readonly Mock<IDiceRoller> _mockRoller;
+
+            public ResultTestCaseData()
+            {
+                _mockRoller = new Mock<IDiceRoller>();
+                _mockRoller.SetupSequence(x => x.RollDice(It.IsAny<Dice>()))
+                    .Returns(6)
+                    .Returns(3)
+                    .Returns(17)
+                    .Returns(12)
+                    .Returns(5);
+            }
+
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData(
+                    new DropExpression(
+                        new DiceExpression(_mockRoller.Object, Dice.d20, 5)))
+                    .Returns(40);
+            }
+        }
+
+        [TestCaseSource(typeof(ResultTestCaseData))]
+        public float Evaluate_ReuturnsCorrectResult(IExpression expression)
+        {
+            return _interpreter.Interpret(expression);
+        }
+
         [Test]
         public void Visit_ShouldSetValue_WhenVisitingNumberExpression()
         {

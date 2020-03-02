@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Expressions
         public IReadOnlyList<int> Keep => _keep.AsReadOnly();
         public IReadOnlyList<int> Discard => _discard.AsReadOnly();
 
-        public RollResultExpression(List<int> keep)
+        public RollResultExpression(IEnumerable<int> keep)
             : this(keep, Array.Empty<int>())
         {
         }
