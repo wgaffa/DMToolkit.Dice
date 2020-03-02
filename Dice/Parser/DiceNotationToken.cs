@@ -38,9 +38,6 @@ namespace Wgaffa.DMToolkit.Parser
 		[Token(Example = ",")]
 		Comma,
 
-		[Token(Example = "%")]
-		Percent,
-
 		Dice,
 
 		[Token(Category = "repeat")]
