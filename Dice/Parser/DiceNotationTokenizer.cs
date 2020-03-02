@@ -7,7 +7,7 @@ namespace Wgaffa.DMToolkit.Parser
 {
     public class DiceNotationTokenizer : Tokenizer<DiceNotationToken>
     {
-        private readonly static TextParser<TextSpan> _diceParser = Span.Regex("\\d*d\\d+");
+        private readonly static TextParser<TextSpan> _diceParser = Span.Regex("\\d*d(\\d+|%)");
         private readonly static TextParser<TextSpan> _repeatParser = Span.Regex("\\d+x");
 
         private readonly static Dictionary<char, DiceNotationToken> _operators = new Dictionary<char, DiceNotationToken>()

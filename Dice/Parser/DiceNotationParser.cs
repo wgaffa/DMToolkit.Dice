@@ -20,7 +20,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TextParser<IExpression> DiceParser =
             from rolls in Numerics.IntegerInt32.OptionalOrDefault(1)
             from _ in Character.EqualTo('d')
-            from sides in Numerics.IntegerInt32
+            from sides in Numerics.IntegerInt32.Or(Character.EqualTo('%').Value(100))
             select (IExpression)new DiceExpression(new Dice(sides), rolls);
 
         private static readonly TextParser<int> RepeatParser =

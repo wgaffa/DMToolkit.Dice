@@ -48,6 +48,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(ListExpression));
                 yield return new TestCaseData("2x[5, 2d8]")
                     .Returns(typeof(RepeatExpression));
+                yield return new TestCaseData("d%")
+                    .Returns(typeof(DiceExpression));
             }
         }
 
