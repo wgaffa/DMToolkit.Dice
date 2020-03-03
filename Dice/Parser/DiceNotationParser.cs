@@ -56,13 +56,16 @@ namespace Wgaffa.DMToolkit.Parser
                            from drop in Token.EqualToValue(DiceNotationToken.Identifier, "L")
                            select (IExpression)new DropExpression(expr)));
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> DiceNotation =
+            Drop.Try().Or(Dice);
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
             Token.EqualTo(DiceNotationToken.Number)
             .Apply(Numerics.DecimalDouble)
             .Select(n => (IExpression)new NumberExpression((float)n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
-            Number.Or(Drop).Try().Or(Dice).Or(Identifier);
+            Number.Or(DiceNotation).Or(Identifier);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Factor =
             (from lparen in Token.EqualTo(DiceNotationToken.LParen)
