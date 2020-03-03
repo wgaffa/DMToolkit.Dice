@@ -41,6 +41,12 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Division =
             Token.EqualTo(DiceNotationToken.Divide).Value(OperatorType.Division);
 
+        private static readonly TokenListParser<DiceNotationToken, DropType> DropLowest =
+            Token.EqualToValue(DiceNotationToken.Identifier, "L").Value(DropType.Lowest);
+
+        private static readonly TokenListParser<DiceNotationToken, DropType> DropHighest =
+            Token.EqualToValue(DiceNotationToken.Identifier, "H").Value(DropType.Highest);
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Identifier =
             Token.EqualTo(DiceNotationToken.Identifier)
             .Select(t => (IExpression)new VariableExpression(t.ToStringValue()));
@@ -53,8 +59,8 @@ namespace Wgaffa.DMToolkit.Parser
             Token.EqualTo(DiceNotationToken.Dice)
             .Apply(DiceParser)
             .Then(expr => (from minus in Token.EqualTo(DiceNotationToken.Minus)
-                           from drop in Token.EqualToValue(DiceNotationToken.Identifier, "L")
-                           select (IExpression)new DropExpression(expr)));
+                           from type in DropHighest.Or(DropLowest)
+                           select (IExpression)new DropExpression(expr, type)));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> DiceNotation =
             Drop.Try().Or(Dice);

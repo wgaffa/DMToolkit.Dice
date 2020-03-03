@@ -58,6 +58,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(SubtractionExpression));
                 yield return new TestCaseData("L-L")
                     .Returns(typeof(SubtractionExpression));
+                yield return new TestCaseData("3d8 - H")
+                    .Returns(typeof(DropExpression));
             }
         }
 
