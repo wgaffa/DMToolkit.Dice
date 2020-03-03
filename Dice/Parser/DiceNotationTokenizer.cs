@@ -76,6 +76,16 @@ namespace Wgaffa.DMToolkit.Parser
                     yield return Result.Value(charToken, next.Location, next.Remainder);
                     next = next.Remainder.ConsumeChar();
                 }
+                else if (char.IsLetter(ch) && ch != 'd')
+                {
+                    var beginIdentifier = next.Location;
+                    do
+                    {
+                        next = next.Remainder.ConsumeChar();
+                    } while (next.HasValue && char.IsLetterOrDigit(next.Value));
+
+                    yield return Result.Value(DiceNotationToken.Identifier, beginIdentifier, next.Location);
+                }
                 else
                 {
                     yield return Result.Empty<DiceNotationToken>(next.Location, new[] { "number", "operator", "dice" });

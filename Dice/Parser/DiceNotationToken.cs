@@ -42,5 +42,7 @@ namespace Wgaffa.DMToolkit.Parser
 
 		[Token(Category = "repeat")]
 		Repeat,
+
+		Identifier,
 	}
 }

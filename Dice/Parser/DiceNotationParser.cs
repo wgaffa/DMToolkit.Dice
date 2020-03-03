@@ -15,6 +15,7 @@ namespace Wgaffa.DMToolkit.Parser
             Subtraction,
             Multiplication,
             Division,
+            DropLowest,
         }
 
         private static readonly TextParser<IExpression> DiceParser =
@@ -40,9 +41,20 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Division =
             Token.EqualTo(DiceNotationToken.Divide).Value(OperatorType.Division);
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> DiceExpression =
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Identifier =
+            Token.EqualTo(DiceNotationToken.Identifier)
+            .Select(t => (IExpression)new VariableExpression(t.ToStringValue()));
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Dice =
             Token.EqualTo(DiceNotationToken.Dice)
             .Apply(DiceParser);
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Drop =
+            Token.EqualTo(DiceNotationToken.Dice)
+            .Apply(DiceParser)
+            .Then(expr => (from minus in Token.EqualTo(DiceNotationToken.Minus)
+                           from drop in Token.EqualToValue(DiceNotationToken.Identifier, "L")
+                           select (IExpression)new DropExpression(expr)));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
             Token.EqualTo(DiceNotationToken.Number)
@@ -50,7 +62,7 @@ namespace Wgaffa.DMToolkit.Parser
             .Select(n => (IExpression)new NumberExpression((float)n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
-            Number.Or(DiceExpression);
+            Number.Or(Drop).Try().Or(Dice).Or(Identifier);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Factor =
             (from lparen in Token.EqualTo(DiceNotationToken.LParen)

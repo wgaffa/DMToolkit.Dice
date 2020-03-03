@@ -50,6 +50,14 @@ namespace DiceNotationParserTests
                     .Returns(typeof(RepeatExpression));
                 yield return new TestCaseData("d%")
                     .Returns(typeof(DiceExpression));
+                yield return new TestCaseData("2d6-L")
+                    .Returns(typeof(DropExpression));
+                yield return new TestCaseData("2d6-STR")
+                    .Returns(typeof(SubtractionExpression));
+                yield return new TestCaseData("2d6-d4")
+                    .Returns(typeof(SubtractionExpression));
+                yield return new TestCaseData("L-L")
+                    .Returns(typeof(SubtractionExpression));
             }
         }
 

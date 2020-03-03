@@ -26,6 +26,9 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("2x").Returns(1);
                 yield return new TestCaseData("[]").Returns(2);
                 yield return new TestCaseData(",").Returns(1);
+                yield return new TestCaseData("L").Returns(1);
+                yield return new TestCaseData("STR").Returns(1);
+                yield return new TestCaseData("L-L").Returns(3);
             }
         }
 
