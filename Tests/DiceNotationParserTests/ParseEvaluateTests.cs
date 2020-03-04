@@ -24,8 +24,14 @@ namespace DiceNotationParserTests
         {
             _mockRoller = new Mock<IDiceRoller>();
 
-            _mockRoller.Setup(d => d.RollDice(It.IsAny<Dice>()))
-                .Returns(3);
+            _mockRoller.SetupSequence(d => d.RollDice(It.IsAny<Dice>()))
+                .Returns(3)
+                .Returns(9)
+                .Returns(18)
+                .Returns(18)
+                .Returns(1)
+                .Returns(1)
+                .Returns(20);
 
             _interpreter = new DiceNotationInterpreter();
         }
@@ -38,6 +44,10 @@ namespace DiceNotationParserTests
                     .Returns(6);
                 yield return new TestCaseData("1.5 * d6")
                     .Returns(4.5);
+                yield return new TestCaseData("6d20-L")
+                    .Returns(49);
+                yield return new TestCaseData("4d20-H")
+                    .Returns(30);
             }
         }
 
@@ -47,12 +57,10 @@ namespace DiceNotationParserTests
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokenlist);
 
-
             var context = new DiceNotationContext(expression)
             {
                 DiceRoller = _mockRoller.Object
             };
-
 
             return _interpreter.Interpret(context);
         }

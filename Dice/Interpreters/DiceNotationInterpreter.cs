@@ -105,17 +105,18 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private float Visit(DropExpression drop, DiceNotationContext context)
         {
-            float result = Visit((dynamic)drop.Right, context);
+            Visit((dynamic)drop.Right, context);
 
             var lastResult = _expressionStack.Pop();
             if (lastResult is RollResultExpression roll)
             {
-                var minimumRoll = roll.Keep.Min();
-                _expressionStack.Push(new RollResultExpression(
-                    roll.Keep.Where(x => x > minimumRoll),
-                    roll.Discard.Append(minimumRoll)));
+                var dropRoll = drop.Type == DropType.Lowest ? roll.Keep.Min() : roll.Keep.Max();
+                RollResultExpression newRoll = new RollResultExpression(
+                    roll.Keep.Except(new int[] { dropRoll }),
+                    roll.Discard.Append(dropRoll));
+                _expressionStack.Push(newRoll);
 
-                return result - minimumRoll;
+                return newRoll.Keep.Sum();
             }
 
             throw new InvalidOperationException();

@@ -14,7 +14,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     {
         private Mock<ISymbolTable> _symbolTable;
         private DiceNotationInterpreter _interpreter;
-        private Mock<IDiceRoller> _mockRoller;
+        protected Mock<IDiceRoller> _mockRoller;
 
         [SetUp]
         public void Setup()
@@ -90,17 +90,23 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         public class ResultTestCaseData : IEnumerable
         {
-            private readonly Mock<IDiceRoller> _mockRoller;
+            private Mock<IDiceRoller> _mockRoller;
 
             public ResultTestCaseData()
             {
+                SetupMock();
+            }
+
+            private void SetupMock()
+            {
+                // Moq.Reset does not work? Still defaults when all sequences has been returned
                 _mockRoller = new Mock<IDiceRoller>();
                 _mockRoller.SetupSequence(x => x.RollDice(It.IsAny<Dice>()))
-                    .Returns(6)
-                    .Returns(3)
-                    .Returns(17)
-                    .Returns(12)
-                    .Returns(5);
+                                    .Returns(6)
+                                    .Returns(3)
+                                    .Returns(17)
+                                    .Returns(12)
+                                    .Returns(5);
             }
 
             public IEnumerator GetEnumerator()
@@ -109,6 +115,11 @@ namespace Wgaffa.DMToolkit.Interpreters
                     new DropExpression(
                         new DiceExpression(_mockRoller.Object, Dice.d20, 5)))
                     .Returns(40);
+                SetupMock();
+                yield return new TestCaseData(
+                    new DropExpression(
+                        new DiceExpression(_mockRoller.Object, Dice.d20, 3), DropType.Highest))
+                    .Returns(9);
             }
         }
 
