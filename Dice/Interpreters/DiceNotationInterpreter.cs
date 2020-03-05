@@ -111,8 +111,10 @@ namespace Wgaffa.DMToolkit.Interpreters
             if (lastResult is RollResultExpression roll)
             {
                 var dropRoll = drop.Type == DropType.Lowest ? roll.Keep.Min() : roll.Keep.Max();
+                var keepList = roll.Keep.ToList();
+                keepList.Remove(dropRoll);
                 RollResultExpression newRoll = new RollResultExpression(
-                    roll.Keep.Except(new int[] { dropRoll }),
+                    keepList,
                     roll.Discard.Append(dropRoll));
                 _expressionStack.Push(newRoll);
 

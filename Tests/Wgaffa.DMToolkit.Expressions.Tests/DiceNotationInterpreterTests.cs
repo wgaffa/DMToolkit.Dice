@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     {
         private Mock<ISymbolTable> _symbolTable;
         private DiceNotationInterpreter _interpreter;
-        protected Mock<IDiceRoller> _mockRoller;
+        private Mock<IDiceRoller> _mockRoller;
 
         [SetUp]
         public void Setup()
@@ -88,45 +89,37 @@ namespace Wgaffa.DMToolkit.Interpreters
             Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<SymbolTableUndefinedException>());
         }
 
-        public class ResultTestCaseData : IEnumerable
+        public class ResultsTestCaseData : IEnumerable
         {
-            private Mock<IDiceRoller> _mockRoller;
-
-            public ResultTestCaseData()
-            {
-                SetupMock();
-            }
-
-            private void SetupMock()
-            {
-                // Moq.Reset does not work? Still defaults when all sequences has been returned
-                _mockRoller = new Mock<IDiceRoller>();
-                _mockRoller.SetupSequence(x => x.RollDice(It.IsAny<Dice>()))
-                                    .Returns(6)
-                                    .Returns(3)
-                                    .Returns(17)
-                                    .Returns(12)
-                                    .Returns(5);
-            }
-
             public IEnumerator GetEnumerator()
             {
                 yield return new TestCaseData(
-                    new DropExpression(
-                        new DiceExpression(_mockRoller.Object, Dice.d20, 5)))
+                    (Func<IDiceRoller, IExpression>)
+                    (roller =>
+                        new DropExpression(
+                            new DiceExpression(roller, Dice.d20, 5))))
                     .Returns(40);
-                SetupMock();
                 yield return new TestCaseData(
+                    (Func<IDiceRoller, IExpression>)
+                    (roller =>
                     new DropExpression(
-                        new DiceExpression(_mockRoller.Object, Dice.d20, 3), DropType.Highest))
+                        new DiceExpression(roller, Dice.d20, 3), DropType.Highest)))
                     .Returns(9);
             }
         }
 
-        [TestCaseSource(typeof(ResultTestCaseData))]
-        public float Evaluate_ReuturnsCorrectResult(IExpression expression)
+        [TestCaseSource(typeof(ResultsTestCaseData))]
+        public float Evaluate_ReturnsCorrectResult(Func<IDiceRoller, IExpression> lazyExpression)
         {
-            return _interpreter.Interpret(expression);
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollDice(It.IsAny<Dice>()))
+                .Returns(6)
+                .Returns(3)
+                .Returns(17)
+                .Returns(12)
+                .Returns(5);
+
+            return _interpreter.Interpret(lazyExpression(mockRoller.Object));
         }
 
         [Test]
