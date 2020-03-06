@@ -2,6 +2,7 @@
 using Superpower.Model;
 using Superpower.Parsers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 
@@ -41,11 +42,11 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Division =
             Token.EqualTo(DiceNotationToken.Divide).Value(OperatorType.Division);
 
-        private static readonly TokenListParser<DiceNotationToken, DropType> DropLowest =
-            Token.EqualToValue(DiceNotationToken.Identifier, "L").Value(DropType.Lowest);
+        private static readonly TokenListParser<DiceNotationToken, DropExpression.StrategyFunc> DropLowest =
+            Token.EqualToValue(DiceNotationToken.Identifier, "L").Value((DropExpression.StrategyFunc)(x => new int[] { x.Min() }));
 
-        private static readonly TokenListParser<DiceNotationToken, DropType> DropHighest =
-            Token.EqualToValue(DiceNotationToken.Identifier, "H").Value(DropType.Highest);
+        private static readonly TokenListParser<DiceNotationToken, DropExpression.StrategyFunc> DropHighest =
+            Token.EqualToValue(DiceNotationToken.Identifier, "H").Value((DropExpression.StrategyFunc)(x => new int[] { x.Max() }));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Identifier =
             Token.EqualTo(DiceNotationToken.Identifier)
@@ -59,8 +60,8 @@ namespace Wgaffa.DMToolkit.Parser
             Token.EqualTo(DiceNotationToken.Dice)
             .Apply(DiceParser)
             .Then(expr => (from minus in Token.EqualTo(DiceNotationToken.Minus)
-                           from type in DropHighest.Or(DropLowest)
-                           select (IExpression)new DropExpression(expr, type)));
+                           from strategy in DropHighest.Or(DropLowest)
+                           select (IExpression)new DropExpression(expr, strategy)));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> DiceNotation =
             Drop.Try().Or(Dice);

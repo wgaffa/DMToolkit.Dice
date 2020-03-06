@@ -103,7 +103,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                     (Func<IDiceRoller, IExpression>)
                     (roller =>
                     new DropExpression(
-                        new DiceExpression(roller, Dice.d20, 3), DropType.Highest)))
+                        new DiceExpression(roller, Dice.d20, 3), x => new int[] { x.Max() })))
                     .Returns(9);
             }
         }

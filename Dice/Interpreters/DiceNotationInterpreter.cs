@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
+using Wgaffa.DMToolkit.Extensions;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
@@ -110,12 +111,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             var lastResult = _expressionStack.Pop();
             if (lastResult is RollResultExpression roll)
             {
-                var dropRoll = drop.Type == DropType.Lowest ? roll.Keep.Min() : roll.Keep.Max();
-                var keepList = roll.Keep.ToList();
-                keepList.Remove(dropRoll);
+                var dropList = drop.Strategy(roll.Keep);
+                var keepList = roll.Keep.Whitout(dropList);
                 RollResultExpression newRoll = new RollResultExpression(
                     keepList,
-                    roll.Discard.Append(dropRoll));
+                    roll.Discard.Concat(dropList));
                 _expressionStack.Push(newRoll);
 
                 return newRoll.Keep.Sum();
