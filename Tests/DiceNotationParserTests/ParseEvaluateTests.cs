@@ -48,6 +48,8 @@ namespace DiceNotationParserTests
                     .Returns(49);
                 yield return new TestCaseData("4d20-H")
                     .Returns(30);
+                yield return new TestCaseData("4d20(k3)")
+                    .Returns(45);
             }
         }
 
