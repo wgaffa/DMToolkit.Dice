@@ -30,6 +30,11 @@ namespace Wgaffa.DMToolkit.Parser
             from _ in Character.EqualTo('x')
             select repeat;
 
+        private static readonly TextParser<int> KeepCount =
+            from keepIdentifier in Character.EqualTo('k')
+            from count in Numerics.IntegerInt32
+            select count;
+
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Addition =
             Token.EqualTo(DiceNotationToken.Plus).Value(OperatorType.Addition);
 
@@ -56,6 +61,14 @@ namespace Wgaffa.DMToolkit.Parser
             Token.EqualTo(DiceNotationToken.Dice)
             .Apply(DiceParser);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Keep =
+            Token.EqualTo(DiceNotationToken.Dice)
+            .Apply(DiceParser)
+            .Then(expr => (from lparen in Token.EqualTo(DiceNotationToken.LParen)
+                           from count in Token.EqualTo(DiceNotationToken.Identifier).Apply(KeepCount)
+                           from rparen in Token.EqualTo(DiceNotationToken.RParen)
+                           select (IExpression)new KeepExpression(expr, count)));
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Drop =
             Token.EqualTo(DiceNotationToken.Dice)
             .Apply(DiceParser)
@@ -64,7 +77,9 @@ namespace Wgaffa.DMToolkit.Parser
                            select (IExpression)new DropExpression(expr, strategy)));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> DiceNotation =
-            Drop.Try().Or(Dice);
+            Drop.Try()
+            .Or(Keep.Try())
+            .Or(Dice);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
             Token.EqualTo(DiceNotationToken.Number)
@@ -72,7 +87,7 @@ namespace Wgaffa.DMToolkit.Parser
             .Select(n => (IExpression)new NumberExpression((float)n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
-            Number.Or(DiceNotation).Or(Identifier);
+            DiceNotation.Or(Identifier).Or(Number);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Factor =
             (from lparen in Token.EqualTo(DiceNotationToken.LParen)
