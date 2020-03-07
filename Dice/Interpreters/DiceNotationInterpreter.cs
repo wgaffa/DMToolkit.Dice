@@ -112,13 +112,44 @@ namespace Wgaffa.DMToolkit.Interpreters
             if (lastResult is RollResultExpression roll)
             {
                 var dropList = drop.Strategy(roll.Keep);
-                var keepList = roll.Keep.Whitout(dropList);
+                var keepList = roll.Keep.Without(dropList);
                 RollResultExpression newRoll = new RollResultExpression(
                     keepList,
                     roll.Discard.Concat(dropList));
                 _expressionStack.Push(newRoll);
 
                 return newRoll.Keep.Sum();
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        private float Visit(KeepExpression keep, DiceNotationContext context)
+        {
+            Visit((dynamic)keep.Right, context);
+
+            var lastResult = _expressionStack.Pop();
+            if (lastResult is RollResultExpression roll)
+            {
+                var keepList = roll.Keep.OrderByDescending(x => x).Take(keep.Count).ToList();
+                var dropped = roll.Keep.Without(keepList);
+
+                var newList = new List<int>();
+                foreach (var item in roll.Keep)
+                {
+                    if (keepList.Contains(item))
+                    {
+                        newList.Add(item);
+                        keepList.Remove(item);
+                    }
+                }
+
+                Debug.Assert(keepList.Count == 0);
+
+                _expressionStack.Push(new RollResultExpression(
+                    newList,
+                    roll.Discard.AppendRange(dropped)));
+                return newList.Sum();
             }
 
             throw new InvalidOperationException();

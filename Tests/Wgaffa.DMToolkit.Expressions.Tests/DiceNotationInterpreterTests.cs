@@ -98,13 +98,22 @@ namespace Wgaffa.DMToolkit.Interpreters
                     (roller =>
                         new DropExpression(
                             new DiceExpression(roller, Dice.d20, 5))))
-                    .Returns(40);
+                    .Returns(40)
+                    .SetName("{m} Drop 3 lowest");
                 yield return new TestCaseData(
                     (Func<IDiceRoller, IExpression>)
                     (roller =>
                     new DropExpression(
                         new DiceExpression(roller, Dice.d20, 3), x => new int[] { x.Max() })))
-                    .Returns(9);
+                    .Returns(9)
+                    .SetName("{m} Drop 3 highest");
+                yield return new TestCaseData(
+                    (Func<IDiceRoller, IExpression>)
+                    (roller =>
+                    new KeepExpression(
+                        new DiceExpression(roller, Dice.d20, 4), 3)))
+                    .Returns(35)
+                    .SetName("{m} Keep 3 highest");
             }
         }
 

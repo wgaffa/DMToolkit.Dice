@@ -10,7 +10,7 @@ namespace Wgaffa.DMToolkit.Extensions
         public static string StringJoin(this IEnumerable<string> source, string separator)
             => string.Join(separator, source);
 
-        public static IEnumerable<T> Whitout<T>(this IEnumerable<T> first, IEnumerable<T> second)
+        public static IEnumerable<T> Without<T>(this IEnumerable<T> first, IEnumerable<T> second)
         {
             Guard.Against.Null(first, nameof(first));
             Guard.Against.Null(second, nameof(second));
@@ -32,6 +32,22 @@ namespace Wgaffa.DMToolkit.Extensions
             }
 
             return source;
+        }
+
+        public static IEnumerable<T> AppendRange<T>(this IEnumerable<T> source, IEnumerable<T> append)
+        {
+            Guard.Against.Null(source, nameof(source));
+            Guard.Against.Null(append, nameof(append));
+
+            foreach (var item in source)
+            {
+                yield return item;
+            }
+
+            foreach (var item in append)
+            {
+                yield return item;
+            }
         }
     }
 }

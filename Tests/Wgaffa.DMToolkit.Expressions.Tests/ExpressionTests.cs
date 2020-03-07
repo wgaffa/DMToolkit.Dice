@@ -137,5 +137,19 @@ namespace Wgaffa.DMTools.Tests
 
             Assert.That(expr.DiceRoller, Is.SameAs(mockRoller.Object));
         }
+
+        [Test]
+        public void KeepExpression_ShouldSetCount()
+        {
+            var keepExpression = new KeepExpression(new DiceExpression(Dice.d20, 3), 5);
+
+            Assert.That(keepExpression.Count, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void KeepExpression_ShouldThrowArgumentError_GivenNegativeCount()
+        {
+            Assert.That(() => new KeepExpression(new DiceExpression(Dice.d20, 3), -3), Throws.ArgumentException);
+        }
     }
 }

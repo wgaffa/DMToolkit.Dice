@@ -19,5 +19,10 @@ namespace Wgaffa.DMToolkit.Expressions
         {
             Strategy = strategy;
         }
+
+        public override string ToString()
+        {
+            return $"Drop {Right}";
+        }
     }
 }
