@@ -46,7 +46,6 @@
     </PackageReference>
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
-    <PackageReference Include="Superpower" Version="2.1.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>

@@ -1,9 +1,11 @@
 ﻿using Ardalis.GuardClauses;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
+using Wgaffa.DMToolkit.Extensions;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
@@ -65,13 +67,15 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private float Visit(DiceExpression dice, DiceNotationContext context)
         {
+            var diceRoller = context.DiceRoller ?? dice.DiceRoller;
+
             var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
-                .Select(_ => (float)dice.DiceRoller.RollDice(dice.Dice))
+                .Select(_ => diceRoller.RollDice(dice.Dice))
                 .ToList();
 
             var rollsExpressions = rolls.Select(x => new NumberExpression(x));
-            _expressionStack.Push(new ListExpression(rollsExpressions));
+            _expressionStack.Push(new RollResultExpression(rolls));
 
             return rolls.Sum();
         }
@@ -90,6 +94,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
         #endregion
 
+        #region Unary Expressions
         private float Visit(NegateExpression negate, DiceNotationContext context)
         {
             float result = -Visit((dynamic)negate.Right, context);
@@ -98,6 +103,58 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return result;
         }
+
+        private float Visit(DropExpression drop, DiceNotationContext context)
+        {
+            Visit((dynamic)drop.Right, context);
+
+            var lastResult = _expressionStack.Pop();
+            if (lastResult is RollResultExpression roll)
+            {
+                var dropList = drop.Strategy(roll.Keep);
+                var keepList = roll.Keep.Without(dropList);
+                RollResultExpression newRoll = new RollResultExpression(
+                    keepList,
+                    roll.Discard.Concat(dropList));
+                _expressionStack.Push(newRoll);
+
+                return newRoll.Keep.Sum();
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        private float Visit(KeepExpression keep, DiceNotationContext context)
+        {
+            Visit((dynamic)keep.Right, context);
+
+            var lastResult = _expressionStack.Pop();
+            if (lastResult is RollResultExpression roll)
+            {
+                var keepList = roll.Keep.OrderByDescending(x => x).Take(keep.Count).ToList();
+                var dropped = roll.Keep.Without(keepList);
+
+                var newList = new List<int>();
+                foreach (var item in roll.Keep)
+                {
+                    if (keepList.Contains(item))
+                    {
+                        newList.Add(item);
+                        keepList.Remove(item);
+                    }
+                }
+
+                Debug.Assert(keepList.Count == 0);
+
+                _expressionStack.Push(new RollResultExpression(
+                    newList,
+                    roll.Discard.AppendRange(dropped)));
+                return newList.Sum();
+            }
+
+            throw new InvalidOperationException();
+        }
+        #endregion
 
         private float Visit(RepeatExpression repeat, DiceNotationContext context)
         {

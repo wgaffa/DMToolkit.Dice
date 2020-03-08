@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +86,49 @@ namespace Wgaffa.DMToolkit.Interpreters
             var expression = new VariableExpression("BAB");
             var context = new DiceNotationContext(expression);
 
-            Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<VariableUndefinedException>());
+            Assert.That(() => _interpreter.Interpret(context), Throws.TypeOf<SymbolTableUndefinedException>());
+        }
+
+        public class ResultsTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData(
+                    (Func<IDiceRoller, IExpression>)
+                    (roller =>
+                        new DropExpression(
+                            new DiceExpression(roller, Dice.d20, 5))))
+                    .Returns(40)
+                    .SetName("{m} Drop 3 lowest");
+                yield return new TestCaseData(
+                    (Func<IDiceRoller, IExpression>)
+                    (roller =>
+                    new DropExpression(
+                        new DiceExpression(roller, Dice.d20, 3), x => new int[] { x.Max() })))
+                    .Returns(9)
+                    .SetName("{m} Drop 3 highest");
+                yield return new TestCaseData(
+                    (Func<IDiceRoller, IExpression>)
+                    (roller =>
+                    new KeepExpression(
+                        new DiceExpression(roller, Dice.d20, 4), 3)))
+                    .Returns(35)
+                    .SetName("{m} Keep 3 highest");
+            }
+        }
+
+        [TestCaseSource(typeof(ResultsTestCaseData))]
+        public float Evaluate_ReturnsCorrectResult(Func<IDiceRoller, IExpression> lazyExpression)
+        {
+            var mockRoller = new Mock<IDiceRoller>();
+            mockRoller.SetupSequence(x => x.RollDice(It.IsAny<Dice>()))
+                .Returns(6)
+                .Returns(3)
+                .Returns(17)
+                .Returns(12)
+                .Returns(5);
+
+            return _interpreter.Interpret(lazyExpression(mockRoller.Object));
         }
 
         [Test]
@@ -270,10 +313,10 @@ namespace Wgaffa.DMToolkit.Interpreters
             var context = new DiceNotationContext(addThree);
             _ = _interpreter.Interpret(context);
 
-            var expected = new List<float> { 2, 4, 2 };
+            var expected = new List<int> { 2, 4, 2 };
             AdditionExpression result = (AdditionExpression)context.Result;
-            ListExpression listExpr = (ListExpression)result.Left;
-            var values = listExpr.Expressions.Cast<NumberExpression>().Select(x => x.Value);
+            RollResultExpression listExpr = (RollResultExpression)result.Left;
+            var values = listExpr.Keep;
             Assert.That(values, Is.EquivalentTo(expected));
         }
     }
