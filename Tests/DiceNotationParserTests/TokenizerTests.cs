@@ -29,6 +29,7 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("L").Returns(1);
                 yield return new TestCaseData("STR").Returns(1);
                 yield return new TestCaseData("L-L").Returns(3);
+                yield return new TestCaseData("drone").Returns(1);
             }
         }
 
@@ -88,7 +89,7 @@ namespace DiceNotationParserTests
         }
 
         private static readonly List<string> InvalidTestCaseData = new List<string>
-        { "dk", "5d", "d", ".5", "2d6.5" };
+        { "5d", ".5", "2d6.5" };
 
         [TestCaseSource(nameof(InvalidTestCaseData))]
         public void InvalidToken_ShouldThrowParseException(string input)

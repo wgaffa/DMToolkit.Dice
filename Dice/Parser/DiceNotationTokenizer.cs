@@ -76,7 +76,7 @@ namespace Wgaffa.DMToolkit.Parser
                     yield return Result.Value(charToken, next.Location, next.Remainder);
                     next = next.Remainder.ConsumeChar();
                 }
-                else if (char.IsLetter(ch) && ch != 'd')
+                else if (char.IsLetter(ch))
                 {
                     var beginIdentifier = next.Location;
                     do
