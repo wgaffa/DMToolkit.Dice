@@ -10,7 +10,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public string Name { get; }
 
-        public IReadOnlyCollection<IExpression> Arguments => _arguments.AsReadOnly();
+        public IReadOnlyList<IExpression> Arguments => _arguments.AsReadOnly();
 
         public FunctionCallExpression(string name, IEnumerable<IExpression> arguments)
         {
