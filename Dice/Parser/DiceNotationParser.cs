@@ -109,6 +109,13 @@ namespace Wgaffa.DMToolkit.Parser
             .Then(x => List.Or(Factor).Select(f => (IExpression)new RepeatExpression(f, x)))
             .Named("repeat");
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> FunctionCall =
+            from identifier in Token.EqualTo(DiceNotationToken.Identifier).Apply(Superpower.Parsers.Identifier.CStyle)
+            from lparen in Token.EqualTo(DiceNotationToken.LParen)
+            from expr in Expr.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+            from rparen in Token.EqualTo(DiceNotationToken.RParen)
+            select (IExpression)new FunctionCallExpression(identifier.ToStringValue(), expr);
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Operand =
             (
             from _ in Token.EqualTo(DiceNotationToken.Minus)
@@ -117,6 +124,7 @@ namespace Wgaffa.DMToolkit.Parser
             )
             .Or(List)
             .Or(Repeat)
+            .Or(FunctionCall.Try())
             .Or(Factor)
             .Named("expression");
 

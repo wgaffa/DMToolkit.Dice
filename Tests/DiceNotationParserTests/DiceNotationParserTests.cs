@@ -62,6 +62,10 @@ namespace DiceNotationParserTests
                     .Returns(typeof(DropExpression));
                 yield return new TestCaseData("4d6(k3)")
                     .Returns(typeof(KeepExpression));
+                yield return new TestCaseData("max(4, 2+4)")
+                    .Returns(typeof(FunctionCallExpression));
+                yield return new TestCaseData("5 + max(3, 2)")
+                    .Returns(typeof(AdditionExpression));
             }
         }
 
