@@ -6,6 +6,8 @@ using System.Linq;
 using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
+using Wgaffa.DMToolkit.Parser;
+using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
@@ -221,5 +223,32 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
         #endregion
+
+        public float Visit(FunctionCallExpression function, DiceNotationContext context)
+        {
+            var functionSymbol = context.SymbolTable
+                .Lookup(function.Name)
+                .Bind(sym =>
+                sym is FunctionSymbol fsym
+                ? Maybe<FunctionSymbol>.Some(fsym)
+                : (Maybe<FunctionSymbol>)None.Value);
+
+            var arguments = functionSymbol
+                .Map(funcSym => funcSym.Parameters)
+                .Map(parameters => parameters.Zip(
+                    function.Arguments,
+                    (sym, expr) => new { Param = sym, Arg = (double)Visit((dynamic)expr, context) })
+                    .ToList()
+                    .Each(_ => _expressionStack.Pop()));
+
+            var result = (float)arguments
+                .Map(args => args.Select(x => x.Arg))
+                .Bind(args => functionSymbol.Map(f => f.Call(args)))
+                .Reduce(default(double));
+
+            _expressionStack.Push(new NumberExpression(result));
+
+            return result;
+        }
     }
 }

@@ -12,6 +12,7 @@ using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Interpreters;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.Functional;
 
 namespace DiceNotationParserTests
 {
@@ -58,6 +59,30 @@ namespace DiceNotationParserTests
                 .Returns(new NumberExpression(5));
             _symbolTable.SetupGet(x => x["ShieldBonus"])
                 .Returns(new NumberExpression(2));
+            _symbolTable.SetupGet(x => x["MaxDex"])
+                .Returns(new NumberExpression(2));
+
+            var realSymbol = new BuiltinTypeSymbol("real");
+            _symbolTable.Setup(x => x.Lookup("max"))
+                .Returns(new FunctionSymbol(
+                    "max",
+                    None.Value,
+                    args => args.Max(),
+                    new ISymbol[]
+                    {
+                        new VariableSymbol("a", realSymbol),
+                        new VariableSymbol("b", realSymbol)
+                    }));
+            _symbolTable.Setup(x => x.Lookup("min"))
+                .Returns(new FunctionSymbol(
+                    "min",
+                    None.Value,
+                    args => args.Min(),
+                    new ISymbol[]
+                    {
+                        new VariableSymbol("a", realSymbol),
+                        new VariableSymbol("b", realSymbol)
+                    }));
 
             _interpreter = new DiceNotationInterpreter();
         }
@@ -95,11 +120,24 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + DEXMOD + Size + Misc")
                     .Returns(22)
                     .SetName("ArmorBonus");
+                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + max(0, min(DEXMOD, MaxDex)) + Size + Misc")
+                    .Returns(20)
+                    .SetName("ArmorBonus with MaxDex");
+            }
+        }
+
+        public class FunctionTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData("5+max(7, 3+8)")
+                    .Returns(16);
             }
         }
 
         [TestCaseSource(typeof(NotationTestCaseData))]
         [TestCaseSource(typeof(PFRollsTestCaseData))]
+        [TestCaseSource(typeof(FunctionTestCaseData))]
         public float Evaluate_ShouldReturnCorrect(string input)
         {
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);
