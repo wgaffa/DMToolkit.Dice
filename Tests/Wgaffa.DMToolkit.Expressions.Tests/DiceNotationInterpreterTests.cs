@@ -7,6 +7,7 @@ using System.Linq;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
+using Wgaffa.DMToolkit.Parser;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {

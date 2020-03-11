@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Expressions;
+using Wgaffa.DMToolkit.Parser;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
