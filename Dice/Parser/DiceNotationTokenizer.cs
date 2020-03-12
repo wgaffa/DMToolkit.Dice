@@ -21,6 +21,14 @@ namespace Wgaffa.DMToolkit.Parser
             ['['] = DiceNotationToken.LBracket,
             [']'] = DiceNotationToken.RBracket,
             [','] = DiceNotationToken.Comma,
+            [';'] = DiceNotationToken.SemiColon,
+            [':'] = DiceNotationToken.Colon,
+            ['='] = DiceNotationToken.Equal,
+        };
+
+        private readonly static List<string> _keywords = new List<string>()
+        {
+            "var"
         };
 
         protected override IEnumerable<Result<DiceNotationToken>> Tokenize(TextSpan span)
@@ -84,7 +92,11 @@ namespace Wgaffa.DMToolkit.Parser
                         next = next.Remainder.ConsumeChar();
                     } while (next.HasValue && char.IsLetterOrDigit(next.Value));
 
-                    yield return Result.Value(DiceNotationToken.Identifier, beginIdentifier, next.Location);
+                    string identifier = beginIdentifier.Until(next.Location).ToStringValue();
+                    if (_keywords.Contains(identifier))
+                        yield return Result.Value(DiceNotationToken.Keyword, beginIdentifier, next.Location);
+                    else
+                        yield return Result.Value(DiceNotationToken.Identifier, beginIdentifier, next.Location);
                 }
                 else
                 {

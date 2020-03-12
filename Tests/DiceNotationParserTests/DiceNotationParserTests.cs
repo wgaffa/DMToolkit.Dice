@@ -66,6 +66,12 @@ namespace DiceNotationParserTests
                     .Returns(typeof(FunctionCallExpression));
                 yield return new TestCaseData("5 + max(3, 2)")
                     .Returns(typeof(AdditionExpression));
+                yield return new TestCaseData("real foo;")
+                    .Returns(typeof(VariableDeclarationExpression));
+                yield return new TestCaseData("real foo; int bar;")
+                    .Returns(typeof(CompoundExpression));
+                yield return new TestCaseData("foo = 6")
+                    .Returns(typeof(AssignmentExpression));
             }
         }
 
@@ -85,6 +91,7 @@ namespace DiceNotationParserTests
             "5 + []",
             "[3, 13,]",
             "2x",
+            "real foo; int bar",
         };
 
         [TestCaseSource(nameof(InvalidSyntaxTestCaseData))]

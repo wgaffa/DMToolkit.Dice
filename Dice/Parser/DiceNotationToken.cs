@@ -38,6 +38,18 @@ namespace Wgaffa.DMToolkit.Parser
 		[Token(Example = ",")]
 		Comma,
 
+		[Token(Example = ";")]
+		SemiColon,
+
+		[Token(Example = ":")]
+		Colon,
+
+		[Token(Category = "keyword")]
+		Keyword,
+
+		[Token(Example = "=")]
+		Equal,
+
 		Dice,
 
 		[Token(Category = "repeat")]

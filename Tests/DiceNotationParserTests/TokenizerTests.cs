@@ -30,6 +30,9 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("STR").Returns(1);
                 yield return new TestCaseData("L-L").Returns(3);
                 yield return new TestCaseData("drone").Returns(1);
+                yield return new TestCaseData(";").Returns(1);
+                yield return new TestCaseData(":").Returns(1);
+                yield return new TestCaseData("=").Returns(1);
             }
         }
 

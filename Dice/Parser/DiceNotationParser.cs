@@ -134,6 +134,29 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
             Parse.Chain(Addition.Or(Subtraction), Term, MakeBinary);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
+            from type in Token.EqualTo(DiceNotationToken.Identifier)
+            from name in Token.EqualTo(DiceNotationToken.Identifier)
+            select (IExpression)new VariableDeclarationExpression(name.ToStringValue(), type.ToStringValue());
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Stmt =
+            VarDecl.Try()
+            .Or(Expr);
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Statement =
+            Stmt
+            .Then(x => Token.EqualTo(DiceNotationToken.SemiColon).Value(x));
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Statements =
+            from stmt in Statement.Many()
+            select (IExpression)new CompoundExpression(stmt);
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> OnelineStatement =
+            (from stmt in Stmt
+             from terminal in Token.EqualTo(DiceNotationToken.SemiColon).Optional()
+             select stmt)
+            .AtEnd();
+
         private static IExpression MakeBinary(OperatorType @operator, IExpression left, IExpression right)
         {
             switch (@operator)
@@ -156,6 +179,8 @@ namespace Wgaffa.DMToolkit.Parser
         }
 
         public static TokenListParser<DiceNotationToken, IExpression> Notation =
-            Expr.AtEnd();
+            OnelineStatement.Try()
+            .Or(Statements)
+            .AtEnd();
     }
 }
