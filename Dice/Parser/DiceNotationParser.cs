@@ -53,9 +53,13 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, DropExpression.StrategyFunc> DropHighest =
             Token.EqualToValue(DiceNotationToken.Identifier, "H").Value((DropExpression.StrategyFunc)(x => new int[] { x.Max() }));
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Identifier =
-            Token.EqualTo(DiceNotationToken.Identifier)
-            .Select(t => (IExpression)new VariableExpression(t.ToStringValue()));
+        private static readonly TokenListParser<DiceNotationToken, string> Variable =
+            from identifier in Token.EqualTo(DiceNotationToken.Identifier)
+            select identifier.ToStringValue();
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Reference =
+            from name in Variable
+            select (IExpression)new VariableExpression(name);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Dice =
             Token.EqualTo(DiceNotationToken.Dice)
@@ -87,7 +91,7 @@ namespace Wgaffa.DMToolkit.Parser
             .Select(n => (IExpression)new NumberExpression(n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
-            DiceNotation.Or(Identifier).Or(Number);
+            DiceNotation.Or(Reference).Or(Number);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Factor =
             (from lparen in Token.EqualTo(DiceNotationToken.LParen)
@@ -136,14 +140,14 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
             from type in Token.EqualTo(DiceNotationToken.Identifier)
-            from name in Token.EqualTo(DiceNotationToken.Identifier)
-            select (IExpression)new VariableDeclarationExpression(name.ToStringValue(), type.ToStringValue());
+            from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+            select (IExpression)new VariableDeclarationExpression(names, type.ToStringValue());
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
-            from left in Token.EqualTo(DiceNotationToken.Identifier)
+            from name in Variable
             from equal in Token.EqualTo(DiceNotationToken.Equal)
             from right in Expr
-            select (IExpression)new AssignmentExpression(left.ToStringValue(), right);
+            select (IExpression)new AssignmentExpression(name, right);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Stmt =
             VarDecl.Try()

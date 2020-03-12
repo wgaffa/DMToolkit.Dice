@@ -72,6 +72,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(CompoundExpression));
                 yield return new TestCaseData("foo = 6")
                     .Returns(typeof(AssignmentExpression));
+                yield return new TestCaseData("real foo, bar;")
+                    .Returns(typeof(VariableDeclarationExpression));
             }
         }
 

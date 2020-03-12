@@ -9,15 +9,17 @@ namespace Wgaffa.DMToolkit.Expressions
 {
     public class VariableDeclarationExpression : IExpression
     {
-        public string Name { get; }
+        private readonly List<string> _names = new List<string>();
+
+        public IReadOnlyList<string> Names { get; }
         public string Type { get; }
 
-        public VariableDeclarationExpression(string name, string type)
+        public VariableDeclarationExpression(IEnumerable<string> names, string type)
         {
-            Guard.Against.Null(name, nameof(name));
+            Guard.Against.Null(names, nameof(names));
             Guard.Against.Null(type, nameof(type));
 
-            Name = name;
+            _names = names.ToList();
             Type = type;
         }
     }
