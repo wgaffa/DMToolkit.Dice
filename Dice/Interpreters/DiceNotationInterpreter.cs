@@ -16,13 +16,13 @@ namespace Wgaffa.DMToolkit.Interpreters
         private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
 
         #region Public API
-        public float Interpret(DiceNotationContext context)
+        public double Interpret(DiceNotationContext context)
         {
             Guard.Against.Null(context, nameof(context));
 
             Debug.Assert(_expressionStack.Count == 0);
 
-            float total = Visit((dynamic)context.Expression, context);
+            double total = Visit((dynamic)context.Expression, context);
             context.Result = _expressionStack.Pop();
 
             Debug.Assert(_expressionStack.Count == 0);
@@ -30,13 +30,13 @@ namespace Wgaffa.DMToolkit.Interpreters
             return total;
         }
 
-        public float Interpret(IExpression expression)
+        public double Interpret(IExpression expression)
         {
             Guard.Against.Null(expression, nameof(expression));
 
             Debug.Assert(_expressionStack.Count == 0);
 
-            float total = Visit((dynamic)expression, new DiceNotationContext(expression));
+            double total = Visit((dynamic)expression, new DiceNotationContext(expression));
             _ = _expressionStack.Pop();
 
             Debug.Assert(_expressionStack.Count == 0);
@@ -46,16 +46,16 @@ namespace Wgaffa.DMToolkit.Interpreters
         #endregion
 
         #region Terminal expressions
-        private float Visit(NumberExpression number, DiceNotationContext _)
+        private double Visit(NumberExpression number, DiceNotationContext _)
         {
             _expressionStack.Push(number);
 
             return number.Value;
         }
 
-        private float Visit(ListExpression list, DiceNotationContext context)
+        private double Visit(ListExpression list, DiceNotationContext context)
         {
-            float sumOfList = list.Expressions.Aggregate(0f, (acc, expr) => acc + Visit((dynamic)expr, context));
+            double sumOfList = list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr, context));
 
             var expressionList = Enumerable
                 .Range(0, list.Expressions.Count)
@@ -67,7 +67,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return sumOfList;
         }
 
-        private float Visit(DiceExpression dice, DiceNotationContext context)
+        private double Visit(DiceExpression dice, DiceNotationContext context)
         {
             var diceRoller = context.DiceRoller ?? dice.DiceRoller;
 
@@ -82,7 +82,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return rolls.Sum();
         }
 
-        private float Visit(VariableExpression variable, DiceNotationContext context)
+        private double Visit(VariableExpression variable, DiceNotationContext context)
         {
             if (context.SymbolTable is null)
                 throw new SymbolTableUndefinedException("No symbol table is set");
@@ -90,23 +90,21 @@ namespace Wgaffa.DMToolkit.Interpreters
             var symbolValue = context.SymbolTable[variable.Symbol]
                 ?? throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
 
-            float result = Visit((dynamic)symbolValue, context);
-
-            return result;
+            return Visit((dynamic)symbolValue, context);
         }
         #endregion
 
         #region Unary Expressions
-        private float Visit(NegateExpression negate, DiceNotationContext context)
+        private double Visit(NegateExpression negate, DiceNotationContext context)
         {
-            float result = -Visit((dynamic)negate.Right, context);
+            double result = -Visit((dynamic)negate.Right, context);
 
             _expressionStack.Push(new NegateExpression(_expressionStack.Pop()));
 
             return result;
         }
 
-        private float Visit(DropExpression drop, DiceNotationContext context)
+        private double Visit(DropExpression drop, DiceNotationContext context)
         {
             Visit((dynamic)drop.Right, context);
 
@@ -126,7 +124,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             throw new InvalidOperationException();
         }
 
-        private float Visit(KeepExpression keep, DiceNotationContext context)
+        private double Visit(KeepExpression keep, DiceNotationContext context)
         {
             Visit((dynamic)keep.Right, context);
 
@@ -158,11 +156,11 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
         #endregion
 
-        private float Visit(RepeatExpression repeat, DiceNotationContext context)
+        private double Visit(RepeatExpression repeat, DiceNotationContext context)
         {
-            float result = Enumerable
+            double result = Enumerable
                 .Range(0, repeat.RepeatTimes)
-                .Aggregate(0f, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
+                .Aggregate(.0, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
 
             var list = Enumerable
                 .Range(0, repeat.RepeatTimes)
@@ -175,9 +173,9 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         #region Binary Expressions
-        private float Visit(AdditionExpression addition, DiceNotationContext context)
+        private double Visit(AdditionExpression addition, DiceNotationContext context)
         {
-            float result = Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context);
+            double result = Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -187,9 +185,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private float Visit(SubtractionExpression subtraction, DiceNotationContext context)
+        private double Visit(SubtractionExpression subtraction, DiceNotationContext context)
         {
-            float result = Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context);
+            double result = Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -199,9 +197,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private float Visit(MultiplicationExpression multiplication, DiceNotationContext context)
+        private double Visit(MultiplicationExpression multiplication, DiceNotationContext context)
         {
-            float result = Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context);
+            double result = Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -211,9 +209,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private float Visit(DivisionExpression divition, DiceNotationContext context)
+        private double Visit(DivisionExpression divition, DiceNotationContext context)
         {
-            float result = Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context);
+            double result = Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context);
 
             var right = _expressionStack.Pop();
             var left = _expressionStack.Pop();
@@ -224,7 +222,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
         #endregion
 
-        public float Visit(FunctionCallExpression function, DiceNotationContext context)
+        public double Visit(FunctionCallExpression function, DiceNotationContext context)
         {
             var functionSymbol = context.SymbolTable
                 .Lookup(function.Name)

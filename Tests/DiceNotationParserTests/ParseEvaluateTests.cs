@@ -138,7 +138,7 @@ namespace DiceNotationParserTests
         [TestCaseSource(typeof(NotationTestCaseData))]
         [TestCaseSource(typeof(PFRollsTestCaseData))]
         [TestCaseSource(typeof(FunctionTestCaseData))]
-        public float Evaluate_ShouldReturnCorrect(string input)
+        public double Evaluate_ShouldReturnCorrect(string input)
         {
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokenlist);

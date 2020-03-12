@@ -71,7 +71,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         [TestCaseSource(typeof(VariableTestCaseData))]
-        public float Evaluate_ShouldReturnResult(IExpression expression)
+        public double Evaluate_ShouldReturnResult(IExpression expression)
         {
             var context = new DiceNotationContext(expression)
             {
@@ -119,7 +119,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         [TestCaseSource(typeof(ResultsTestCaseData))]
-        public float Evaluate_ReturnsCorrectResult(Func<IDiceRoller, IExpression> lazyExpression)
+        public double Evaluate_ReturnsCorrectResult(Func<IDiceRoller, IExpression> lazyExpression)
         {
             var mockRoller = new Mock<IDiceRoller>();
             mockRoller.SetupSequence(x => x.RollDice(It.IsAny<Dice>()))
@@ -182,7 +182,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             var result = _interpreter.Interpret(critical);
 
-            Assert.That(result, Is.EqualTo(14f));
+            Assert.That(result, Is.EqualTo(14));
         }
 
         [Test]
@@ -270,7 +270,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var numbers = new List<IExpression>()
             {
-                new NumberExpression(3.5f),
+                new NumberExpression(3.5),
                 new NumberExpression(2),
                 new NumberExpression(7)
             };
@@ -278,7 +278,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             var result = _interpreter.Interpret(expression);
 
-            Assert.That(result, Is.EqualTo(12.5f));
+            Assert.That(result, Is.EqualTo(12.5));
         }
 
         [Test]
@@ -298,11 +298,11 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             // 5 * 2 + 3.2
             var multiplication = new MultiplicationExpression(new NumberExpression(5), new NumberExpression(2));
-            var addition = new AdditionExpression(multiplication, new NumberExpression(3.2f));
+            var addition = new AdditionExpression(multiplication, new NumberExpression(3.2));
 
             var result = _interpreter.Interpret(new DiceNotationContext(addition));
 
-            Assert.That(result, Is.EqualTo(13.2f));
+            Assert.That(result, Is.EqualTo(13.2));
         }
 
         [Test]

@@ -84,7 +84,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
             Token.EqualTo(DiceNotationToken.Number)
             .Apply(Numerics.DecimalDouble)
-            .Select(n => (IExpression)new NumberExpression((float)n));
+            .Select(n => (IExpression)new NumberExpression(n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
             DiceNotation.Or(Identifier).Or(Number);
