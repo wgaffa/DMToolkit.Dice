@@ -139,15 +139,23 @@ namespace Wgaffa.DMToolkit.Parser
             from name in Token.EqualTo(DiceNotationToken.Identifier)
             select (IExpression)new VariableDeclarationExpression(name.ToStringValue(), type.ToStringValue());
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
+            from left in Token.EqualTo(DiceNotationToken.Identifier)
+            from equal in Token.EqualTo(DiceNotationToken.Equal)
+            from right in Expr
+            select (IExpression)new AssignmentExpression(left.ToStringValue(), right);
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Stmt =
             VarDecl.Try()
+            .Or(Assign.Try())
             .Or(Expr);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Statement =
-            Stmt
-            .Then(x => Token.EqualTo(DiceNotationToken.SemiColon).Value(x));
+            from stmt in Stmt
+            from terminate in Token.EqualTo(DiceNotationToken.SemiColon)
+            select stmt;
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Statements =
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Block =
             from stmt in Statement.Many()
             select (IExpression)new CompoundExpression(stmt);
 
@@ -180,7 +188,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         public static TokenListParser<DiceNotationToken, IExpression> Notation =
             OnelineStatement.Try()
-            .Or(Statements)
+            .Or(Block)
             .AtEnd();
     }
 }
