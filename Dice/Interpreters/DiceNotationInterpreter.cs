@@ -154,7 +154,6 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             throw new InvalidOperationException();
         }
-        #endregion
 
         private double Visit(RepeatExpression repeat, DiceNotationContext context)
         {
@@ -171,6 +170,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return result;
         }
+        #endregion
 
         #region Binary Expressions
         private double Visit(AdditionExpression addition, DiceNotationContext context)
@@ -247,6 +247,29 @@ namespace Wgaffa.DMToolkit.Interpreters
             _expressionStack.Push(new NumberExpression(result));
 
             return result;
+        }
+
+        private double Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
+        {
+            return 0;
+        }
+
+        private double Visit(AssignmentExpression assignment, DiceNotationContext context)
+        {
+            double result = Visit((dynamic)assignment.Expression, context);
+
+            return result;
+        }
+
+        private double Visit(CompoundExpression compound, DiceNotationContext context)
+        {
+            double lastResult = 0;
+            foreach (var block in compound.Expressions)
+            {
+                lastResult = Visit((dynamic)block, context);
+            }
+
+            return lastResult;
         }
     }
 }
