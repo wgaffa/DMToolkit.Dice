@@ -11,7 +11,7 @@ namespace Wgaffa.DMToolkit.Expressions
     {
         private readonly List<string> _names = new List<string>();
 
-        public IReadOnlyList<string> Names { get; }
+        public IReadOnlyList<string> Names => _names.AsReadOnly();
         public string Type { get; }
 
         public VariableDeclarationExpression(IEnumerable<string> names, string type)

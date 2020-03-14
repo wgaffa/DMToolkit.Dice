@@ -63,6 +63,13 @@ namespace DiceNotationParserTests
                 .Returns(new NumberExpression(2));
 
             var realSymbol = new BuiltinTypeSymbol("real");
+            var intSymbol = new BuiltinTypeSymbol("int");
+            _symbolTable.Setup(x => x.Lookup(It.IsAny<string>()))
+                .Returns(None.Value);
+            _symbolTable.Setup(x => x.Lookup("real"))
+                .Returns(realSymbol);
+            _symbolTable.Setup(x => x.Lookup("int"))
+                .Returns(intSymbol);
             _symbolTable.Setup(x => x.Lookup("max"))
                 .Returns(new FunctionSymbol(
                     "max",
@@ -161,7 +168,13 @@ namespace DiceNotationParserTests
                 SymbolTable = _symbolTable.Object,
             };
 
-            return _interpreter.Interpret(context);
+            var semantic = new SemanticAnalyzer();
+            var ast = semantic.Analyze(context);
+            return _interpreter.Interpret(new DiceNotationContext(ast)
+            {
+                SymbolTable = _symbolTable.Object,
+                DiceRoller = _mockRoller.Object
+            });
         }
     }
 }
