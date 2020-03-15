@@ -8,7 +8,7 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
-    public class FunctionSymbol : ISymbol
+    public class FunctionSymbol : ValueObject<FunctionSymbol>, ISymbol
     {
         private readonly List<ISymbol> _parameters = new List<ISymbol>();
 
@@ -34,6 +34,27 @@ namespace Wgaffa.DMToolkit.Parser
             Guard.Against.Null(parameters, nameof(parameters));
 
             _parameters = parameters.ToList();
+        }
+
+        public override bool Equals(FunctionSymbol other)
+        {
+            if (other is null)
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
+            return Name == other.Name
+                && Type.Equals(other.Type)
+                && _parameters.SequenceEqual(other._parameters);
+        }
+
+        protected override IEnumerable<int> HashCodes()
+        {
+            yield return Name.GetHashCode();
+            yield return Type.GetHashCode();
+            foreach (var item in _parameters)
+                yield return item.GetHashCode();
         }
     }
 }

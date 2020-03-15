@@ -30,15 +30,6 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Returns(1);
 
             _symbolTable = new Mock<ISymbolTable>();
-            _symbolTable
-                .SetupGet(s => s["BAB"])
-                .Returns(new NumberExpression(6));
-            _symbolTable
-                .SetupGet(s => s["StrMod"])
-                .Returns(new NumberExpression(2));
-            _symbolTable
-                .SetupGet(s => s["Size"])
-                .Returns(new NumberExpression(-1));
 
             _interpreter = new DiceNotationInterpreter();
         }

@@ -1,12 +1,10 @@
-﻿using Wgaffa.DMToolkit.Expressions;
-using Wgaffa.Functional;
+﻿using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
     public interface ISymbolTable
     {
-        IExpression this[string name] { get; }
-
+        int Depth { get; }
         void Add(ISymbol symbol);
         Maybe<ISymbol> Lookup(string name);
     }

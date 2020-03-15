@@ -14,6 +14,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreter
     {
         private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
+        private readonly Dictionary<string, double> _globalMemory = new Dictionary<string, double>();
 
         #region Public API
         public double Interpret(DiceNotationContext context)
@@ -87,8 +88,10 @@ namespace Wgaffa.DMToolkit.Interpreters
             if (context.SymbolTable is null)
                 throw new SymbolTableUndefinedException("No symbol table is set");
 
-            var symbolValue = context.SymbolTable[variable.Symbol]
-                ?? throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined");
+            var symbolValue = context.SymbolTable.Lookup(variable.Symbol)
+                .Nothing(() => throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined"))
+                .Map(v => _globalMemory[v.Name])
+                .Reduce(default(double));
 
             return Visit((dynamic)symbolValue, context);
         }

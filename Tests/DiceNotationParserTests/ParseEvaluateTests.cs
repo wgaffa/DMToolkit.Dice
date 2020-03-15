@@ -37,31 +37,6 @@ namespace DiceNotationParserTests
                 .Returns(20);
 
             _symbolTable = new Mock<ISymbolTable>();
-            _symbolTable.SetupGet(x => x["INTMOD"])
-                .Returns(new NumberExpression(3));
-            _symbolTable.SetupGet(x => x["STRMOD"])
-                .Returns(new NumberExpression(2));
-            _symbolTable.SetupGet(x => x["DEXMOD"])
-                .Returns(new NumberExpression(4));
-            _symbolTable.SetupGet(x => x["Ranks"])
-                .Returns(new NumberExpression(2));
-            _symbolTable.SetupGet(x => x["ClassSkill"])
-                .Returns(new NumberExpression(3));
-            _symbolTable.SetupGet(x => x["Misc"])
-                .Returns(new NumberExpression(0));
-            _symbolTable.SetupGet(x => x["RangePenalty"])
-                .Returns(new NegateExpression(new NumberExpression(4)));
-            _symbolTable.SetupGet(x => x["BAB"])
-                .Returns(new NumberExpression(4));
-            _symbolTable.SetupGet(x => x["Size"])
-                .Returns(new NumberExpression(1));
-            _symbolTable.SetupGet(x => x["ArmorBonus"])
-                .Returns(new NumberExpression(5));
-            _symbolTable.SetupGet(x => x["ShieldBonus"])
-                .Returns(new NumberExpression(2));
-            _symbolTable.SetupGet(x => x["MaxDex"])
-                .Returns(new NumberExpression(2));
-
             var realSymbol = new BuiltinTypeSymbol("real");
             var intSymbol = new BuiltinTypeSymbol("int");
             _symbolTable.Setup(x => x.Lookup(It.IsAny<string>()))
