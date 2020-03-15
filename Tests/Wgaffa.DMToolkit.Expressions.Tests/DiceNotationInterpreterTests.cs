@@ -8,12 +8,14 @@ using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
     [TestFixture]
     public class DiceNotationInterpreterTests
     {
+        private Mock<ISymbol> _mockSymbol;
         private Mock<ISymbolTable> _symbolTable;
         private DiceNotationInterpreter _interpreter;
         private Mock<IDiceRoller> _mockRoller;
@@ -29,7 +31,14 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Returns(6)
                 .Returns(1);
 
+            _mockSymbol = new Mock<ISymbol>();
             _symbolTable = new Mock<ISymbolTable>();
+            _symbolTable.Setup(x => x.Lookup("BAB"))
+                .Returns(new VariableSymbol("BAB", Maybe<ISymbol>.Some(_mockSymbol.Object)));
+            _symbolTable.Setup(x => x.Lookup("StrMod"))
+                .Returns(new VariableSymbol("StrMod", Maybe<ISymbol>.Some(_mockSymbol.Object)));
+            _symbolTable.Setup(x => x.Lookup("Size"))
+                .Returns(new VariableSymbol("Size", Maybe<ISymbol>.Some(_mockSymbol.Object)));
 
             _interpreter = new DiceNotationInterpreter();
         }
@@ -69,7 +78,14 @@ namespace Wgaffa.DMToolkit.Interpreters
                 SymbolTable = _symbolTable.Object
             };
 
-            return _interpreter.Interpret(context);
+            var setup = new Dictionary<string, double>
+            {
+                ["BAB"] = 4,
+                ["Size"] = -1,
+                ["StrMod"] = 4,
+            };
+
+            return _interpreter.Interpret(context, setup);
         }
 
         [Test]
@@ -294,22 +310,6 @@ namespace Wgaffa.DMToolkit.Interpreters
             var result = _interpreter.Interpret(new DiceNotationContext(addition));
 
             Assert.That(result, Is.EqualTo(13.2));
-        }
-
-        [Test]
-        public void Interpret_ShouldSetContextResult_GivenExpression()
-        {
-            var dice = new DiceExpression(_mockRoller.Object, new Dice(6), 3);
-            var addThree = new AdditionExpression(dice, new NumberExpression(3));
-
-            var context = new DiceNotationContext(addThree);
-            _ = _interpreter.Interpret(context);
-
-            var expected = new List<int> { 2, 4, 2 };
-            AdditionExpression result = (AdditionExpression)context.Result;
-            RollResultExpression listExpr = (RollResultExpression)result.Left;
-            var values = listExpr.Keep;
-            Assert.That(values, Is.EquivalentTo(expected));
         }
     }
 }

@@ -19,7 +19,7 @@ namespace DiceNotationParserTests
     public class ParseEvaluateTests
     {
         private Mock<IDiceRoller> _mockRoller;
-        private Mock<ISymbolTable> _symbolTable;
+        private ISymbolTable _symbolTable;
         private DiceNotationInterpreter _interpreter;
 
         [SetUp]
@@ -36,35 +36,27 @@ namespace DiceNotationParserTests
                 .Returns(1)
                 .Returns(20);
 
-            _symbolTable = new Mock<ISymbolTable>();
+            _symbolTable = new SymbolTable();
             var realSymbol = new BuiltinTypeSymbol("real");
             var intSymbol = new BuiltinTypeSymbol("int");
-            _symbolTable.Setup(x => x.Lookup(It.IsAny<string>()))
-                .Returns(None.Value);
-            _symbolTable.Setup(x => x.Lookup("real"))
-                .Returns(realSymbol);
-            _symbolTable.Setup(x => x.Lookup("int"))
-                .Returns(intSymbol);
-            _symbolTable.Setup(x => x.Lookup("max"))
-                .Returns(new FunctionSymbol(
-                    "max",
-                    None.Value,
-                    args => args.Max(),
-                    new ISymbol[]
-                    {
-                        new VariableSymbol("a", realSymbol),
-                        new VariableSymbol("b", realSymbol)
-                    }));
-            _symbolTable.Setup(x => x.Lookup("min"))
-                .Returns(new FunctionSymbol(
-                    "min",
-                    None.Value,
-                    args => args.Min(),
-                    new ISymbol[]
-                    {
-                        new VariableSymbol("a", realSymbol),
-                        new VariableSymbol("b", realSymbol)
-                    }));
+            var parameters = new ISymbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
+            _symbolTable.Add(realSymbol);
+            _symbolTable.Add(intSymbol);
+            _symbolTable.Add(new FunctionSymbol("max", realSymbol, x => x.Max(), parameters));
+            _symbolTable.Add(new FunctionSymbol("min", realSymbol, x => x.Min(), parameters));
+
+            _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));
+            _symbolTable.Add(new VariableSymbol("STRMOD", intSymbol));
+            _symbolTable.Add(new VariableSymbol("DEXMOD", intSymbol));
+            _symbolTable.Add(new VariableSymbol("BAB", intSymbol));
+            _symbolTable.Add(new VariableSymbol("Ranks", intSymbol));
+            _symbolTable.Add(new VariableSymbol("ClassSkill", intSymbol));
+            _symbolTable.Add(new VariableSymbol("Size", intSymbol));
+            _symbolTable.Add(new VariableSymbol("Misc", intSymbol));
+            _symbolTable.Add(new VariableSymbol("ArmorBonus", intSymbol));
+            _symbolTable.Add(new VariableSymbol("ShieldBonus", intSymbol));
+            _symbolTable.Add(new VariableSymbol("RangePenalty", intSymbol));
+            _symbolTable.Add(new VariableSymbol("MaxDex", intSymbol));
 
             _interpreter = new DiceNotationInterpreter();
         }
@@ -128,6 +120,30 @@ namespace DiceNotationParserTests
             }
         }
 
+        public class VariableSetup : IEnumerable<KeyValuePair<string, double>>
+        {
+            public IEnumerator<KeyValuePair<string, double>> GetEnumerator()
+            {
+                yield return new KeyValuePair<string, double>("INTMOD", 3);
+                yield return new KeyValuePair<string, double>("Ranks", 2);
+                yield return new KeyValuePair<string, double>("ClassSkill", 3);
+                yield return new KeyValuePair<string, double>("STRMOD", 2);
+                yield return new KeyValuePair<string, double>("BAB", 4);
+                yield return new KeyValuePair<string, double>("Size", 1);
+                yield return new KeyValuePair<string, double>("RangePenalty", -4);
+                yield return new KeyValuePair<string, double>("ArmorBonus", 5);
+                yield return new KeyValuePair<string, double>("ShieldBonus", 2);
+                yield return new KeyValuePair<string, double>("MaxDex", 2);
+                yield return new KeyValuePair<string, double>("DEXMOD", 4);
+                yield return new KeyValuePair<string, double>("Misc", 0);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         [TestCaseSource(typeof(NotationTestCaseData))]
         [TestCaseSource(typeof(PFRollsTestCaseData))]
         [TestCaseSource(typeof(FunctionTestCaseData))]
@@ -140,16 +156,16 @@ namespace DiceNotationParserTests
             var context = new DiceNotationContext(expression)
             {
                 DiceRoller = _mockRoller.Object,
-                SymbolTable = _symbolTable.Object,
+                SymbolTable = _symbolTable,
             };
 
             var semantic = new SemanticAnalyzer();
             var ast = semantic.Analyze(context);
             return _interpreter.Interpret(new DiceNotationContext(ast)
             {
-                SymbolTable = _symbolTable.Object,
+                SymbolTable = _symbolTable,
                 DiceRoller = _mockRoller.Object
-            });
+            }, new VariableSetup());
         }
     }
 }

@@ -13,20 +13,19 @@ namespace Wgaffa.DMToolkit.Interpreters
 {
     public class DiceNotationInterpreter
     {
-        private readonly Stack<IExpression> _expressionStack = new Stack<IExpression>();
         private readonly Dictionary<string, double> _globalMemory = new Dictionary<string, double>();
 
         #region Public API
-        public double Interpret(DiceNotationContext context)
+        public double Interpret(DiceNotationContext context, Maybe<IEnumerable<KeyValuePair<string, double>>> initialValues = null)
         {
             Guard.Against.Null(context, nameof(context));
-
-            Debug.Assert(_expressionStack.Count == 0);
+            initialValues
+                .NoneIfNull()
+                .Match(
+                    ifSome: x => x.Each(kv => _globalMemory[kv.Key] = kv.Value),
+                    ifNone: () => { });
 
             double total = Visit((dynamic)context.Expression, context);
-            context.Result = _expressionStack.Pop();
-
-            Debug.Assert(_expressionStack.Count == 0);
 
             return total;
         }
@@ -35,12 +34,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             Guard.Against.Null(expression, nameof(expression));
 
-            Debug.Assert(_expressionStack.Count == 0);
-
             double total = Visit((dynamic)expression, new DiceNotationContext(expression));
-            _ = _expressionStack.Pop();
-
-            Debug.Assert(_expressionStack.Count == 0);
 
             return total;
         }
@@ -49,21 +43,12 @@ namespace Wgaffa.DMToolkit.Interpreters
         #region Terminal expressions
         private double Visit(NumberExpression number, DiceNotationContext _)
         {
-            _expressionStack.Push(number);
-
             return number.Value;
         }
 
         private double Visit(ListExpression list, DiceNotationContext context)
         {
             double sumOfList = list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr, context));
-
-            var expressionList = Enumerable
-                .Range(0, list.Expressions.Count)
-                .Select(_ => _expressionStack.Pop())
-                .ToList();
-
-            _expressionStack.Push(new ListExpression(expressionList));
 
             return sumOfList;
         }
@@ -78,7 +63,6 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .ToList();
 
             var rollsExpressions = rolls.Select(x => new NumberExpression(x));
-            _expressionStack.Push(new RollResultExpression(rolls));
 
             return rolls.Sum();
         }
@@ -93,7 +77,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Map(v => _globalMemory[v.Name])
                 .Reduce(default(double));
 
-            return Visit((dynamic)symbolValue, context);
+            return symbolValue;
         }
         #endregion
 
@@ -102,8 +86,6 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             double result = -Visit((dynamic)negate.Right, context);
 
-            _expressionStack.Push(new NegateExpression(_expressionStack.Pop()));
-
             return result;
         }
 
@@ -111,15 +93,14 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             Visit((dynamic)drop.Right, context);
 
-            var lastResult = _expressionStack.Pop();
-            if (lastResult is RollResultExpression roll)
+            if (context.RollResults.Last() is RollResultExpression roll)
             {
                 var dropList = drop.Strategy(roll.Keep);
                 var keepList = roll.Keep.Without(dropList);
                 RollResultExpression newRoll = new RollResultExpression(
                     keepList,
                     roll.Discard.Concat(dropList));
-                _expressionStack.Push(newRoll);
+                context.RollResults.Add(newRoll);
 
                 return newRoll.Keep.Sum();
             }
@@ -131,8 +112,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             Visit((dynamic)keep.Right, context);
 
-            var lastResult = _expressionStack.Pop();
-            if (lastResult is RollResultExpression roll)
+            if (context.RollResults.Last() is RollResultExpression roll)
             {
                 var keepList = roll.Keep.OrderByDescending(x => x).Take(keep.Count).ToList();
                 var dropped = roll.Keep.Without(keepList);
@@ -149,7 +129,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
                 Debug.Assert(keepList.Count == 0);
 
-                _expressionStack.Push(new RollResultExpression(
+                context.RollResults.Add(new RollResultExpression(
                     newList,
                     roll.Discard.AppendRange(dropped)));
                 return newList.Sum();
@@ -164,13 +144,6 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Range(0, repeat.RepeatTimes)
                 .Aggregate(.0, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
 
-            var list = Enumerable
-                .Range(0, repeat.RepeatTimes)
-                .Select(_ => _expressionStack.Pop())
-                .ToList();
-
-            _expressionStack.Push(new ListExpression(list));
-
             return result;
         }
         #endregion
@@ -180,22 +153,12 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             double result = Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context);
 
-            var right = _expressionStack.Pop();
-            var left = _expressionStack.Pop();
-
-            _expressionStack.Push(new AdditionExpression(left, right));
-
             return result;
         }
 
         private double Visit(SubtractionExpression subtraction, DiceNotationContext context)
         {
             double result = Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context);
-
-            var right = _expressionStack.Pop();
-            var left = _expressionStack.Pop();
-
-            _expressionStack.Push(new SubtractionExpression(left, right));
 
             return result;
         }
@@ -204,22 +167,12 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             double result = Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context);
 
-            var right = _expressionStack.Pop();
-            var left = _expressionStack.Pop();
-
-            _expressionStack.Push(new MultiplicationExpression(left, right));
-
             return result;
         }
 
         private double Visit(DivisionExpression divition, DiceNotationContext context)
         {
             double result = Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context);
-
-            var right = _expressionStack.Pop();
-            var left = _expressionStack.Pop();
-
-            _expressionStack.Push(new DivisionExpression(left, right));
 
             return result;
         }
@@ -239,15 +192,12 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Map(parameters => parameters.Zip(
                     function.Arguments,
                     (sym, expr) => new { Param = sym, Arg = (double)Visit((dynamic)expr, context) })
-                    .ToList()
-                    .Each(_ => _expressionStack.Pop()));
+                    .ToList());
 
             var result = (float)arguments
                 .Map(args => args.Select(x => x.Arg))
                 .Bind(args => functionSymbol.Map(f => f.Call(args)))
                 .Reduce(default(double));
-
-            _expressionStack.Push(new NumberExpression(result));
 
             return result;
         }
@@ -260,6 +210,8 @@ namespace Wgaffa.DMToolkit.Interpreters
         private double Visit(AssignmentExpression assignment, DiceNotationContext context)
         {
             double result = Visit((dynamic)assignment.Expression, context);
+
+            _globalMemory[assignment.Identifier] = result;
 
             return result;
         }

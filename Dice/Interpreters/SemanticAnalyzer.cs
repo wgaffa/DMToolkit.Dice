@@ -53,7 +53,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Map(vars => vars.Each(v =>
                     context.SymbolTable.Lookup(v.Name)
                     .Match(
-                        ifSome: _ => throw new InvalidOperationException("duplicate identifier"),
+                        ifSome: s => throw new InvalidOperationException($"duplicate identifier {s.Name}"),
                         ifNone: () => context.SymbolTable.Add(v))
                     ));
 

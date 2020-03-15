@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Extensions
@@ -16,5 +12,8 @@ namespace Wgaffa.DMToolkit.Extensions
 
             return source;
         }
+
+        public static Maybe<T> NoneIfNull<T>(this Maybe<T> source)
+            => source ?? None.Value;
     }
 }
