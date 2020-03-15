@@ -1,24 +1,23 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using Moq;
 using DMTools.Die.Rollers;
 using Wgaffa.DMToolkit;
+using NUnit.Framework;
 
 namespace DiceTest
 {
-    [TestClass]
     public class DiceRolling
     {
-        [TestMethod]
+        [Test]
         public void CreateNegativeDiceSides()
         {
-            Assert.ThrowsException<ArgumentException>(() => new Dice(-4));
+            Assert.That(() => new Dice(-4), Throws.ArgumentException);
         }
 
-        [TestMethod]
+        [Test]
         public void CreateZeroSidedDice()
         {
-            Assert.ThrowsException<ArgumentException>(() => new Dice(0));
+            Assert.That(() => new Dice(0), Throws.ArgumentException);
         }
     }
 }
