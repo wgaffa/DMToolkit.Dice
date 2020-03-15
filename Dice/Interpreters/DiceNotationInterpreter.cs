@@ -62,7 +62,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Select(_ => diceRoller.RollDice(dice.Dice))
                 .ToList();
 
-            var rollsExpressions = rolls.Select(x => new NumberExpression(x));
+            context.RollResults.Add(new RollResult(rolls));
 
             return rolls.Sum();
         }
@@ -93,11 +93,11 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             Visit((dynamic)drop.Right, context);
 
-            if (context.RollResults.Last() is RollResultExpression roll)
+            if (context.RollResults.Last() is RollResult roll)
             {
                 var dropList = drop.Strategy(roll.Keep);
                 var keepList = roll.Keep.Without(dropList);
-                RollResultExpression newRoll = new RollResultExpression(
+                RollResult newRoll = new RollResult(
                     keepList,
                     roll.Discard.Concat(dropList));
                 context.RollResults.Add(newRoll);
@@ -112,7 +112,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             Visit((dynamic)keep.Right, context);
 
-            if (context.RollResults.Last() is RollResultExpression roll)
+            if (context.RollResults.Last() is RollResult roll)
             {
                 var keepList = roll.Keep.OrderByDescending(x => x).Take(keep.Count).ToList();
                 var dropped = roll.Keep.Without(keepList);
@@ -129,7 +129,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
                 Debug.Assert(keepList.Count == 0);
 
-                context.RollResults.Add(new RollResultExpression(
+                context.RollResults.Add(new RollResult(
                     newList,
                     roll.Discard.AppendRange(dropped)));
                 return newList.Sum();

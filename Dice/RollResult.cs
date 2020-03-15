@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Wgaffa.DMToolkit.Expressions
+namespace Wgaffa.DMToolkit
 {
-    public class RollResultExpression : IExpression
+    public class RollResult
     {
         private readonly List<int> _keep;
         private readonly List<int> _discard;
@@ -13,12 +13,12 @@ namespace Wgaffa.DMToolkit.Expressions
         public IReadOnlyList<int> Keep => _keep.AsReadOnly();
         public IReadOnlyList<int> Discard => _discard.AsReadOnly();
 
-        public RollResultExpression(IEnumerable<int> keep)
+        public RollResult(IEnumerable<int> keep)
             : this(keep, Array.Empty<int>())
         {
         }
 
-        public RollResultExpression(IEnumerable<int> keep, IEnumerable<int> discard)
+        public RollResult(IEnumerable<int> keep, IEnumerable<int> discard)
         {
             Guard.Against.Null(keep, nameof(keep));
             Guard.Against.Null(discard, nameof(discard));
