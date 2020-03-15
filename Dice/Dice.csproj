@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>Wgaffa.DMToolkit</RootNamespace>
-    <AssemblyName>DMTools.Dice</AssemblyName>
+    <AssemblyName>Wgaffa.DMToolkit.Dice</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <NeutralLanguage>en</NeutralLanguage>
     <DebutType>Full</DebutType>
