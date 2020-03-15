@@ -17,6 +17,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return Visit((dynamic)context.Expression, context);
         }
 
+        private IExpression Visit(IExpression expr, DiceNotationContext context)
+            => expr;
+
         private IExpression Visit(BinaryExpression binary, DiceNotationContext context)
         {
             Visit((dynamic)binary.Left, context);
