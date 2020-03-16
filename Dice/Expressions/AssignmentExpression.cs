@@ -15,5 +15,10 @@ namespace Wgaffa.DMToolkit.Expressions
             Identifier = identifier;
             Expression = expression;
         }
+
+        public override string ToString()
+        {
+            return $"{Identifier} = {Expression}";
+        }
     }
 }

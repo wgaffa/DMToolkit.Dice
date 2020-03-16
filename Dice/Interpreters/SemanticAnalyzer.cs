@@ -57,13 +57,13 @@ namespace Wgaffa.DMToolkit.Interpreters
             var typeSymbol = context.SymbolTable.Lookup(varDecl.Type);
 
             var symbols = typeSymbol
-                .Nothing(() => throw new InvalidOperationException("undefined type"))
+                .Nothing(() => _errors.Add(new SemanticError("VAR", 2, $"unrecognized type {varDecl.Type}")))
                 .Map(type =>
                     varDecl.Names.Select(name => new VariableSymbol(name, Maybe<ISymbol>.Some(type))))
                 .Map(vars => vars.Each(v =>
                     context.SymbolTable.Lookup(v.Name)
                     .Match(
-                        ifSome: s => throw new InvalidOperationException($"duplicate identifier {s.Name}"),
+                        ifSome: s => _errors.Add(new SemanticError("VAR", 3, $"{s.Name} already declared")),
                         ifNone: () => context.SymbolTable.Add(v))
                     ));
 
@@ -78,8 +78,13 @@ namespace Wgaffa.DMToolkit.Interpreters
             return variable;
         }
 
-        private IExpression Visit(AssignmentExpression assignment, DiceNotationContext _)
+        private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
         {
+            var identifier = context.SymbolTable.Lookup(assignment.Identifier)
+                .Nothing(() => _errors.Add(new SemanticError("VAR", 1, "undefined variable")));
+
+            Visit((dynamic)assignment.Expression, context);
+
             return assignment;
         }
     }

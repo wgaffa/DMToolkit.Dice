@@ -22,5 +22,10 @@ namespace Wgaffa.DMToolkit.Expressions
             _names = names.ToList();
             Type = type;
         }
+
+        public override string ToString()
+        {
+            return $"{Type}: {string.Join(',', _names)}";
+        }
     }
 }

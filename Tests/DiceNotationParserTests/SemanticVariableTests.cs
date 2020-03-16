@@ -25,12 +25,24 @@ namespace DiceNotationParserTests
             }
         }
 
-        [Test]
-        public void Analyze_ShouldReturnError_GivenNoDefinedVariable()
+        public static readonly List<IExpression> InvalidVariableTestCaseData = new List<IExpression>()
+        {
+            new VariableExpression("foo"),
+            new VariableDeclarationExpression(new string[] { "foo" }, "fake"),
+            new VariableDeclarationExpression(new string[] { "bar", "bar" }, "int"),
+            new AssignmentExpression("foo", new NumberExpression(3)),
+            new CompoundExpression(new List<IExpression>()
+            {
+                new VariableDeclarationExpression(new string[] { "foo" }, "int"),
+                new AssignmentExpression("foo", new VariableExpression("bar")),
+            }),
+        };
+
+        [TestCaseSource(nameof(InvalidVariableTestCaseData))]
+        public void Analyze_ShouldReturnError_GivenNoDefinedVariable(IExpression expression)
         {
             var symbolTable = new SymbolTable(new SetupBuiltinSymbols());
             var semantic = new SemanticAnalyzer();
-            var expression = new VariableExpression("foo");
             var context = new DiceNotationContext(expression)
             {
                 SymbolTable = symbolTable
