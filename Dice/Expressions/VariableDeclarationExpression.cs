@@ -1,9 +1,8 @@
 ﻿using Ardalis.GuardClauses;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Wgaffa.DMToolkit.Extensions;
+using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
@@ -13,12 +12,14 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public IReadOnlyList<string> Names => _names.AsReadOnly();
         public string Type { get; }
+        public Maybe<IExpression> InitialValue { get; }
 
-        public VariableDeclarationExpression(IEnumerable<string> names, string type)
+        public VariableDeclarationExpression(IEnumerable<string> names, string type, Maybe<IExpression> initialValue = null)
         {
             Guard.Against.Null(names, nameof(names));
             Guard.Against.Null(type, nameof(type));
 
+            InitialValue = initialValue.NoneIfNull();
             _names = names.ToList();
             Type = type;
         }

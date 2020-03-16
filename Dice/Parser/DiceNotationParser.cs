@@ -1,10 +1,9 @@
 ﻿using Superpower;
-using Superpower.Model;
 using Superpower.Parsers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
+using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
@@ -139,9 +138,15 @@ namespace Wgaffa.DMToolkit.Parser
             Parse.Chain(Addition.Or(Subtraction), Term, MakeBinary);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
-            from type in Token.EqualTo(DiceNotationToken.Identifier)
+            (from type in Token.EqualTo(DiceNotationToken.Identifier)
             from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
-            select (IExpression)new VariableDeclarationExpression(names, type.ToStringValue());
+            select (IExpression)new VariableDeclarationExpression(names, type.ToStringValue()))
+            .Then(expr =>
+                (from eq in Token.EqualTo(DiceNotationToken.Equal)
+                 from value in Expr
+                 let varDecl = (VariableDeclarationExpression)expr
+                 select (IExpression)new VariableDeclarationExpression(varDecl.Names, varDecl.Type, Maybe<IExpression>.Some(value)))
+                .OptionalOrDefault(expr));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
             from name in Variable
