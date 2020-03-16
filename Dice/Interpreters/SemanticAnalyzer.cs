@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
+using Wgaffa.DMToolkit.Interpreters.Errors;
 using Wgaffa.DMToolkit.Parser;
 using Wgaffa.Functional;
 
@@ -12,9 +13,18 @@ namespace Wgaffa.DMToolkit.Interpreters
 {
     public class SemanticAnalyzer
     {
-        public IExpression Analyze(DiceNotationContext context)
+        private List<SemanticError> _errors = new List<SemanticError>();
+
+        public Result<IExpression, IList<SemanticError>> Analyze(DiceNotationContext context)
         {
-            return Visit((dynamic)context.Expression, context);
+            _errors.Clear();
+
+            var result = Visit((dynamic)context.Expression, context);
+
+            if (_errors.Count > 0)
+                return _errors;
+            else
+                return result;
         }
 
         private IExpression Visit(IExpression expr, DiceNotationContext context)
@@ -62,6 +72,9 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(VariableExpression variable, DiceNotationContext context)
         {
+            var symbol = context.SymbolTable.Lookup(variable.Symbol)
+                .Nothing(() => _errors.Add(new SemanticError("VAR", 1, "undefined variable")));
+
             return variable;
         }
 
