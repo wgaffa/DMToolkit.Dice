@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 {
     public class SemanticAnalyzer
     {
-        private List<SemanticError> _errors = new List<SemanticError>();
+        private readonly List<SemanticError> _errors = new List<SemanticError>();
 
         public Result<IExpression, IList<SemanticError>> Analyze(DiceNotationContext context)
         {
@@ -27,7 +27,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 return result;
         }
 
-        private IExpression Visit(IExpression expr, DiceNotationContext context)
+        private IExpression Visit(IExpression expr, DiceNotationContext _)
             => expr;
 
         private IExpression Visit(BinaryExpression binary, DiceNotationContext context)
@@ -78,7 +78,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return variable;
         }
 
-        private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
+        private IExpression Visit(AssignmentExpression assignment, DiceNotationContext _)
         {
             return assignment;
         }
