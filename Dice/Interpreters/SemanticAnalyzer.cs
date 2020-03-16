@@ -67,6 +67,9 @@ namespace Wgaffa.DMToolkit.Interpreters
                         ifNone: () => context.SymbolTable.Add(v))
                     ));
 
+            varDecl.InitialValue
+                .Map(expr => Visit((dynamic)expr, context));
+
             return varDecl;
         }
 

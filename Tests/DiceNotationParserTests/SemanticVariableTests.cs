@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Superpower;
 using System.Collections;
 using System.Collections.Generic;
 using Wgaffa.DMToolkit.Expressions;
@@ -25,22 +26,22 @@ namespace DiceNotationParserTests
             }
         }
 
-        public static readonly List<IExpression> InvalidVariableTestCaseData = new List<IExpression>()
+        public static readonly List<string> InvalidVariableTestCaseData = new List<string>()
         {
-            new VariableExpression("foo"),
-            new VariableDeclarationExpression(new string[] { "foo" }, "fake"),
-            new VariableDeclarationExpression(new string[] { "bar", "bar" }, "int"),
-            new AssignmentExpression("foo", new NumberExpression(3)),
-            new CompoundExpression(new List<IExpression>()
-            {
-                new VariableDeclarationExpression(new string[] { "foo" }, "int"),
-                new AssignmentExpression("foo", new VariableExpression("bar")),
-            }),
+            "foo",
+            "fake foo;",
+            "int bar, bar;",
+            "foo = 3",
+            "int foo; foo = bar;",
+            "int foo, bar = zar"
         };
 
         [TestCaseSource(nameof(InvalidVariableTestCaseData))]
-        public void Analyze_ShouldReturnError_GivenNoDefinedVariable(IExpression expression)
+        public void Analyze_ShouldReturnError_GivenNoDefinedVariable(string input)
         {
+            var tokens = new DiceNotationTokenizer().Tokenize(input);
+            var expression = DiceNotationParser.Notation.Parse(tokens);
+
             var symbolTable = new SymbolTable(new SetupBuiltinSymbols());
             var semantic = new SemanticAnalyzer();
             var context = new DiceNotationContext(expression)
