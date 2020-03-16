@@ -11,6 +11,7 @@ using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Interpreters;
+using Wgaffa.DMToolkit.Interpreters.Errors;
 using Wgaffa.DMToolkit.Parser;
 using Wgaffa.Functional;
 
@@ -140,7 +141,7 @@ namespace DiceNotationParserTests
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                throw new NotImplementedException();
+                return (IEnumerator)GetEnumerator();
             }
         }
 
@@ -160,12 +161,15 @@ namespace DiceNotationParserTests
             };
 
             var semantic = new SemanticAnalyzer();
+            double result = 0;
             var ast = semantic.Analyze(context);
-            return _interpreter.Interpret(new DiceNotationContext(ast)
-            {
-                SymbolTable = _symbolTable,
-                DiceRoller = _mockRoller.Object
-            }, new VariableSetup());
+            ast.Map(expr =>
+                _interpreter.Interpret(new DiceNotationContext(expr)
+                    { SymbolTable = _symbolTable, DiceRoller = _mockRoller.Object },
+                    new VariableSetup()))
+                .OnSuccess(r => result = r);
+
+            return result;
         }
     }
 }

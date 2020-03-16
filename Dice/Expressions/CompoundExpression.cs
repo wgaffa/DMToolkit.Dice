@@ -19,5 +19,10 @@ namespace Wgaffa.DMToolkit.Expressions
 
             _expressions = expressions.ToList();
         }
+
+        public override string ToString()
+        {
+            return $"{string.Join(';', _expressions)}";
+        }
     }
 }
