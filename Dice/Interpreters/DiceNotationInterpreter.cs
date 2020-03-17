@@ -204,6 +204,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
         {
+            var value = varDecl.InitialValue
+                .Map(expr => (double)Visit((dynamic)expr, context))
+                .Map(v => varDecl.Names.Each(name => _globalMemory[name] = v));
+
             return 0;
         }
 
