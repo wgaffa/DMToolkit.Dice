@@ -26,7 +26,10 @@ namespace Wgaffa.DMToolkit.Parser
             ['='] = DiceNotationToken.Equal,
         };
 
-        private readonly static List<string> _keywords = new List<string>();
+        private readonly static List<string> _keywords = new List<string>()
+        {
+            "def"
+        };
 
         protected override IEnumerable<Result<DiceNotationToken>> Tokenize(TextSpan span)
         {
