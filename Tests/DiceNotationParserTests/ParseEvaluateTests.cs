@@ -120,6 +120,8 @@ namespace DiceNotationParserTests
                     .Returns(17);
                 yield return new TestCaseData("int foo, bar = 5; foo+bar;")
                     .Returns(10);
+                yield return new TestCaseData("def Attack = (d20 + 5) * 1.5; Attack + 5;")
+                    .Returns(17);
             }
         }
 

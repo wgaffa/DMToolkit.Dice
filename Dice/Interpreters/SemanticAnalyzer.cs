@@ -93,7 +93,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             context.SymbolTable.Lookup(definition.Name)
                 .Match(
                     ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
-                    ifNone: () => { });
+                    ifNone: () => context.SymbolTable.Add(new DefinitionSymbol(definition.Name, definition.Expression)));
 
             return definition;
         }
