@@ -1,21 +1,25 @@
 ﻿using Ardalis.GuardClauses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Wgaffa.DMToolkit.Interpreters.Errors
 {
-    public class SemanticError
+    public sealed class SemanticError
     {
-        public string Category { get; }
+        public delegate SemanticError CreateError(string additional);
+
+        public static readonly CreateError VariableUndefined = x =>
+            new SemanticError(ErrorCategory.Variable, 1, $"undefined variable {x}");
+        public static readonly CreateError VariableUnknownType = x =>
+            new SemanticError(ErrorCategory.Variable, 2, $"unrecognized type {x}");
+        public static readonly CreateError VariableAlreadyDeclared = x =>
+            new SemanticError(ErrorCategory.Variable, 3, $"{x} already declared");
+
+        public ErrorCategory Category { get; }
         public int Code { get; }
         public string Message { get; }
 
-        public SemanticError(string category, int code, string message)
+        private SemanticError(ErrorCategory category, int code, string message)
         {
-            Guard.Against.NullOrWhiteSpace(category, nameof(category));
+            Guard.Against.Null(category, nameof(category));
             Guard.Against.NegativeOrZero(code, nameof(code));
             Guard.Against.NullOrWhiteSpace(message, nameof(message));
 
@@ -26,7 +30,7 @@ namespace Wgaffa.DMToolkit.Interpreters.Errors
 
         public override string ToString()
         {
-            return $"{Category}{Code}: {Message}";
+            return $"{Category}{Code:000}: {Message}";
         }
     }
 }

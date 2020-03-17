@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Interpreters.Errors;
@@ -57,13 +54,13 @@ namespace Wgaffa.DMToolkit.Interpreters
             var typeSymbol = context.SymbolTable.Lookup(varDecl.Type);
 
             var symbols = typeSymbol
-                .Nothing(() => _errors.Add(new SemanticError("VAR", 2, $"unrecognized type {varDecl.Type}")))
+                .Nothing(() => _errors.Add(SemanticError.VariableUnknownType(varDecl.Type)))
                 .Map(type =>
                     varDecl.Names.Select(name => new VariableSymbol(name, Maybe<ISymbol>.Some(type))))
                 .Map(vars => vars.Each(v =>
                     context.SymbolTable.Lookup(v.Name)
                     .Match(
-                        ifSome: s => _errors.Add(new SemanticError("VAR", 3, $"{s.Name} already declared")),
+                        ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                         ifNone: () => context.SymbolTable.Add(v))
                     ));
 
@@ -76,7 +73,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private IExpression Visit(VariableExpression variable, DiceNotationContext context)
         {
             var symbol = context.SymbolTable.Lookup(variable.Symbol)
-                .Nothing(() => _errors.Add(new SemanticError("VAR", 1, "undefined variable")));
+                .Nothing(() => _errors.Add(SemanticError.VariableUndefined(variable.Symbol)));
 
             return variable;
         }
@@ -84,7 +81,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
         {
             var identifier = context.SymbolTable.Lookup(assignment.Identifier)
-                .Nothing(() => _errors.Add(new SemanticError("VAR", 1, "undefined variable")));
+                .Nothing(() => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
 
             Visit((dynamic)assignment.Expression, context);
 
