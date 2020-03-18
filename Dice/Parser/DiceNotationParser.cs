@@ -196,7 +196,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Block =
             from stmts in StatementList.Many()
-            select (IExpression)new CompoundExpression(stmts);
+            select stmts.Length == 1 ? stmts[0] : new CompoundExpression(stmts);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> OnelineStatement =
             (from stmt in Stmt
