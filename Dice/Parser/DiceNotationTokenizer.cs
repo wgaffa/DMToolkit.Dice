@@ -28,7 +28,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         private readonly static List<string> _keywords = new List<string>()
         {
-            "def"
+            "def", "end"
         };
 
         protected override IEnumerable<Result<DiceNotationToken>> Tokenize(TextSpan span)
