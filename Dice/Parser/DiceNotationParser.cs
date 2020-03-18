@@ -1,6 +1,7 @@
 ﻿using Superpower;
 using Superpower.Parsers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.Functional;
@@ -144,10 +145,26 @@ namespace Wgaffa.DMToolkit.Parser
             from expr in Expr
             select (IExpression)new DefinitionExpression(name.ToStringValue(), expr);
 
+        private static readonly TokenListParser<DiceNotationToken, KeyValuePair<string, string>[]> Params =
+            (from type in Token.EqualTo(DiceNotationToken.Identifier)
+             from name in Token.EqualTo(DiceNotationToken.Identifier)
+             select new KeyValuePair<string, string>(type.ToStringValue(), name.ToStringValue()))
+            .ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma));
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> FuncDecl =
+            from type in Token.EqualTo(DiceNotationToken.Identifier)
+            from name in Token.EqualTo(DiceNotationToken.Identifier)
+            from lparen in Token.EqualTo(DiceNotationToken.LParen)
+            from par in Params
+            from rparen in Token.EqualTo(DiceNotationToken.RParen)
+            from body in Parse.Ref(() => Block)
+            from end in Token.EqualToValue(DiceNotationToken.Keyword, "end")
+            select (IExpression)new FunctionExpression(name.ToStringValue(), body, type.ToStringValue());
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
             (from type in Token.EqualTo(DiceNotationToken.Identifier)
-            from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
-            select (IExpression)new VariableDeclarationExpression(names, type.ToStringValue()))
+             from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+             select (IExpression)new VariableDeclarationExpression(names, type.ToStringValue()))
             .Then(expr =>
                 (from eq in Token.EqualTo(DiceNotationToken.Equal)
                  from value in Expr
@@ -168,16 +185,22 @@ namespace Wgaffa.DMToolkit.Parser
             .Or(Expr);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Statement =
-            from stmt in Stmt
-            from terminate in Token.EqualTo(DiceNotationToken.SemiColon)
-            select stmt;
+            FuncDecl.Try()
+            .Or(
+                from stmt in Stmt
+                from terminate in Token.EqualTo(DiceNotationToken.SemiColon)
+                select stmt
+                );
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Block =
+        private static readonly TokenListParser<DiceNotationToken, IExpression> StatementList =
             from stmt in Statement.Many()
             select (IExpression)new CompoundExpression(stmt);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Block =
+            StatementList;
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> OnelineStatement =
-            (from stmt in Stmt
+            (from stmt in Statement
              from terminal in Token.EqualTo(DiceNotationToken.SemiColon).Optional()
              select stmt)
             .AtEnd();

@@ -78,6 +78,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(VariableDeclarationExpression));
                 yield return new TestCaseData("def StandardRoll = 10 + d6;")
                     .Returns(typeof(DefinitionExpression));
+                yield return new TestCaseData("int Test(int a, real b) a + b; end")
+                    .Returns(typeof(FunctionExpression));
             }
         }
 
