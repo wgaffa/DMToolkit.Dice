@@ -243,5 +243,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return lastResult;
         }
+
+        private double Visit(FunctionExpression _, DiceNotationContext _1)
+        {
+            return 0;
+        }
     }
 }

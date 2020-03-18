@@ -159,7 +159,7 @@ namespace Wgaffa.DMToolkit.Parser
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
             from body in Parse.Ref(() => Block)
             from end in Token.EqualToValue(DiceNotationToken.Keyword, "end")
-            select (IExpression)new FunctionExpression(name.ToStringValue(), body, type.ToStringValue());
+            select (IExpression)new FunctionExpression(name.ToStringValue(), body, type.ToStringValue(), par);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
             (from type in Token.EqualTo(DiceNotationToken.Identifier)

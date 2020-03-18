@@ -97,5 +97,22 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return definition;
         }
+
+        private IExpression Visit(FunctionExpression function, DiceNotationContext context)
+        {
+            var userFunction = new UserFunctionSymbol(
+                function.Identifier,
+                context.SymbolTable.Lookup(function.ReturnType),
+                function.Body);
+
+            context.SymbolTable.Lookup(function.Identifier)
+                .Match(
+                ifSome: s => SemanticError.VariableAlreadyDeclared(s.Name),
+                ifNone: () => context.SymbolTable.Add(userFunction));
+
+            Visit((dynamic)function.Body, context);
+
+            return function;
+        }
     }
 }
