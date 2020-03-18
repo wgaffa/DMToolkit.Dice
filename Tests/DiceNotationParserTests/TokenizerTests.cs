@@ -33,6 +33,7 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData(";").Returns(1);
                 yield return new TestCaseData(":").Returns(1);
                 yield return new TestCaseData("=").Returns(1);
+                yield return new TestCaseData("3.2452").Returns(1);
             }
         }
 
