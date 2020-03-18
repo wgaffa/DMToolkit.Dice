@@ -137,6 +137,13 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
             Parse.Chain(Addition.Or(Subtraction), Term, MakeBinary);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Definition =
+            from def in Token.EqualToValue(DiceNotationToken.Keyword, "def")
+            from name in Token.EqualTo(DiceNotationToken.Identifier)
+            from eq in Token.EqualTo(DiceNotationToken.Equal)
+            from expr in Expr
+            select (IExpression)new DefinitionExpression(name.ToStringValue(), expr);
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
             (from type in Token.EqualTo(DiceNotationToken.Identifier)
             from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
@@ -157,6 +164,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Stmt =
             VarDecl.Try()
             .Or(Assign.Try())
+            .Or(Definition.Try())
             .Or(Expr);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Statement =

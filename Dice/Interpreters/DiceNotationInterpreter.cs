@@ -74,7 +74,15 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             var symbolValue = context.SymbolTable.Lookup(variable.Symbol)
                 .Nothing(() => throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined"))
-                .Map(v => _globalMemory[v.Name])
+                .Map(s =>
+                {
+                    return s switch
+                    {
+                        VariableSymbol var => _globalMemory[var.Name],
+                        DefinitionSymbol def => Visit((dynamic)def.Expression, context),
+                        _ => throw new InvalidOperationException(),
+                    };
+                })
                 .Reduce(default(double));
 
             return symbolValue;
@@ -204,6 +212,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
         {
+            var value = varDecl.InitialValue
+                .Map(expr => (double)Visit((dynamic)expr, context))
+                .Map(v => varDecl.Names.Each(name => _globalMemory[name] = v));
+
             return 0;
         }
 
@@ -214,6 +226,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             _globalMemory[assignment.Identifier] = result;
 
             return result;
+        }
+
+        private double Visit(DefinitionExpression _, DiceNotationContext _1)
+        {
+            return 0;
         }
 
         private double Visit(CompoundExpression compound, DiceNotationContext context)

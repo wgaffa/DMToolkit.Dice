@@ -87,5 +87,15 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return assignment;
         }
+
+        private IExpression Visit(DefinitionExpression definition, DiceNotationContext context)
+        {
+            context.SymbolTable.Lookup(definition.Name)
+                .Match(
+                    ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
+                    ifNone: () => context.SymbolTable.Add(new DefinitionSymbol(definition.Name, definition.Expression)));
+
+            return definition;
+        }
     }
 }

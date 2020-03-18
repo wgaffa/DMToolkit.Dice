@@ -11,14 +11,6 @@ namespace DiceNotationParserTests
 {
     public class SymbolTableTests
     {
-        private SymbolTable _symbolTable;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _symbolTable = new SymbolTable();
-        }
-
         [Test]
         public void Add_ShouldAddItem_WhenNoDuplicateExist()
         {

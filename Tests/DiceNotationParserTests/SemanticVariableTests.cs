@@ -33,7 +33,8 @@ namespace DiceNotationParserTests
             "int bar, bar;",
             "foo = 3",
             "int foo; foo = bar;",
-            "int foo, bar = zar"
+            "int foo, bar = zar",
+            "int foo; def foo = 10;",
         };
 
         [TestCaseSource(nameof(InvalidVariableTestCaseData))]
