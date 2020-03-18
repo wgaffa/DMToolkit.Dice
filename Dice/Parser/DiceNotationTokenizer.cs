@@ -28,7 +28,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         private readonly static List<string> _keywords = new List<string>()
         {
-            "def"
+            "def", "end"
         };
 
         protected override IEnumerable<Result<DiceNotationToken>> Tokenize(TextSpan span)
@@ -66,12 +66,10 @@ namespace Wgaffa.DMToolkit.Parser
                     if (next.HasValue && next.Value == '.')
                     {
                         next = next.Remainder.ConsumeChar();
-                        do
+                        while (next.HasValue && next.Value >= '0' && next.Value <= '9')
                             next = next.Remainder.ConsumeChar();
-                        while (next.HasValue && next.Value >= '0' && next.Value <= '9');
 
-                        yield return Result.Value(DiceNotationToken.Number, beginNumber, next.Remainder);
-                        next = next.Remainder.ConsumeChar();
+                        yield return Result.Value(DiceNotationToken.Number, beginNumber, next.Location);
                     }
                     else
                     {

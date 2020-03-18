@@ -88,6 +88,8 @@ namespace DiceNotationParserTests
                     .Returns(DiceNotationToken.Repeat);
                 yield return new TestCaseData("def")
                     .Returns(DiceNotationToken.Keyword);
+                yield return new TestCaseData("end")
+                    .Returns(DiceNotationToken.Keyword);
             }
         }
 
