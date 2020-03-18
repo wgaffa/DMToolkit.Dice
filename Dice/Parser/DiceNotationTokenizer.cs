@@ -66,9 +66,11 @@ namespace Wgaffa.DMToolkit.Parser
                     if (next.HasValue && next.Value == '.')
                     {
                         next = next.Remainder.ConsumeChar();
-                        var decimals = Numerics.Natural(next.Location);
+                        do
+                            next = next.Remainder.ConsumeChar();
+                        while (next.HasValue && next.Value >= '0' && next.Value <= '9');
 
-                        yield return Result.Value(DiceNotationToken.Number, beginNumber, decimals.Remainder);
+                        yield return Result.Value(DiceNotationToken.Number, beginNumber, next.Remainder);
                         next = next.Remainder.ConsumeChar();
                     }
                     else
