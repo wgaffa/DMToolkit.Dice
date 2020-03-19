@@ -9,17 +9,17 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
-    public class SymbolTable : ISymbolTable
+    public class ScopedSymbolTable : ISymbolTable
     {
         private readonly Dictionary<string, ISymbol> _symbols = new Dictionary<string, ISymbol>();
 
         public int Depth => _symbols.Count;
 
-        public SymbolTable()
+        public ScopedSymbolTable()
         {
         }
 
-        public SymbolTable(IEnumerable<ISymbol> builtInSymbols)
+        public ScopedSymbolTable(IEnumerable<ISymbol> builtInSymbols)
             => builtInSymbols.Each(s => Add(s));
 
         public void Add(ISymbol symbol) => _symbols.Add(symbol.Name, symbol);

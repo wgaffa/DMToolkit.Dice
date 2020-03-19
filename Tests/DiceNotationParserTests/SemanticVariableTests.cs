@@ -43,7 +43,7 @@ namespace DiceNotationParserTests
             var tokens = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokens);
 
-            var symbolTable = new SymbolTable(new SetupBuiltinSymbols());
+            var symbolTable = new ScopedSymbolTable(new SetupBuiltinSymbols());
             var semantic = new SemanticAnalyzer();
             var context = new DiceNotationContext(expression)
             {
