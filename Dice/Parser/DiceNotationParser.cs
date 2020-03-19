@@ -65,25 +65,19 @@ namespace Wgaffa.DMToolkit.Parser
             Token.EqualTo(DiceNotationToken.Dice)
             .Apply(DiceParser);
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Keep =
-            Token.EqualTo(DiceNotationToken.Dice)
-            .Apply(DiceParser)
-            .Then(expr => (from lparen in Token.EqualTo(DiceNotationToken.LParen)
-                           from count in Token.EqualTo(DiceNotationToken.Identifier).Apply(KeepCount)
-                           from rparen in Token.EqualTo(DiceNotationToken.RParen)
-                           select (IExpression)new KeepExpression(expr, count)));
+        private static TokenListParser<DiceNotationToken, IExpression> Keep(IExpression expr) =>
+            from lparen in Token.EqualTo(DiceNotationToken.LParen)
+            from count in Token.EqualTo(DiceNotationToken.Identifier).Apply(KeepCount)
+            from rparen in Token.EqualTo(DiceNotationToken.RParen)
+            select (IExpression)new KeepExpression(expr, count);
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Drop =
-            Token.EqualTo(DiceNotationToken.Dice)
-            .Apply(DiceParser)
-            .Then(expr => (from minus in Token.EqualTo(DiceNotationToken.Minus)
-                           from strategy in DropHighest.Or(DropLowest)
-                           select (IExpression)new DropExpression(expr, strategy)));
+        private static TokenListParser<DiceNotationToken, IExpression> Drop(IExpression expr) =>
+            from minus in Token.EqualTo(DiceNotationToken.Minus)
+            from drop in DropHighest.Or(DropLowest)
+            select (IExpression)new DropExpression(expr, drop);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> DiceNotation =
-            Drop.Try()
-            .Or(Keep.Try())
-            .Or(Dice);
+            Dice.Then(d => Keep(d).Or(Drop(d).Try()).OptionalOrDefault(d));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
             Token.EqualTo(DiceNotationToken.Number)
