@@ -112,23 +112,24 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(DefinitionExpression definition, DiceNotationContext context)
         {
-            var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
             var symbol = _currentScope.Bind(s => s.Lookup(definition.Name));
 
-            return symbol switch
+            switch (symbol)
             {
-                Some<ISymbol> _ => definition,
-                None<ISymbol> none => CreateDefinition(definitionSymbol),
-                _ => throw new InvalidOperationException(),
-            };
+                case Some<ISymbol> some:
+                    _errors.Add(SemanticError.VariableAlreadyDeclared(some.Reduce(default(ISymbol)).Name));
+                    return definition;
 
-            DefinitionExpression CreateDefinition(ISymbol symbol)
-            {
-                _currentScope.Match(s => s.Add(symbol), () => { });
-                return new DefinitionExpression(
-                    symbol.Name,
-                    definition.Expression,
-                    Maybe<ISymbol>.Some(symbol));
+                case None<ISymbol> none:
+                    var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
+                    _currentScope.Match(s => s.Add(definitionSymbol), () => { });
+                    return new DefinitionExpression(
+                        definition.Name,
+                        definition.Expression,
+                        Maybe<ISymbol>.Some(definitionSymbol));
+
+                default:
+                    throw new InvalidOperationException();
             }
         }
 
@@ -153,5 +154,11 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return new FunctionExpression(function.Identifier, body, function.ReturnType);
         }
+
+        private IExpression Visit(FunctionCallExpression functionCall, DiceNotationContext context) =>
+            new FunctionCallExpression(
+                functionCall.Name,
+                functionCall.Arguments
+                    .Select(arg => (IExpression)Visit((dynamic)arg, context)));
     }
 }
