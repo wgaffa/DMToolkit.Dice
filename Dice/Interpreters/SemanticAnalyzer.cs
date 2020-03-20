@@ -11,10 +11,15 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class SemanticAnalyzer
     {
         private readonly List<SemanticError> _errors = new List<SemanticError>();
+        private ScopedSymbolTable _globalScope;
+        private Maybe<ISymbolTable> _currentScope = None.Value;
 
         public Result<IExpression, IList<SemanticError>> Analyze(DiceNotationContext context)
         {
             _errors.Clear();
+
+            _globalScope = new ScopedSymbolTable(context.SymbolTable, None.Value, 1);
+            _currentScope = _globalScope;
 
             var result = Visit((dynamic)context.Expression, context);
 
@@ -61,7 +66,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                     context.SymbolTable.Lookup(v.Name)
                     .Match(
                         ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
-                        ifNone: () => context.SymbolTable.Add(v))
+                        ifNone: () => _currentScope.Match(s => s.Add(v), () => { }))
                     ));
 
             varDecl.InitialValue
@@ -93,7 +98,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             context.SymbolTable.Lookup(definition.Name)
                 .Match(
                     ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
-                    ifNone: () => context.SymbolTable.Add(new DefinitionSymbol(definition.Name, definition.Expression)));
+                    ifNone: () => _currentScope.Match(
+                        s => s.Add(new DefinitionSymbol(definition.Name, definition.Expression)),
+                        () => { }));
 
             return definition;
         }
@@ -110,7 +117,12 @@ namespace Wgaffa.DMToolkit.Interpreters
                 ifSome: s => SemanticError.VariableAlreadyDeclared(s.Name),
                 ifNone: () => context.SymbolTable.Add(userFunction));
 
+            int scopeLevel = _currentScope.Map(s => ((ScopedSymbolTable)s).Level + 1).Reduce(1);
+            _currentScope = new ScopedSymbolTable(_currentScope, scopeLevel);
+
             Visit((dynamic)function.Body, context);
+
+            _currentScope = _currentScope.Bind(s => ((ScopedSymbolTable)s).EnclosingScope);
 
             return function;
         }

@@ -59,5 +59,21 @@ namespace DiceNotationParserTests
 
             Assert.That(value, Is.TypeOf<None<ISymbol>>());
         }
+
+        [TestCase("foo")]
+        [TestCase("bar")]
+        public void Lookup_ShouldSucceed_GivenNestedScopes(string identifier)
+        {
+            var foo = new VariableSymbol("foo", new BuiltinTypeSymbol("int"));
+            var bar = new VariableSymbol("bar", new BuiltinTypeSymbol("real"));
+            var global = new ScopedSymbolTable(new ISymbol[] { foo });
+            var nested = new ScopedSymbolTable(new ISymbol[] { bar }, global, 2);
+
+            var result = nested.Lookup(identifier).Reduce(default(ISymbol));
+
+            var expected = identifier == "foo" ? foo : bar;
+
+            Assert.That(result, Is.EqualTo(expected));
+        }
     }
 }
