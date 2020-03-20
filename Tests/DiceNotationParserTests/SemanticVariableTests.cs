@@ -62,6 +62,7 @@ namespace DiceNotationParserTests
         {
             "int foo() real bar; end real bar;",
             "int bar; int foo() int bar; end",
+            "def Attack = 5; Attack;",
         };
 
         [TestCaseSource(nameof(ValidTestCaseData))]

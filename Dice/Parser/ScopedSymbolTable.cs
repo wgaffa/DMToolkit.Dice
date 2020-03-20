@@ -35,6 +35,11 @@ namespace Wgaffa.DMToolkit.Parser
                 ? Maybe<ISymbol>.Some(_symbols[name])
                 : EnclosingScope.Bind(s => s.Lookup(name));
 
+        public Maybe<ISymbol> LookupCurrent(string name)
+            => _symbols.ContainsKey(name)
+                ? Maybe<ISymbol>.Some(_symbols[name])
+                : (Maybe<ISymbol>)None.Value;
+
         public IEnumerator<ISymbol> GetEnumerator()
         {
             return _symbols.Values.GetEnumerator();

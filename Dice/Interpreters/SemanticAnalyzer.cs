@@ -56,14 +56,15 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
         {
-            var typeSymbol = context.SymbolTable.Lookup(varDecl.Type);
+            var typeSymbol = _currentScope.Bind(
+                s => s.Lookup(varDecl.Type));
 
             var symbols = typeSymbol
                 .Nothing(() => _errors.Add(SemanticError.VariableUnknownType(varDecl.Type)))
                 .Map(type =>
                     varDecl.Names.Select(name => new VariableSymbol(name, Maybe<ISymbol>.Some(type))))
                 .Map(vars => vars.Each(v =>
-                    context.SymbolTable.Lookup(v.Name)
+                    _currentScope.Bind(s => ((ScopedSymbolTable)s).LookupCurrent(v.Name))
                     .Match(
                         ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                         ifNone: () => _currentScope.Match(s => s.Add(v), () => { }))
@@ -77,16 +78,19 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(VariableExpression variable, DiceNotationContext context)
         {
-            var symbol = context.SymbolTable.Lookup(variable.Symbol)
-                .Nothing(() => _errors.Add(SemanticError.VariableUndefined(variable.Symbol)));
+            _currentScope.Bind(s => s.Lookup(variable.Symbol))
+                .Match(
+                ifSome: s => { },
+                ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Symbol)));
 
             return variable;
         }
 
         private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
         {
-            _currentScope.Match(
-                ifSome: s => s.Lookup(assignment.Identifier),
+            _currentScope.Bind(s => s.Lookup(assignment.Identifier))
+                .Match(
+                ifSome: _ => { },
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
 
             Visit((dynamic)assignment.Expression, context);
@@ -96,7 +100,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(DefinitionExpression definition, DiceNotationContext context)
         {
-            context.SymbolTable.Lookup(definition.Name)
+            _currentScope.Bind(s => s.Lookup(definition.Name))
                 .Match(
                     ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                     ifNone: () => _currentScope.Match(
@@ -110,13 +114,13 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var userFunction = new UserFunctionSymbol(
                 function.Identifier,
-                context.SymbolTable.Lookup(function.ReturnType),
+                _currentScope.Bind(s => s.Lookup(function.ReturnType)),
                 function.Body);
 
-            context.SymbolTable.Lookup(function.Identifier)
+            _currentScope.Bind(s => s.Lookup(function.Identifier))
                 .Match(
                 ifSome: s => SemanticError.VariableAlreadyDeclared(s.Name),
-                ifNone: () => context.SymbolTable.Add(userFunction));
+                ifNone: () => _currentScope.Match(s => s.Add(userFunction), () => { }));
 
             int scopeLevel = _currentScope.Map(s => ((ScopedSymbolTable)s).Level + 1).Reduce(1);
             _currentScope = new ScopedSymbolTable(_currentScope, scopeLevel);
