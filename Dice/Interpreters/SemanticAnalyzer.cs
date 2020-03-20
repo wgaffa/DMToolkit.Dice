@@ -85,8 +85,9 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
         {
-            var identifier = context.SymbolTable.Lookup(assignment.Identifier)
-                .Nothing(() => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
+            _currentScope.Match(
+                ifSome: s => s.Lookup(assignment.Identifier),
+                ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
 
             Visit((dynamic)assignment.Expression, context);
 
