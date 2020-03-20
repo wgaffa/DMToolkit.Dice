@@ -43,7 +43,7 @@ namespace DiceNotationParserTests
             var tokens = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokens);
 
-            var symbolTable = new SymbolTable(new SetupBuiltinSymbols());
+            var symbolTable = new ScopedSymbolTable(new SetupBuiltinSymbols());
             var semantic = new SemanticAnalyzer();
             var context = new DiceNotationContext(expression)
             {
@@ -56,6 +56,28 @@ namespace DiceNotationParserTests
             result.OnError(l => errors.AddRange(l));
 
             Assert.That(errors.Count, Is.EqualTo(1));
+        }
+
+        public static List<string> ValidTestCaseData = new List<string>()
+        {
+            "int foo() real bar; end real bar;",
+            "int bar; int foo() int bar; end",
+        };
+
+        [TestCaseSource(nameof(ValidTestCaseData))]
+        public void Analyze_ShouldSucceed(string input)
+        {
+            var tokens = new DiceNotationTokenizer().Tokenize(input);
+            var program = DiceNotationParser.Notation.Parse(tokens);
+
+            var global = new ScopedSymbolTable(new SetupBuiltinSymbols());
+            var semantic = new SemanticAnalyzer();
+            var context = new DiceNotationContext(program) { SymbolTable = global };
+
+            bool success = false;
+            var result = semantic.Analyze(context).OnSuccess(_ => success = true);
+
+            Assert.That(success, Is.True);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace DiceNotationParserTests
                 .Returns(1)
                 .Returns(20);
 
-            _symbolTable = new SymbolTable();
+            _symbolTable = new ScopedSymbolTable();
             var realSymbol = new BuiltinTypeSymbol("real");
             var intSymbol = new BuiltinTypeSymbol("int");
             var parameters = new ISymbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
