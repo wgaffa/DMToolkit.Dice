@@ -65,7 +65,12 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(VariableExpression variable, DiceNotationContext context)
         {
-            return _globalMemory[variable.Symbol];
+            return variable.Symbol.Reduce(default(ISymbol)) switch
+            {
+                VariableSymbol var => _globalMemory[var.Name],
+                DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),
+                _ => throw new InvalidOperationException()
+            };
         }
         #endregion
 

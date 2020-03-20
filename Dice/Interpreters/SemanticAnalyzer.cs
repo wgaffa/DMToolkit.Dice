@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
@@ -32,26 +33,35 @@ namespace Wgaffa.DMToolkit.Interpreters
         private IExpression Visit(IExpression expr, DiceNotationContext _)
             => expr;
 
-        private IExpression Visit(BinaryExpression binary, DiceNotationContext context)
-        {
-            Visit((dynamic)binary.Left, context);
-            Visit((dynamic)binary.Right, context);
+        private IExpression Visit(AdditionExpression addition, DiceNotationContext context)
+            => new AdditionExpression(
+                Visit((dynamic)addition.Left, context),
+                Visit((dynamic)addition.Right, context));
 
-            return binary;
-        }
+        private IExpression Visit(SubtractionExpression subtraction, DiceNotationContext context)
+            => new SubtractionExpression(
+                Visit((dynamic)subtraction.Left, context),
+                Visit((dynamic)subtraction.Right, context));
 
-        private IExpression Visit(UnaryExpression unary, DiceNotationContext context)
-        {
-            Visit((dynamic)unary.Right, context);
+        private IExpression Visit(MultiplicationExpression multiplication, DiceNotationContext context)
+                    => new MultiplicationExpression(
+                        Visit((dynamic)multiplication.Left, context),
+                        Visit((dynamic)multiplication.Right, context));
 
-            return unary;
-        }
+        private IExpression Visit(DivisionExpression division, DiceNotationContext context)
+                    => new DivisionExpression(
+                        Visit((dynamic)division.Left, context),
+                        Visit((dynamic)division.Right, context));
+
+        private IExpression Visit(NegateExpression negate, DiceNotationContext context) =>
+            new NegateExpression(Visit((dynamic)negate.Right, context));
 
         private IExpression Visit(CompoundExpression compound, DiceNotationContext context)
         {
-            compound.Expressions.Each(expr => Visit((dynamic)expr, context));
+            var list = compound.Expressions
+                .Select(expr => (IExpression)Visit((dynamic)expr, context));
 
-            return compound;
+            return new CompoundExpression(list);
         }
 
         private IExpression Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
@@ -78,12 +88,14 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(VariableExpression variable, DiceNotationContext context)
         {
-            _currentScope.Bind(s => s.Lookup(variable.Symbol))
-                .Match(
+            var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
+            symbol.Match(
                 ifSome: s => { },
-                ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Symbol)));
+                ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Identifier)));
 
-            return variable;
+            return symbol
+                .Map(s => new VariableExpression(s.Name, Maybe<ISymbol>.Some(s)))
+                .Reduce(variable);
         }
 
         private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
@@ -93,21 +105,31 @@ namespace Wgaffa.DMToolkit.Interpreters
                 ifSome: _ => { },
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
 
-            Visit((dynamic)assignment.Expression, context);
+            IExpression expr = Visit((dynamic)assignment.Expression, context);
 
-            return assignment;
+            return new AssignmentExpression(assignment.Identifier, expr);
         }
 
         private IExpression Visit(DefinitionExpression definition, DiceNotationContext context)
         {
-            _currentScope.Bind(s => s.Lookup(definition.Name))
-                .Match(
-                    ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
-                    ifNone: () => _currentScope.Match(
-                        s => s.Add(new DefinitionSymbol(definition.Name, definition.Expression)),
-                        () => { }));
+            var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
+            var symbol = _currentScope.Bind(s => s.Lookup(definition.Name));
 
-            return definition;
+            return symbol switch
+            {
+                Some<ISymbol> _ => definition,
+                None<ISymbol> none => CreateDefinition(definitionSymbol),
+                _ => throw new InvalidOperationException(),
+            };
+
+            DefinitionExpression CreateDefinition(ISymbol symbol)
+            {
+                _currentScope.Match(s => s.Add(symbol), () => { });
+                return new DefinitionExpression(
+                    symbol.Name,
+                    definition.Expression,
+                    Maybe<ISymbol>.Some(symbol));
+            }
         }
 
         private IExpression Visit(FunctionExpression function, DiceNotationContext context)
@@ -125,11 +147,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             int scopeLevel = _currentScope.Map(s => ((ScopedSymbolTable)s).Level + 1).Reduce(1);
             _currentScope = new ScopedSymbolTable(_currentScope, scopeLevel);
 
-            Visit((dynamic)function.Body, context);
+            IExpression body = Visit((dynamic)function.Body, context);
 
             _currentScope = _currentScope.Bind(s => ((ScopedSymbolTable)s).EnclosingScope);
 
-            return function;
+            return new FunctionExpression(function.Identifier, body, function.ReturnType);
         }
     }
 }

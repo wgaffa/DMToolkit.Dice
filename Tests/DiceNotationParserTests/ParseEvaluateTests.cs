@@ -169,7 +169,7 @@ namespace DiceNotationParserTests
             var ast = semantic.Analyze(context);
             ast.Map(expr =>
                 _interpreter.Interpret(new DiceNotationContext(expr)
-                { SymbolTable = _symbolTable, DiceRoller = _mockRoller.Object },
+                { SymbolTable = context.SymbolTable, DiceRoller = _mockRoller.Object },
                     new VariableSetup()))
                 .OnSuccess(r => result = r);
 
