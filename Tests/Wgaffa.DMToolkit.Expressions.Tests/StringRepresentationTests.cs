@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections;
+using System.Collections.Generic;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.Expressions;
 
@@ -71,6 +72,71 @@ namespace Wgaffa.DMTools.Tests
                             new NumberExpression(2))))
                     .Returns(
                     "<assign: var=foo value=<* <+ <num: 5.2> <num: 2.3>> <num: 2>>>");
+                yield return new TestCaseData(
+                    new DefinitionExpression(
+                        "foo",
+                        new AdditionExpression(
+                            new DiceExpression(Dice.d8, 2),
+                            new NumberExpression(3))))
+                    .Returns("<decl_def: var=foo value=<+ <dice: rolls=2, d8> <num: 3>>>");
+                yield return new TestCaseData(
+                    new DropExpression(
+                        new DiceExpression(Dice.d6, 4)))
+                    .Returns("<drop: lowest <dice: rolls=4, d6>>");
+                yield return new TestCaseData(
+                    new DropExpression(
+                        new DiceExpression(Dice.d6, 4), DropType.Highest))
+                    .Returns("<drop: highest <dice: rolls=4, d6>>");
+                yield return new TestCaseData(
+                    new KeepExpression(
+                        new DiceExpression(Dice.d10, 5), 3))
+                    .Returns("<keep: 3 <dice: rolls=5, d10>>");
+                yield return new TestCaseData(
+                    new CompoundExpression(
+                        new IExpression[]
+                        {
+                            new AdditionExpression(
+                                new NumberExpression(3),
+                                new NumberExpression(2)),
+                            new DiceExpression(Dice.d20),
+                            new AssignmentExpression("foo", new NumberExpression(5)),
+                        }))
+                    .Returns("<block: <+ <num: 3> <num: 2>> <dice: rolls=1, d20> <assign: var=foo value=<num: 5>>>");
+                yield return new TestCaseData(
+                    new RepeatExpression(
+                        new DiceExpression(Dice.d6, 2), 2))
+                    .Returns("<repeat: 2 <dice: rolls=2, d6>>");
+                yield return new TestCaseData(
+                    new FunctionExpression(
+                        "foo",
+                        new AdditionExpression(
+                            new NumberExpression(3),
+                            new NumberExpression(5)),
+                        "int"))
+                    .Returns("<func: var=foo return=int body=<+ <num: 3> <num: 5>>>");
+                yield return new TestCaseData(
+                    new FunctionExpression(
+                        "foo",
+                        new AdditionExpression(
+                            new NumberExpression(3),
+                            new NumberExpression(5)),
+                        "int",
+                        new KeyValuePair<string, string>[]
+                        {
+                            new KeyValuePair<string, string>("int", "a"),
+                            new KeyValuePair<string, string>("int", "b")
+                        }))
+                    .Returns("<func: var=foo return=int body=<+ <num: 3> <num: 5>> params=int:a int:b>");
+                yield return new TestCaseData(
+                    new FunctionCallExpression(
+                        "foo",
+                        new IExpression[]
+                        {
+                            new SubtractionExpression(
+                                new NumberExpression(5),
+                                new NumberExpression(2))
+                        }))
+                    .Returns("<call: foo args=<- <num: 5> <num: 2>>>");
             }
         }
 

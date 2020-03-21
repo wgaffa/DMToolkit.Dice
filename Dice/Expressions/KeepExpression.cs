@@ -16,7 +16,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"Keep {Right}";
+            return $"<keep: {Count} {Right}>";
         }
     }
 }

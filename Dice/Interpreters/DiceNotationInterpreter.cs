@@ -86,7 +86,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             if (context.RollResults.Last() is RollResult roll)
             {
-                var dropList = drop.Strategy(roll.Keep);
+                var dropList = drop.Type.Strategy(roll.Keep);
                 var keepList = roll.Keep.Without(dropList);
                 RollResult newRoll = new RollResult(
                     keepList,

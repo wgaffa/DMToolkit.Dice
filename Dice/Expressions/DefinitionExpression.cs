@@ -25,5 +25,10 @@ namespace Wgaffa.DMToolkit.Expressions
             Expression = expression;
             Symbol = symbol;
         }
+
+        public override string ToString()
+        {
+            return $"<decl_def: var={Name} value={Expression}>";
+        }
     }
 }

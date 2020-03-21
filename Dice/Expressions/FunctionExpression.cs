@@ -31,5 +31,12 @@ namespace Wgaffa.DMToolkit.Expressions
             Body = body;
             ReturnType = returnType;
         }
+
+        public override string ToString()
+        {
+            var parameters = _parameters.Select(kv => $"{kv.Key}:{kv.Value}").ToList();
+            var paramString = parameters.Count == 0 ? string.Empty : $" params={string.Join(' ', parameters)}";
+            return $"<func: var={Identifier} return={ReturnType} body={Body}{paramString}>";
+        }
     }
 }

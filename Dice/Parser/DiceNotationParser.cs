@@ -47,11 +47,11 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Division =
             Token.EqualTo(DiceNotationToken.Divide).Value(OperatorType.Division);
 
-        private static readonly TokenListParser<DiceNotationToken, DropExpression.StrategyFunc> DropLowest =
-            Token.EqualToValue(DiceNotationToken.Identifier, "L").Value((DropExpression.StrategyFunc)(x => new int[] { x.Min() }));
+        private static readonly TokenListParser<DiceNotationToken, DropType> DropLowest =
+            Token.EqualToValue(DiceNotationToken.Identifier, "L").Value(DropType.Lowest);
 
-        private static readonly TokenListParser<DiceNotationToken, DropExpression.StrategyFunc> DropHighest =
-            Token.EqualToValue(DiceNotationToken.Identifier, "H").Value((DropExpression.StrategyFunc)(x => new int[] { x.Max() }));
+        private static readonly TokenListParser<DiceNotationToken, DropType> DropHighest =
+            Token.EqualToValue(DiceNotationToken.Identifier, "H").Value(DropType.Highest);
 
         private static readonly TokenListParser<DiceNotationToken, string> Variable =
             from identifier in Token.EqualTo(DiceNotationToken.Identifier)
