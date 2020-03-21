@@ -11,18 +11,10 @@ namespace DiceNotationParserTests
 {
     public class SymbolTableTests
     {
-        private SymbolTable _symbolTable;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _symbolTable = new SymbolTable();
-        }
-
         [Test]
         public void Add_ShouldAddItem_WhenNoDuplicateExist()
         {
-            var table = new SymbolTable();
+            var table = new ScopedSymbolTable();
             table.Add(new BuiltinTypeSymbol("int"));
 
             Assert.That(table.Depth, Is.EqualTo(1));
@@ -31,7 +23,7 @@ namespace DiceNotationParserTests
         [Test]
         public void Add_ShouldThrow_GivenDuplicateKeys()
         {
-            var table = new SymbolTable();
+            var table = new ScopedSymbolTable();
             table.Add(new BuiltinTypeSymbol("int"));
 
             Assert.That(() => table.Add(new BuiltinTypeSymbol("int")), Throws.TypeOf<ArgumentException>());
@@ -51,7 +43,7 @@ namespace DiceNotationParserTests
         [Test]
         public void Lookup_ShouldReturnSome_GivenGivenExistingName()
         {
-            var table = new SymbolTable(SetupFooBar());
+            var table = new ScopedSymbolTable(SetupFooBar());
             var value = table.Lookup("foo").Reduce(default(ISymbol));
 
             var expected = new VariableSymbol("foo", new BuiltinTypeSymbol("int"));
@@ -62,10 +54,26 @@ namespace DiceNotationParserTests
         [Test]
         public void Lookup_ShouldReturnNone_GivenNoneExistingName()
         {
-            var table = new SymbolTable(SetupFooBar());
+            var table = new ScopedSymbolTable(SetupFooBar());
             var value = table.Lookup("fizz");
 
             Assert.That(value, Is.TypeOf<None<ISymbol>>());
+        }
+
+        [TestCase("foo")]
+        [TestCase("bar")]
+        public void Lookup_ShouldSucceed_GivenNestedScopes(string identifier)
+        {
+            var foo = new VariableSymbol("foo", new BuiltinTypeSymbol("int"));
+            var bar = new VariableSymbol("bar", new BuiltinTypeSymbol("real"));
+            var global = new ScopedSymbolTable(new ISymbol[] { foo });
+            var nested = new ScopedSymbolTable(new ISymbol[] { bar }, global, 2);
+
+            var result = nested.Lookup(identifier).Reduce(default(ISymbol));
+
+            var expected = identifier == "foo" ? foo : bar;
+
+            Assert.That(result, Is.EqualTo(expected));
         }
     }
 }

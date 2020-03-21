@@ -14,29 +14,27 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreter
     {
         private readonly Dictionary<string, double> _globalMemory = new Dictionary<string, double>();
+        private ISymbolTable _currentScope;
 
         #region Public API
-        public double Interpret(DiceNotationContext context, Maybe<IEnumerable<KeyValuePair<string, double>>> initialValues = null)
+        public double Interpret(DiceNotationContext context, IEnumerable<KeyValuePair<string, double>> initialValues = null)
         {
             Guard.Against.Null(context, nameof(context));
-            initialValues
-                .NoneIfNull()
-                .Match(
-                    ifSome: x => x.Each(kv => _globalMemory[kv.Key] = kv.Value),
-                    ifNone: () => { });
+            Guard.Against.Null(context.SymbolTable, nameof(context.SymbolTable));
 
-            double total = Visit((dynamic)context.Expression, context);
+            if (!(initialValues is null))
+                initialValues.Each(kv => _globalMemory[kv.Key] = kv.Value);
 
-            return total;
+            _currentScope = context.SymbolTable;
+
+            return (double)Visit((dynamic)context.Expression, context);
         }
 
         public double Interpret(IExpression expression)
         {
             Guard.Against.Null(expression, nameof(expression));
 
-            double total = Visit((dynamic)expression, new DiceNotationContext(expression));
-
-            return total;
+            return (double)Visit((dynamic)expression, new DiceNotationContext(expression));
         }
         #endregion
 
@@ -48,9 +46,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(ListExpression list, DiceNotationContext context)
         {
-            double sumOfList = list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr, context));
-
-            return sumOfList;
+            return list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr, context));
         }
 
         private double Visit(DiceExpression dice, DiceNotationContext context)
@@ -69,24 +65,19 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(VariableExpression variable, DiceNotationContext context)
         {
-            if (context.SymbolTable is null)
-                throw new SymbolTableUndefinedException("No symbol table is set");
-
-            var symbolValue = context.SymbolTable.Lookup(variable.Symbol)
-                .Nothing(() => throw new VariableUndefinedException(variable.Symbol, $"{variable.Symbol} is undefined"))
-                .Map(v => _globalMemory[v.Name])
-                .Reduce(default(double));
-
-            return symbolValue;
+            return variable.Symbol.Reduce(default(ISymbol)) switch
+            {
+                VariableSymbol var => _globalMemory[var.Name],
+                DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),
+                _ => throw new InvalidOperationException()
+            };
         }
         #endregion
 
         #region Unary Expressions
         private double Visit(NegateExpression negate, DiceNotationContext context)
         {
-            double result = -Visit((dynamic)negate.Right, context);
-
-            return result;
+            return (double)-Visit((dynamic)negate.Right, context);
         }
 
         private double Visit(DropExpression drop, DiceNotationContext context)
@@ -140,52 +131,42 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(RepeatExpression repeat, DiceNotationContext context)
         {
-            double result = Enumerable
+            return (double)Enumerable
                 .Range(0, repeat.RepeatTimes)
                 .Aggregate(.0, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
-
-            return result;
         }
         #endregion
 
         #region Binary Expressions
         private double Visit(AdditionExpression addition, DiceNotationContext context)
         {
-            double result = Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context);
-
-            return result;
+            return (double)(Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context));
         }
 
         private double Visit(SubtractionExpression subtraction, DiceNotationContext context)
         {
-            double result = Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context);
-
-            return result;
+            return (double)(Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context));
         }
 
         private double Visit(MultiplicationExpression multiplication, DiceNotationContext context)
         {
-            double result = Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context);
-
-            return result;
+            return (double)(Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context));
         }
 
         private double Visit(DivisionExpression divition, DiceNotationContext context)
         {
-            double result = Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context);
-
-            return result;
+            return (double)(Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context));
         }
         #endregion
 
         public double Visit(FunctionCallExpression function, DiceNotationContext context)
         {
-            var functionSymbol = context.SymbolTable
+            var functionSymbol = _currentScope
                 .Lookup(function.Name)
                 .Bind(sym =>
-                sym is FunctionSymbol fsym
-                ? Maybe<FunctionSymbol>.Some(fsym)
-                : (Maybe<FunctionSymbol>)None.Value);
+                    sym is FunctionSymbol fsym
+                        ? Maybe<FunctionSymbol>.Some(fsym)
+                        : (Maybe<FunctionSymbol>)None.Value);
 
             var arguments = functionSymbol
                 .Map(funcSym => funcSym.Parameters)
@@ -204,6 +185,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
         {
+            var value = varDecl.InitialValue
+                .Map(expr => (double)Visit((dynamic)expr, context))
+                .Map(v => varDecl.Names.Each(name => _globalMemory[name] = v));
+
             return 0;
         }
 
@@ -216,6 +201,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
+        private double Visit(DefinitionExpression _, DiceNotationContext _1)
+        {
+            return 0;
+        }
+
         private double Visit(CompoundExpression compound, DiceNotationContext context)
         {
             double lastResult = 0;
@@ -225,6 +215,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             }
 
             return lastResult;
+        }
+
+        private double Visit(FunctionExpression _, DiceNotationContext _1)
+        {
+            return 0;
         }
     }
 }

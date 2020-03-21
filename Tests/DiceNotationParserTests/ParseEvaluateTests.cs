@@ -1,19 +1,13 @@
 ﻿using Moq;
 using NUnit.Framework;
 using Superpower;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.DiceRollers;
-using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Interpreters;
-using Wgaffa.DMToolkit.Interpreters.Errors;
 using Wgaffa.DMToolkit.Parser;
-using Wgaffa.Functional;
 
 namespace DiceNotationParserTests
 {
@@ -37,7 +31,7 @@ namespace DiceNotationParserTests
                 .Returns(1)
                 .Returns(20);
 
-            _symbolTable = new SymbolTable();
+            _symbolTable = new ScopedSymbolTable();
             var realSymbol = new BuiltinTypeSymbol("real");
             var intSymbol = new BuiltinTypeSymbol("int");
             var parameters = new ISymbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
@@ -107,6 +101,12 @@ namespace DiceNotationParserTests
             {
                 yield return new TestCaseData("5+max(7, 3+8)")
                     .Returns(16);
+                yield return new TestCaseData("int Add5(int a) a + 5; end Add5(10);")
+                    .Returns(15)
+                    .Ignore("Not fully implemented, was created at the wrong step");
+                yield return new TestCaseData("real Pi() 3.14; end Pi();")
+                    .Returns(3.14)
+                    .Ignore("Not fully implemented, was created at the wrong step");
             }
         }
 
@@ -117,6 +117,10 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("real foo; foo = 5.2;")
                     .Returns(5.2);
                 yield return new TestCaseData("int foo, bar; foo = 5; bar = 2d6; foo+bar;")
+                    .Returns(17);
+                yield return new TestCaseData("int foo, bar = 5; foo+bar;")
+                    .Returns(10);
+                yield return new TestCaseData("def Attack = (d20 + 5) * 1.5; Attack + 5;")
                     .Returns(17);
             }
         }
@@ -165,7 +169,7 @@ namespace DiceNotationParserTests
             var ast = semantic.Analyze(context);
             ast.Map(expr =>
                 _interpreter.Interpret(new DiceNotationContext(expr)
-                    { SymbolTable = _symbolTable, DiceRoller = _mockRoller.Object },
+                { SymbolTable = context.SymbolTable, DiceRoller = _mockRoller.Object },
                     new VariableSetup()))
                 .OnSuccess(r => result = r);
 

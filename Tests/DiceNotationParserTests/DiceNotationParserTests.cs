@@ -76,6 +76,10 @@ namespace DiceNotationParserTests
                     .Returns(typeof(VariableDeclarationExpression));
                 yield return new TestCaseData("int foo = 5;")
                     .Returns(typeof(VariableDeclarationExpression));
+                yield return new TestCaseData("def StandardRoll = 10 + d6;")
+                    .Returns(typeof(DefinitionExpression));
+                yield return new TestCaseData("int Test(int a, real b) a + b; end")
+                    .Returns(typeof(FunctionExpression));
             }
         }
 
@@ -96,6 +100,9 @@ namespace DiceNotationParserTests
             "[3, 13,]",
             "2x",
             "real foo; int bar",
+            "def = 5 + 5;",
+            "def Bee =",
+            "def A = 5 + def",
         };
 
         [TestCaseSource(nameof(InvalidSyntaxTestCaseData))]
