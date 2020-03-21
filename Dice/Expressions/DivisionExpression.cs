@@ -8,7 +8,7 @@
 
         public override string ToString()
         {
-            return $"Div{Left}, {Right}";
+            return $"</ {Left} {Right}>";
         }
     }
 }

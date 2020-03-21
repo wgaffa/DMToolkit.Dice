@@ -9,7 +9,7 @@
 
         public override string ToString()
         {
-            return $"Neg {Right}";
+            return $"<negate {Right}>";
         }
     }
 }

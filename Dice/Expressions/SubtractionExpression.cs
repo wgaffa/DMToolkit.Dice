@@ -8,7 +8,7 @@
 
         public override string ToString()
         {
-            return $"Sub {Left}, {Right}";
+            return $"<- {Left} {Right}>";
         }
     }
 }

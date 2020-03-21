@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"{Value:0.##}";
+            return $"<num: {Value}>";
         }
     }
 }
