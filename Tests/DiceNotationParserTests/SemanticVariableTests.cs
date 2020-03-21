@@ -37,7 +37,7 @@ namespace DiceNotationParserTests
         };
 
         [TestCaseSource(nameof(InvalidVariableTestCaseData))]
-        public void Analyze_ShouldReturnError_GivenNoDefinedVariable(string input)
+        public void Analyze_ShouldReturnError_GivenInvalidString(string input)
         {
             var tokens = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokens);
