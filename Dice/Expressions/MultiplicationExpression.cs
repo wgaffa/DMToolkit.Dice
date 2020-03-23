@@ -8,7 +8,7 @@
 
         public override string ToString()
         {
-            return $"Mul {Left}, {Right}";
+            return $"<* {Left} {Right}>";
         }
     }
 }

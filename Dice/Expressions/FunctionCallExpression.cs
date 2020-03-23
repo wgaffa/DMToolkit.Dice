@@ -20,5 +20,10 @@ namespace Wgaffa.DMToolkit.Expressions
             _arguments = arguments.ToList();
             Name = name;
         }
+
+        public override string ToString()
+        {
+            return $"<call: {Name} args={string.Join(' ', Arguments)}>";
+        }
     }
 }

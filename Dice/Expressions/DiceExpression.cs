@@ -34,7 +34,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"{(NumberOfRolls > 1 ? NumberOfRolls.ToString() : string.Empty)}d{Dice.Sides}";
+            return $"<dice: rolls={NumberOfRolls}, d{Dice.Sides}>";
         }
     }
 }

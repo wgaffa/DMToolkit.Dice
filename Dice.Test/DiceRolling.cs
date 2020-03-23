@@ -19,5 +19,22 @@ namespace DiceTest
         {
             Assert.That(() => new Dice(0), Throws.ArgumentException);
         }
+
+        [Test]
+        public void Equal_ShouldReturnTrue_GivenSameReference()
+        {
+            var dice = new Dice(66);
+            var refDice = dice;
+
+            Assert.That(dice, Is.EqualTo(refDice));
+        }
+
+        [Test]
+        public void GetHashCode_ShouldReturnHashCode()
+        {
+            var expected = 17 * 213 + 6;
+
+            Assert.That(Dice.d6.GetHashCode(), Is.EqualTo(expected));
+        }
     }
 }

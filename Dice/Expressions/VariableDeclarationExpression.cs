@@ -26,7 +26,8 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"{Type}: {string.Join(',', _names)}";
+            var assign = InitialValue.Map(expr => $" assign={expr}").Reduce(string.Empty);
+            return $"<decl_var: type={Type} names={string.Join(", ", _names)}{assign}>";
         }
     }
 }

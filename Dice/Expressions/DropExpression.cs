@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ardalis.GuardClauses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,23 +7,24 @@ namespace Wgaffa.DMToolkit.Expressions
 {
     public class DropExpression : UnaryExpression
     {
-        public delegate IEnumerable<int> StrategyFunc(IEnumerable<int> rolls);
-        public StrategyFunc Strategy { get; }
+        public DropType Type { get; }
 
         public DropExpression(IExpression right) : base(right)
         {
-            Strategy = x => new int[] { x.Min() };
+            Type = DropType.Lowest;
         }
 
-        public DropExpression(IExpression right, StrategyFunc strategy)
+        public DropExpression(IExpression right, DropType type)
             : base(right)
         {
-            Strategy = strategy;
+            Guard.Against.Null(type, nameof(type));
+
+            Type = type;
         }
 
         public override string ToString()
         {
-            return $"Drop {Right}";
+            return $"<drop: {Type.Name} {Right}>";
         }
     }
 }

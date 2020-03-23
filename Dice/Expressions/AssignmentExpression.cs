@@ -18,7 +18,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"{Identifier} = {Expression}";
+            return $"<assign: var={Identifier} value={Expression}>";
         }
     }
 }

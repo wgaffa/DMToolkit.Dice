@@ -16,7 +16,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"{RepeatTimes}x {Right}";
+            return $"<repeat: {RepeatTimes} {Right}>";
         }
     }
 }
