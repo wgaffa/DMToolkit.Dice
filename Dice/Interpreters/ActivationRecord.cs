@@ -6,7 +6,8 @@ namespace Wgaffa.DMToolkit.Interpreters
 {
     public enum RecordType
     {
-        Program
+        Program,
+        Function,
     }
 
     public class ActivationRecord

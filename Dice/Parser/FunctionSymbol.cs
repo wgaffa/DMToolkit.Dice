@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Wgaffa.DMToolkit.Interpreters;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
@@ -15,9 +16,9 @@ namespace Wgaffa.DMToolkit.Parser
         public string Name { get; }
         public Maybe<ISymbol> Type { get; }
         public IReadOnlyList<ISymbol> Parameters => _parameters.AsReadOnly();
-        public Func<IEnumerable<double>, double> Call { get; }
+        public Func<ActivationRecord, double> Call { get; }
 
-        public FunctionSymbol(string name, Maybe<ISymbol> type, Func<IEnumerable<double>, double> func)
+        public FunctionSymbol(string name, Maybe<ISymbol> type, Func<ActivationRecord, double> func)
         {
             Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Guard.Against.Null(type, nameof(type));
@@ -28,7 +29,7 @@ namespace Wgaffa.DMToolkit.Parser
             Call = func;
         }
 
-        public FunctionSymbol(string name, Maybe<ISymbol> type, Func<IEnumerable<double>, double> func, IEnumerable<ISymbol> parameters)
+        public FunctionSymbol(string name, Maybe<ISymbol> type, Func<ActivationRecord, double> func, IEnumerable<ISymbol> parameters)
             : this(name, type, func)
         {
             Guard.Against.Null(parameters, nameof(parameters));

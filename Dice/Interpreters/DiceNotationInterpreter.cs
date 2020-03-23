@@ -169,24 +169,24 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         public double Visit(FunctionCallExpression function, DiceNotationContext context)
         {
-            var functionSymbol = _currentScope
-                .Lookup(function.Name)
-                .Bind(sym =>
-                    sym is FunctionSymbol fsym
-                        ? Maybe<FunctionSymbol>.Some(fsym)
-                        : (Maybe<FunctionSymbol>)None.Value);
+            var record = new ActivationRecord(
+                function.Name,
+                RecordType.Function,
+                2);
 
-            var arguments = functionSymbol
+            var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
+            var arguments = castedSymbol
                 .Map(funcSym => funcSym.Parameters)
-                .Map(parameters => parameters.Zip(
-                    function.Arguments,
-                    (sym, expr) => new { Param = sym, Arg = (double)Visit((dynamic)expr, context) })
+                .Map(parameters => parameters
+                    .Zip(function.Arguments)
+                    .Each(x => record[x.First.Name] = Visit((dynamic)x.Second, context))
                     .ToList());
 
-            var result = (float)arguments
-                .Map(args => args.Select(x => x.Arg))
-                .Bind(args => functionSymbol.Map(f => f.Call(args)))
-                .Reduce(default(double));
+            _callStack.Push(record);
+
+            var result = castedSymbol.Map(x => x.Call(record)).Reduce(default(double));
+
+            _callStack.Pop();
 
             return result;
         }

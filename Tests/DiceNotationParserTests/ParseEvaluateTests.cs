@@ -37,8 +37,8 @@ namespace DiceNotationParserTests
             var parameters = new ISymbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
             _symbolTable.Add(realSymbol);
             _symbolTable.Add(intSymbol);
-            _symbolTable.Add(new FunctionSymbol("max", realSymbol, x => x.Max(), parameters));
-            _symbolTable.Add(new FunctionSymbol("min", realSymbol, x => x.Min(), parameters));
+            _symbolTable.Add(new FunctionSymbol("max", realSymbol, x => (double)((double)x["a"] > (double)x["b"] ? x["a"] : x["b"]), parameters));
+            _symbolTable.Add(new FunctionSymbol("min", realSymbol, x => (double)((double)x["a"] <= (double)x["b"] ? x["a"] : x["b"]), parameters));
 
             _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));
             _symbolTable.Add(new VariableSymbol("STRMOD", intSymbol));

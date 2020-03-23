@@ -155,10 +155,12 @@ namespace Wgaffa.DMToolkit.Interpreters
             return new FunctionExpression(function.Identifier, body, function.ReturnType);
         }
 
-        private IExpression Visit(FunctionCallExpression functionCall, DiceNotationContext context) =>
-            new FunctionCallExpression(
+        private IExpression Visit(FunctionCallExpression functionCall, DiceNotationContext context) => new FunctionCallExpression(
                 functionCall.Name,
                 functionCall.Arguments
-                    .Select(arg => (IExpression)Visit((dynamic)arg, context)));
+                .Select(arg => (IExpression)Visit((dynamic)arg, context)))
+        {
+            Symbol = _currentScope.Bind(s => s.Lookup(functionCall.Name))
+        };
     }
 }

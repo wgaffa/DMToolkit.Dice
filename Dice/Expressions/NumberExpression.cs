@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
@@ -13,7 +14,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"<num: {Value}>";
+            return $"<num: {Value.ToString(CultureInfo.InvariantCulture)}>";
         }
     }
 }
