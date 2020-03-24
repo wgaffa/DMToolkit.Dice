@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 {
     public class DiceNotationInterpreter
     {
-        private readonly Dictionary<string, double> _globalMemory = new Dictionary<string, double>();
+        private readonly Stack<ActivationRecord> _callStack = new Stack<ActivationRecord>();
         private ISymbolTable _currentScope;
 
         #region Public API
@@ -22,12 +22,19 @@ namespace Wgaffa.DMToolkit.Interpreters
             Guard.Against.Null(context, nameof(context));
             Guard.Against.Null(context.SymbolTable, nameof(context.SymbolTable));
 
+            var record = new ActivationRecord("main", RecordType.Program, 1);
             if (!(initialValues is null))
-                initialValues.Each(kv => _globalMemory[kv.Key] = kv.Value);
+                initialValues.Each(kv => record[kv.Key] = kv.Value);
 
             _currentScope = context.SymbolTable;
 
-            return (double)Visit((dynamic)context.Expression, context);
+            _callStack.Push(record);
+
+            var result = (double)Visit((dynamic)context.Expression, context);
+
+            _callStack.Pop();
+
+            return result;
         }
 
         public double Interpret(IExpression expression)
@@ -65,9 +72,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private double Visit(VariableExpression variable, DiceNotationContext context)
         {
+            var record = _callStack.Peek();
             return variable.Symbol.Reduce(default(ISymbol)) switch
             {
-                VariableSymbol var => _globalMemory[var.Name],
+                VariableSymbol var => (double)record[var.Name],
                 DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),
                 _ => throw new InvalidOperationException()
             };
@@ -161,33 +169,47 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         public double Visit(FunctionCallExpression function, DiceNotationContext context)
         {
-            var functionSymbol = _currentScope
-                .Lookup(function.Name)
-                .Bind(sym =>
-                    sym is FunctionSymbol fsym
-                        ? Maybe<FunctionSymbol>.Some(fsym)
-                        : (Maybe<FunctionSymbol>)None.Value);
+            var record = new ActivationRecord(
+                function.Name,
+                RecordType.Function,
+                2);
 
-            var arguments = functionSymbol
+            var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
+            var arguments = castedSymbol
                 .Map(funcSym => funcSym.Parameters)
-                .Map(parameters => parameters.Zip(
-                    function.Arguments,
-                    (sym, expr) => new { Param = sym, Arg = (double)Visit((dynamic)expr, context) })
+                .Map(parameters => parameters
+                    .Zip(function.Arguments)
+                    .Each(x => record[x.First.Name] = Visit((dynamic)x.Second, context))
                     .ToList());
 
-            var result = (float)arguments
-                .Map(args => args.Select(x => x.Arg))
-                .Bind(args => functionSymbol.Map(f => f.Call(args)))
-                .Reduce(default(double));
+            _callStack.Push(record);
+
+            double result = 0;
+            switch (castedSymbol.Reduce(default(FunctionSymbol)))
+            {
+                case BuiltinFunctionSymbol builtin:
+                    result = builtin.Call(record);
+                    break;
+
+                case UserFunctionSymbol userFunction:
+                    result = Visit((dynamic)userFunction.Body, context);
+                    break;
+
+                default:
+                    break;
+            }
+
+            _callStack.Pop();
 
             return result;
         }
 
         private double Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
         {
+            var record = _callStack.Peek();
             var value = varDecl.InitialValue
                 .Map(expr => (double)Visit((dynamic)expr, context))
-                .Map(v => varDecl.Names.Each(name => _globalMemory[name] = v));
+                .Map(v => varDecl.Names.Each(name => record[name] = v));
 
             return 0;
         }
@@ -196,7 +218,8 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             double result = Visit((dynamic)assignment.Expression, context);
 
-            _globalMemory[assignment.Identifier] = result;
+            var record = _callStack.Peek();
+            record[assignment.Identifier] = result;
 
             return result;
         }

@@ -12,7 +12,7 @@
     <PackageReference Include="Ardalis.SmartEnum" Version="1.0.8" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Superpower" Version="2.3.0" />
-    <PackageReference Include="Wgaffa.Functional.Maybe" Version="1.0.2" />
+    <PackageReference Include="Wgaffa.Functional.Maybe" Version="1.0.2-1584211390" />
     <PackageReference Include="Wgaffa.Functional.Result" Version="1.2.1" />
   </ItemGroup>
   <ItemGroup>

@@ -135,10 +135,22 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(FunctionExpression function, DiceNotationContext context)
         {
+            var parameters = function.Parameters
+                .Select(x => new { Id = x.Value, Symbol = _currentScope.Bind(s => s.Lookup(x.Key)) })
+                .Where(x => x.Symbol is Some<ISymbol>)
+                .Select(x => new VariableSymbol(x.Id, x.Symbol))
+                .ToList();
+
+            if (parameters.Count != function.Parameters.Count)
+            {
+                _errors.Add(SemanticError.VariableUnknownType(string.Empty));
+            }
+
             var userFunction = new UserFunctionSymbol(
                 function.Identifier,
                 _currentScope.Bind(s => s.Lookup(function.ReturnType)),
-                function.Body);
+                function.Body,
+                parameters);
 
             _currentScope.Bind(s => s.Lookup(function.Identifier))
                 .Match(
@@ -148,17 +160,31 @@ namespace Wgaffa.DMToolkit.Interpreters
             int scopeLevel = _currentScope.Map(s => ((ScopedSymbolTable)s).Level + 1).Reduce(1);
             _currentScope = new ScopedSymbolTable(_currentScope, scopeLevel);
 
+            parameters.ForEach(x => _currentScope.Do(scope => scope.Add(x)));
             IExpression body = Visit((dynamic)function.Body, context);
+
+            userFunction.Body = body;
 
             _currentScope = _currentScope.Bind(s => ((ScopedSymbolTable)s).EnclosingScope);
 
-            return new FunctionExpression(function.Identifier, body, function.ReturnType);
+            return new FunctionExpression(
+                function.Identifier,
+                body,
+                function.ReturnType,
+                function.Parameters);
         }
 
-        private IExpression Visit(FunctionCallExpression functionCall, DiceNotationContext context) =>
-            new FunctionCallExpression(
+        private IExpression Visit(FunctionCallExpression functionCall, DiceNotationContext context)
+        {
+            Maybe<ISymbol> functionSymbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
+            var callExpression = new FunctionCallExpression(
                 functionCall.Name,
                 functionCall.Arguments
                     .Select(arg => (IExpression)Visit((dynamic)arg, context)));
+
+            callExpression.Symbol = functionSymbol;
+
+            return callExpression;
+        }
     }
 }
