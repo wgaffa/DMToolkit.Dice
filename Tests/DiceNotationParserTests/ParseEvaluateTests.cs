@@ -3,7 +3,6 @@ using NUnit.Framework;
 using Superpower;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Interpreters;
@@ -37,8 +36,16 @@ namespace DiceNotationParserTests
             var parameters = new ISymbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
             _symbolTable.Add(realSymbol);
             _symbolTable.Add(intSymbol);
-            _symbolTable.Add(new FunctionSymbol("max", realSymbol, x => (double)((double)x["a"] > (double)x["b"] ? x["a"] : x["b"]), parameters));
-            _symbolTable.Add(new FunctionSymbol("min", realSymbol, x => (double)((double)x["a"] <= (double)x["b"] ? x["a"] : x["b"]), parameters));
+            _symbolTable.Add(new BuiltinFunctionSymbol(
+                "max",
+                realSymbol,
+                x => (double)((double)x["a"] > (double)x["b"] ? x["a"] : x["b"]),
+                parameters));
+            _symbolTable.Add(new BuiltinFunctionSymbol(
+                "min",
+                realSymbol,
+                x => (double)((double)x["a"] <= (double)x["b"] ? x["a"] : x["b"]),
+                parameters));
 
             _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));
             _symbolTable.Add(new VariableSymbol("STRMOD", intSymbol));
@@ -102,11 +109,9 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("5+max(7, 3+8)")
                     .Returns(16);
                 yield return new TestCaseData("int Add5(int a) a + 5; end Add5(10);")
-                    .Returns(15)
-                    .Ignore("Not fully implemented, was created at the wrong step");
+                    .Returns(15);
                 yield return new TestCaseData("real Pi() 3.14; end Pi();")
-                    .Returns(3.14)
-                    .Ignore("Not fully implemented, was created at the wrong step");
+                    .Returns(3.14);
             }
         }
 

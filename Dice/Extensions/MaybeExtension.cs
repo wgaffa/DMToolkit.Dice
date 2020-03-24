@@ -15,5 +15,13 @@ namespace Wgaffa.DMToolkit.Extensions
 
         public static Maybe<T> NoneIfNull<T>(this Maybe<T> source)
             => source ?? None.Value;
+
+        public static Maybe<T> Do<T>(this Maybe<T> source, Action<T> action)
+        {
+            if (source is Some<T> some)
+                action(some.Reduce(default(T)));
+
+            return source;
+        }
     }
 }

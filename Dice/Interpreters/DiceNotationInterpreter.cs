@@ -184,7 +184,20 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            var result = castedSymbol.Map(x => x.Call(record)).Reduce(default(double));
+            double result = 0;
+            switch (castedSymbol.Reduce(default(FunctionSymbol)))
+            {
+                case BuiltinFunctionSymbol builtin:
+                    result = builtin.Call(record);
+                    break;
+
+                case UserFunctionSymbol userFunction:
+                    result = Visit((dynamic)userFunction.Body, context);
+                    break;
+
+                default:
+                    break;
+            }
 
             _callStack.Pop();
 
