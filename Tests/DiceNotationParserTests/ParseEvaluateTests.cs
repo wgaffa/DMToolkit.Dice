@@ -1,6 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
 using Superpower;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Wgaffa.DMToolkit;
@@ -172,7 +173,8 @@ namespace DiceNotationParserTests
             var semantic = new SemanticAnalyzer();
             double result = 0;
             var ast = semantic.Analyze(context);
-            ast.Map(expr =>
+            ast.OnError(e => throw new Exception($"{e.Count} errors during semantic analyze"))
+                .Map(expr =>
                 _interpreter.Interpret(new DiceNotationContext(expr)
                 { SymbolTable = context.SymbolTable, DiceRoller = _mockRoller.Object },
                     new VariableSetup()))

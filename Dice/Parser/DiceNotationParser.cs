@@ -179,17 +179,19 @@ namespace Wgaffa.DMToolkit.Parser
             .Or(Expr);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Statement =
-            (from stmt in Stmt
+            FuncDecl.Try()
+            .Or(
+            from stmt in Stmt
             from terminate in Token.EqualTo(DiceNotationToken.SemiColon)
             select stmt)
             .Named("statement");
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> StatementList =
-            (FuncDecl.Try()
-            .Or(Statement));
+        private static readonly TokenListParser<DiceNotationToken, IExpression[]> StatementList =
+            Statement
+            .Many();
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Block =
-            from stmts in StatementList.Many()
+            from stmts in StatementList
             select stmts.Length == 1 ? stmts[0] : new CompoundExpression(stmts);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> OnelineStatement =

@@ -80,6 +80,8 @@ namespace DiceNotationParserTests
                     .Returns(typeof(DefinitionExpression));
                 yield return new TestCaseData("int Test(int a, real b) a + b; end")
                     .Returns(typeof(FunctionExpression));
+                yield return new TestCaseData("real foo = 5; real Bar() 5; end")
+                    .Returns(typeof(CompoundExpression));
             }
         }
 
