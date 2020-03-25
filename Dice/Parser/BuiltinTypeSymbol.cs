@@ -1,28 +1,23 @@
-﻿using Ardalis.GuardClauses;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
-    public class BuiltinTypeSymbol : ValueObject<BuiltinTypeSymbol>, ISymbol
+    public class BuiltinTypeSymbol : Symbol, IEquatable<BuiltinTypeSymbol>
     {
-        public string Name { get; }
-
-        public Maybe<ISymbol> Type => None.Value;
-
         public BuiltinTypeSymbol(string name)
+            : base(name, None.Value)
         {
-            Guard.Against.NullOrWhiteSpace(name, nameof(name));
-
-            Name = name;
         }
 
         public override string ToString()
         {
             return Name;
         }
-        public override bool Equals(BuiltinTypeSymbol other)
+
+        #region Equality
+        public bool Equals(BuiltinTypeSymbol other)
         {
             if (other is null)
                 return false;
@@ -34,10 +29,33 @@ namespace Wgaffa.DMToolkit.Parser
                 && Type.Equals(other.Type);
         }
 
-        protected override IEnumerable<int> HashCodes()
+        public override bool Equals(object obj)
         {
-            yield return Name.GetHashCode();
-            yield return Type.GetHashCode();
+            if (obj is null)
+                return false;
+
+            if (GetType() != obj.GetType())
+                return false;
+
+            return Equals(obj as BuiltinTypeSymbol);
+        }
+
+        public static bool operator ==(BuiltinTypeSymbol left, BuiltinTypeSymbol right) =>
+            EqualityComparer<BuiltinTypeSymbol>.Default.Equals(left, right);
+
+        public static bool operator !=(BuiltinTypeSymbol left, BuiltinTypeSymbol right) =>
+            !(left == right);
+        #endregion
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 213 + Name.GetHashCode();
+                hash = hash * 213 + Type.GetHashCode();
+                return hash;
+            }
         }
     }
 }

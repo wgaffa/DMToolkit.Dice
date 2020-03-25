@@ -73,7 +73,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private double Visit(VariableExpression variable, DiceNotationContext context)
         {
             var record = _callStack.Peek();
-            return variable.Symbol.Reduce(default(ISymbol)) switch
+            return variable.Symbol.Reduce(default(Symbol)) switch
             {
                 VariableSymbol var => (double)record[var.Name],
                 DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),

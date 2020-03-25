@@ -31,7 +31,6 @@ namespace Wgaffa.DMToolkit
             }
         }
 
-
         protected abstract IEnumerable<int> HashCodes();
     }
 }

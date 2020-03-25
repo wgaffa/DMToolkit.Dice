@@ -12,17 +12,17 @@ namespace Wgaffa.DMToolkit.Parser
 
         public BuiltinFunctionSymbol(
             string name,
-            Maybe<ISymbol> type,
+            Maybe<Symbol> type,
             Func<ActivationRecord, double> func)
-            : this(name, type, func, Array.Empty<ISymbol>())
+            : this(name, type, func, Array.Empty<Symbol>())
         {
         }
 
         public BuiltinFunctionSymbol(
             string name,
-            Maybe<ISymbol> type,
+            Maybe<Symbol> type,
             Func<ActivationRecord, double> func,
-            IEnumerable<ISymbol> parameters)
+            IEnumerable<Symbol> parameters)
             : base(name, type, parameters)
         {
             Guard.Against.Null(func, nameof(func));

@@ -6,24 +6,18 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
-    public abstract class FunctionSymbol : ValueObject<FunctionSymbol>, ISymbol
+    public abstract class FunctionSymbol : Symbol, IEquatable<FunctionSymbol>
     {
-        protected readonly List<ISymbol> _parameters = new List<ISymbol>();
+        protected readonly List<Symbol> _parameters = new List<Symbol>();
 
-        public string Name { get; }
-        public Maybe<ISymbol> Type { get; }
-        public IReadOnlyList<ISymbol> Parameters => _parameters.AsReadOnly();
+        public IReadOnlyList<Symbol> Parameters => _parameters.AsReadOnly();
 
-        protected FunctionSymbol(string name, Maybe<ISymbol> type)
+        protected FunctionSymbol(string name, Maybe<Symbol> type)
+            : base(name, type)
         {
-            Guard.Against.NullOrWhiteSpace(name, nameof(name));
-            Guard.Against.Null(type, nameof(type));
-
-            Name = name;
-            Type = type;
         }
 
-        protected FunctionSymbol(string name, Maybe<ISymbol> type, IEnumerable<ISymbol> parameters)
+        protected FunctionSymbol(string name, Maybe<Symbol> type, IEnumerable<Symbol> parameters)
             : this(name, type)
         {
             Guard.Against.Null(parameters, nameof(parameters));
@@ -31,7 +25,8 @@ namespace Wgaffa.DMToolkit.Parser
             _parameters = parameters.ToList();
         }
 
-        public override bool Equals(FunctionSymbol other)
+        #region Equality
+        public bool Equals(FunctionSymbol other)
         {
             if (other is null)
                 return false;
@@ -44,12 +39,29 @@ namespace Wgaffa.DMToolkit.Parser
                 && _parameters.SequenceEqual(other._parameters);
         }
 
-        protected override IEnumerable<int> HashCodes()
+        public override bool Equals(object obj)
         {
-            yield return Name.GetHashCode();
-            yield return Type.GetHashCode();
-            foreach (var item in _parameters)
-                yield return item.GetHashCode();
+            if (obj is null)
+                return false;
+
+            if (GetType() != obj.GetType())
+                return false;
+
+            return Equals(obj as FunctionSymbol);
+        }
+        #endregion
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 213 + Name.GetHashCode();
+                hash = hash * 213 + Type.GetHashCode();
+                hash = hash * 213 + _parameters.Aggregate(hash, (acc, symbol) => acc * 213 + symbol.GetHashCode());
+
+                return hash;
+            }
         }
     }
 }

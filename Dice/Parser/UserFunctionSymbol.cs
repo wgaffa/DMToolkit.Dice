@@ -10,12 +10,19 @@ namespace Wgaffa.DMToolkit.Parser
     {
         public IExpression Body { get; internal set; }
 
-        public UserFunctionSymbol(string name, Maybe<ISymbol> type, IExpression body)
-            : this(name, type, body, Array.Empty<ISymbol>())
+        public UserFunctionSymbol(
+            string name,
+            Maybe<Symbol> type,
+            IExpression body)
+            : this(name, type, body, Array.Empty<Symbol>())
         {
         }
 
-        public UserFunctionSymbol(string name, Maybe<ISymbol> type, IExpression body, IEnumerable<ISymbol> parameters)
+        public UserFunctionSymbol(
+            string name,
+            Maybe<Symbol> type,
+            IExpression body,
+            IEnumerable<Symbol> parameters)
             : base(name, type, parameters)
         {
             Guard.Against.Null(body, nameof(body));

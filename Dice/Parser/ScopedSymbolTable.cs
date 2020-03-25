@@ -8,7 +8,7 @@ namespace Wgaffa.DMToolkit.Parser
 {
     public class ScopedSymbolTable : ISymbolTable
     {
-        private readonly Dictionary<string, ISymbol> _symbols = new Dictionary<string, ISymbol>();
+        private readonly Dictionary<string, Symbol> _symbols = new Dictionary<string, Symbol>();
 
         public int Depth => _symbols.Count;
         public int Level { get; }
@@ -20,27 +20,31 @@ namespace Wgaffa.DMToolkit.Parser
             Level = scopeLevel;
         }
 
-        public ScopedSymbolTable(IEnumerable<ISymbol> builtinSymbols, Maybe<ISymbolTable> enclosingScope = null, int scopeLevel = 1)
+        public ScopedSymbolTable(IEnumerable<Symbol> builtinSymbols, Maybe<ISymbolTable> enclosingScope = null, int scopeLevel = 1)
             : this(enclosingScope, scopeLevel)
         {
             Guard.Against.Null(builtinSymbols, nameof(builtinSymbols));
 
-            builtinSymbols.Each(s => Add(s));
+            builtinSymbols.Each(Add);
         }
 
-        public void Add(ISymbol symbol) => _symbols.Add(symbol.Name, symbol);
+        public void Add(Symbol symbol)
+        {
+            symbol.ScopeLevel = Level;
+            _symbols.Add(symbol.Name, symbol);
+        }
 
-        public Maybe<ISymbol> Lookup(string name)
+        public Maybe<Symbol> Lookup(string name)
             => _symbols.ContainsKey(name)
-                ? Maybe<ISymbol>.Some(_symbols[name])
+                ? Maybe<Symbol>.Some(_symbols[name])
                 : EnclosingScope.Bind(s => s.Lookup(name));
 
-        public Maybe<ISymbol> LookupCurrent(string name)
+        public Maybe<Symbol> LookupCurrent(string name)
             => _symbols.ContainsKey(name)
-                ? Maybe<ISymbol>.Some(_symbols[name])
-                : (Maybe<ISymbol>)None.Value;
+                ? Maybe<Symbol>.Some(_symbols[name])
+                : (Maybe<Symbol>)None.Value;
 
-        public IEnumerator<ISymbol> GetEnumerator()
+        public IEnumerator<Symbol> GetEnumerator()
         {
             return _symbols.Values.GetEnumerator();
         }
