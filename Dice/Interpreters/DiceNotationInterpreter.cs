@@ -3,11 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Wgaffa.DMToolkit.Exceptions;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Parser;
-using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
@@ -17,6 +15,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private ISymbolTable _currentScope;
 
         #region Public API
+
         public double Interpret(DiceNotationContext context, IEnumerable<KeyValuePair<string, double>> initialValues = null)
         {
             Guard.Against.Null(context, nameof(context));
@@ -43,9 +42,11 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return (double)Visit((dynamic)expression, new DiceNotationContext(expression));
         }
-        #endregion
+
+        #endregion Public API
 
         #region Terminal expressions
+
         private double Visit(NumberExpression number, DiceNotationContext _)
         {
             return number.Value;
@@ -73,16 +74,18 @@ namespace Wgaffa.DMToolkit.Interpreters
         private double Visit(VariableExpression variable, DiceNotationContext context)
         {
             var record = _callStack.Peek();
-            return variable.Symbol.Reduce(default(ISymbol)) switch
+            return variable.Symbol.Reduce(default(Symbol)) switch
             {
                 VariableSymbol var => (double)record[var.Name],
                 DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),
                 _ => throw new InvalidOperationException()
             };
         }
-        #endregion
+
+        #endregion Terminal expressions
 
         #region Unary Expressions
+
         private double Visit(NegateExpression negate, DiceNotationContext context)
         {
             return (double)-Visit((dynamic)negate.Right, context);
@@ -143,9 +146,11 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Range(0, repeat.RepeatTimes)
                 .Aggregate(.0, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
         }
-        #endregion
+
+        #endregion Unary Expressions
 
         #region Binary Expressions
+
         private double Visit(AdditionExpression addition, DiceNotationContext context)
         {
             return (double)(Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context));
@@ -165,14 +170,15 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             return (double)(Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context));
         }
-        #endregion
+
+        #endregion Binary Expressions
 
         public double Visit(FunctionCallExpression function, DiceNotationContext context)
         {
             var record = new ActivationRecord(
                 function.Name,
                 RecordType.Function,
-                2);
+                function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0));
 
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
             var arguments = castedSymbol

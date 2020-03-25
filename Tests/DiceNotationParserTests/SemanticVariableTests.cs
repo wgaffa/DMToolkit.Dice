@@ -12,9 +12,9 @@ namespace DiceNotationParserTests
 {
     public class SemanticVariableTests
     {
-        public class SetupBuiltinSymbols : IEnumerable<ISymbol>
+        public class SetupBuiltinSymbols : IEnumerable<Symbol>
         {
-            public IEnumerator<ISymbol> GetEnumerator()
+            public IEnumerator<Symbol> GetEnumerator()
             {
                 yield return new BuiltinTypeSymbol("real");
                 yield return new BuiltinTypeSymbol("int");
@@ -63,6 +63,7 @@ namespace DiceNotationParserTests
             "int foo() real bar; end real bar;",
             "int bar; int foo() int bar; end",
             "def Attack = 5; Attack;",
+            "int x; inf foo(int a, int b) int bar(int a, int b) 10 + a + b; end a - b; end",
         };
 
         [TestCaseSource(nameof(ValidTestCaseData))]

@@ -72,7 +72,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             var symbols = typeSymbol
                 .Nothing(() => _errors.Add(SemanticError.VariableUnknownType(varDecl.Type)))
                 .Map(type =>
-                    varDecl.Names.Select(name => new VariableSymbol(name, Maybe<ISymbol>.Some(type))))
+                    varDecl.Names.Select(name => new VariableSymbol(name, Maybe<Symbol>.Some(type))))
                 .Map(vars => vars.Each(v =>
                     _currentScope.Bind(s => ((ScopedSymbolTable)s).LookupCurrent(v.Name))
                     .Match(
@@ -90,11 +90,11 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
             symbol.Match(
-                ifSome: s => { },
+                ifSome: _ => { },
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Identifier)));
 
             return symbol
-                .Map(s => new VariableExpression(s.Name, Maybe<ISymbol>.Some(s)))
+                .Map(s => new VariableExpression(s.Name, Maybe<Symbol>.Some(s)))
                 .Reduce(variable);
         }
 
@@ -116,17 +116,17 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             switch (symbol)
             {
-                case Some<ISymbol> some:
-                    _errors.Add(SemanticError.VariableAlreadyDeclared(some.Reduce(default(ISymbol)).Name));
+                case Some<Symbol> some:
+                    _errors.Add(SemanticError.VariableAlreadyDeclared(some.Reduce(default(Symbol)).Name));
                     return definition;
 
-                case None<ISymbol> none:
+                case None<Symbol> none:
                     var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
                     _currentScope.Match(s => s.Add(definitionSymbol), () => { });
                     return new DefinitionExpression(
                         definition.Name,
                         definition.Expression,
-                        Maybe<ISymbol>.Some(definitionSymbol));
+                        Maybe<Symbol>.Some(definitionSymbol));
 
                 default:
                     throw new InvalidOperationException();
@@ -137,7 +137,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var parameters = function.Parameters
                 .Select(x => new { Id = x.Value, Symbol = _currentScope.Bind(s => s.Lookup(x.Key)) })
-                .Where(x => x.Symbol is Some<ISymbol>)
+                .Where(x => x.Symbol is Some<Symbol>)
                 .Select(x => new VariableSymbol(x.Id, x.Symbol))
                 .ToList();
 
@@ -176,7 +176,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         private IExpression Visit(FunctionCallExpression functionCall, DiceNotationContext context)
         {
-            Maybe<ISymbol> functionSymbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
+            Maybe<Symbol> functionSymbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
             var callExpression = new FunctionCallExpression(
                 functionCall.Name,
                 functionCall.Arguments

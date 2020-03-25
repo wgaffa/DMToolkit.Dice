@@ -6,19 +6,12 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
-    public class VariableSymbol : ValueObject<VariableSymbol>, ISymbol
+    public class VariableSymbol : Symbol, IEquatable<VariableSymbol>
     {
-        public string Name { get; }
-
-        public Maybe<ISymbol> Type { get; }
-
-        public VariableSymbol(string name, Maybe<ISymbol> type)
+        public VariableSymbol(string name, Maybe<Symbol> type)
+            : base(name, type)
         {
-            Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Guard.Against.NullOrNone(type, nameof(type));
-
-            Name = name;
-            Type = type;
         }
 
         public override string ToString()
@@ -26,7 +19,8 @@ namespace Wgaffa.DMToolkit.Parser
             return $"{Name}:{Type}";
         }
 
-        public override bool Equals(VariableSymbol other)
+        #region Equality
+        public bool Equals(VariableSymbol other)
         {
             if (other is null)
                 return false;
@@ -38,10 +32,34 @@ namespace Wgaffa.DMToolkit.Parser
                 && Type.Equals(other.Type);
         }
 
-        protected override IEnumerable<int> HashCodes()
+        public override bool Equals(object obj)
         {
-            yield return Name.GetHashCode();
-            yield return Type.GetHashCode();
+            if (obj is null)
+                return false;
+
+            if (GetType() != obj.GetType())
+                return false;
+
+            return Equals(obj as VariableSymbol);
+        }
+
+        public static bool operator ==(VariableSymbol left, VariableSymbol right) =>
+            EqualityComparer<VariableSymbol>.Default.Equals(left, right);
+
+        public static bool operator !=(VariableSymbol left, VariableSymbol right) =>
+            !(left == right);
+        #endregion
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 213 + Name.GetHashCode();
+                hash = hash * 213 + Type.GetHashCode();
+
+                return hash;
+            }
         }
     }
 }

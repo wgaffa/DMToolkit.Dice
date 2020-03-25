@@ -29,7 +29,7 @@ namespace DiceNotationParserTests
             Assert.That(() => table.Add(new BuiltinTypeSymbol("int")), Throws.TypeOf<ArgumentException>());
         }
 
-        public IEnumerable<ISymbol> SetupFooBar()
+        public IEnumerable<Symbol> SetupFooBar()
         {
             var real = new BuiltinTypeSymbol("real");
             var integer = new BuiltinTypeSymbol("int");
@@ -44,7 +44,7 @@ namespace DiceNotationParserTests
         public void Lookup_ShouldReturnSome_GivenGivenExistingName()
         {
             var table = new ScopedSymbolTable(SetupFooBar());
-            var value = table.Lookup("foo").Reduce(default(ISymbol));
+            var value = table.Lookup("foo").Reduce(default(Symbol));
 
             var expected = new VariableSymbol("foo", new BuiltinTypeSymbol("int"));
 
@@ -57,7 +57,7 @@ namespace DiceNotationParserTests
             var table = new ScopedSymbolTable(SetupFooBar());
             var value = table.Lookup("fizz");
 
-            Assert.That(value, Is.TypeOf<None<ISymbol>>());
+            Assert.That(value, Is.TypeOf<None<Symbol>>());
         }
 
         [TestCase("foo")]
@@ -66,10 +66,10 @@ namespace DiceNotationParserTests
         {
             var foo = new VariableSymbol("foo", new BuiltinTypeSymbol("int"));
             var bar = new VariableSymbol("bar", new BuiltinTypeSymbol("real"));
-            var global = new ScopedSymbolTable(new ISymbol[] { foo });
-            var nested = new ScopedSymbolTable(new ISymbol[] { bar }, global, 2);
+            var global = new ScopedSymbolTable(new Symbol[] { foo });
+            var nested = new ScopedSymbolTable(new Symbol[] { bar }, global, 2);
 
-            var result = nested.Lookup(identifier).Reduce(default(ISymbol));
+            var result = nested.Lookup(identifier).Reduce(default(Symbol));
 
             var expected = identifier == "foo" ? foo : bar;
 

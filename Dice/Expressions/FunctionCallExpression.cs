@@ -11,7 +11,7 @@ namespace Wgaffa.DMToolkit.Expressions
         private readonly List<IExpression> _arguments = new List<IExpression>();
 
         public string Name { get; }
-        internal Maybe<ISymbol> Symbol { get; set; } = None.Value;
+        internal Maybe<Symbol> Symbol { get; set; } = None.Value;
 
         public IReadOnlyList<IExpression> Arguments => _arguments.AsReadOnly();
 
