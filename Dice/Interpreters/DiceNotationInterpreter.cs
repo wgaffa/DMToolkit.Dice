@@ -6,6 +6,7 @@ using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
@@ -74,9 +75,14 @@ namespace Wgaffa.DMToolkit.Interpreters
         private double Visit(VariableExpression variable, DiceNotationContext context)
         {
             var record = _callStack.Peek();
+            int currentScopeLevel = record.NestingLevel;
+            int variableScope = variable.Symbol.Map(s => s.ScopeLevel).Reduce(currentScopeLevel);
             return variable.Symbol.Reduce(default(Symbol)) switch
             {
-                VariableSymbol var => (double)record[var.Name],
+                VariableSymbol var => (double)record
+                    .Follow(currentScopeLevel - variableScope)
+                    .Map(x => x[var.Name])
+                    .Reduce((double)0),
                 DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),
                 _ => throw new InvalidOperationException()
             };
@@ -175,11 +181,23 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         public double Visit(FunctionCallExpression function, DiceNotationContext context)
         {
+            Maybe<ActivationRecord> accesslink = None.Value;
+            if (_callStack.Peek().NestingLevel < function.Symbol.Map(x => x.ScopeLevel).Reduce(0))
+            {
+                accesslink = _callStack.Peek().AccessLink;
+            }
+            else
+            {
+                int currentScope = _callStack.Peek().NestingLevel;
+                int variableScope = function.Symbol.Map(s => s.ScopeLevel).Reduce(currentScope);
+                accesslink = _callStack.Peek().Follow(currentScope - variableScope);
+            }
+
             var record = new ActivationRecord(
                 function.Name,
                 RecordType.Function,
                 function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0),
-                _callStack.Peek().NoneIfNull());
+                accesslink);
 
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
             var arguments = castedSymbol

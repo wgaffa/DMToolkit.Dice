@@ -90,12 +90,10 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
             symbol.Match(
-                ifSome: _ => { },
+                ifSome: s => variable.Symbol = s,
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Identifier)));
 
-            return symbol
-                .Map(s => new VariableExpression(s.Name, Maybe<Symbol>.Some(s)))
-                .Reduce(variable);
+            return variable;
         }
 
         private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
