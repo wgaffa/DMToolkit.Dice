@@ -90,24 +90,23 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
             symbol.Match(
-                ifSome: _ => { },
+                ifSome: s => variable.Symbol = s,
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Identifier)));
 
-            return symbol
-                .Map(s => new VariableExpression(s.Name, Maybe<Symbol>.Some(s)))
-                .Reduce(variable);
+            return variable;
         }
 
         private IExpression Visit(AssignmentExpression assignment, DiceNotationContext context)
         {
+            Maybe<Symbol> variableSymbol = None.Value;
             _currentScope.Bind(s => s.Lookup(assignment.Identifier))
                 .Match(
-                ifSome: _ => { },
+                ifSome: s => variableSymbol = s,
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
 
             IExpression expr = Visit((dynamic)assignment.Expression, context);
 
-            return new AssignmentExpression(assignment.Identifier, expr);
+            return new AssignmentExpression(assignment.Identifier, expr) { Symbol = variableSymbol };
         }
 
         private IExpression Visit(DefinitionExpression definition, DiceNotationContext context)

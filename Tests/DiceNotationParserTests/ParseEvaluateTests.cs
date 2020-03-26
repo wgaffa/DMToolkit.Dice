@@ -47,6 +47,11 @@ namespace DiceNotationParserTests
                 realSymbol,
                 x => (double)((double)x["a"] <= (double)x["b"] ? x["a"] : x["b"]),
                 parameters));
+            _symbolTable.Add(new BuiltinFunctionSymbol(
+                "print",
+                realSymbol,
+                x => { Console.WriteLine(x["a"]); return 0; },
+                new Symbol[] { new VariableSymbol("a", intSymbol) }));
 
             _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));
             _symbolTable.Add(new VariableSymbol("STRMOD", intSymbol));
@@ -116,6 +121,22 @@ namespace DiceNotationParserTests
             }
         }
 
+        public class ScopingTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData("real foo = 5.5; real Bar(real a) foo = a; end Bar(3.2); foo;")
+                    .Returns(3.2);
+                yield return new TestCaseData("int x = 3; " +
+                    "int P() x = x - 1; end " +
+                    "int Q() " +
+                    "   int y = x; int R() x = x + 1; y = y + x; P(); end " +
+                    "R(); P(); end " +
+                    "x = 2; Q(); x;")
+                    .Returns(1);
+            }
+        }
+
         public class VariableTestCaseData : IEnumerable
         {
             public IEnumerator GetEnumerator()
@@ -159,6 +180,7 @@ namespace DiceNotationParserTests
         [TestCaseSource(typeof(PFRollsTestCaseData))]
         [TestCaseSource(typeof(FunctionTestCaseData))]
         [TestCaseSource(typeof(VariableTestCaseData))]
+        [TestCaseSource(typeof(ScopingTestCaseData))]
         public double Evaluate_ShouldReturnCorrect(string input)
         {
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);

@@ -7,7 +7,7 @@ namespace Wgaffa.DMToolkit.Expressions
     public class VariableExpression : IExpression
     {
         public string Identifier { get; }
-        public Maybe<Symbol> Symbol { get; }
+        public Maybe<Symbol> Symbol { get; internal set; }
 
         public VariableExpression(string identifier)
             : this(identifier, None.Value)
