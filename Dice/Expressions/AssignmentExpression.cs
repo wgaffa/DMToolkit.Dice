@@ -1,4 +1,6 @@
 ﻿using Ardalis.GuardClauses;
+using Wgaffa.DMToolkit.Parser;
+using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
@@ -6,6 +8,7 @@ namespace Wgaffa.DMToolkit.Expressions
     {
         public string Identifier { get; }
         public IExpression Expression { get; }
+        public Maybe<Symbol> Symbol { get; internal set; } = None.Value;
 
         public AssignmentExpression(string identifier, IExpression expression)
         {

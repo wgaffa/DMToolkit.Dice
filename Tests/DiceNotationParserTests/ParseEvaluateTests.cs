@@ -116,6 +116,15 @@ namespace DiceNotationParserTests
             }
         }
 
+        public class ScopingTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData("int foo = 5.5; int Bar(int a) foo = a; end Bar(3.2); foo;")
+                    .Returns(3.2);
+            }
+        }
+
         public class VariableTestCaseData : IEnumerable
         {
             public IEnumerator GetEnumerator()
@@ -159,6 +168,7 @@ namespace DiceNotationParserTests
         [TestCaseSource(typeof(PFRollsTestCaseData))]
         [TestCaseSource(typeof(FunctionTestCaseData))]
         [TestCaseSource(typeof(VariableTestCaseData))]
+        [TestCaseSource(typeof(ScopingTestCaseData))]
         public double Evaluate_ShouldReturnCorrect(string input)
         {
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);

@@ -178,7 +178,8 @@ namespace Wgaffa.DMToolkit.Interpreters
             var record = new ActivationRecord(
                 function.Name,
                 RecordType.Function,
-                function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0));
+                function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0),
+                _callStack.Peek().NoneIfNull());
 
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
             var arguments = castedSymbol
@@ -225,7 +226,13 @@ namespace Wgaffa.DMToolkit.Interpreters
             double result = Visit((dynamic)assignment.Expression, context);
 
             var record = _callStack.Peek();
-            record[assignment.Identifier] = result;
+            int currentScopeLevel = record.NestingLevel;
+            int variableScopeLevel = assignment.Symbol.Map(x => x.ScopeLevel).Reduce(currentScopeLevel);
+            var declaredRecord = record.Follow(currentScopeLevel - variableScopeLevel);
+
+            declaredRecord.Match(
+                ifSome: x => x[assignment.Identifier] = result,
+                ifNone: () => throw new InvalidOperationException());
 
             return result;
         }
