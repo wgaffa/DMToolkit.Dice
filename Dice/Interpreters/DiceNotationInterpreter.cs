@@ -100,7 +100,6 @@ namespace Wgaffa.DMToolkit.Interpreters
                 variableScope = varSymbol.ScopeLevel;
             }
 
-            int j = 5;
             return varSymbol switch
             {
                 VariableSymbol var => (double)record
@@ -110,35 +109,35 @@ namespace Wgaffa.DMToolkit.Interpreters
                 DefinitionSymbol def => RunDefinition(def),
                 _ => throw new InvalidOperationException()
             };
+        }
 
-            double RunDefinition(DefinitionSymbol definition)
+        private double RunDefinition(DefinitionSymbol definition)
+        {
+            Maybe<ActivationRecord> accesslink;
+            if (_callStack.Peek().NestingLevel < definition.ScopeLevel)
             {
-                Maybe<ActivationRecord> accesslink = None.Value;
-                if (_callStack.Peek().NestingLevel < definition.ScopeLevel)
-                {
-                    accesslink = _callStack.Peek().AccessLink;
-                }
-                else
-                {
-                    int currentScope = _callStack.Peek().NestingLevel;
-                    int variableScope = definition.ScopeLevel;
-                    accesslink = _callStack.Peek().Follow(currentScope - variableScope);
-                }
-
-                var record = new ActivationRecord(
-                    definition.Name,
-                    RecordType.Definition,
-                    definition.ScopeLevel + 1,
-                    accesslink);
-
-                _callStack.Push(record);
-
-                double result = Visit((dynamic)definition.Expression);
-
-                _callStack.Pop();
-
-                return result;
+                accesslink = _callStack.Peek().AccessLink;
             }
+            else
+            {
+                int currentScope = _callStack.Peek().NestingLevel;
+                int variableScope = definition.ScopeLevel;
+                accesslink = _callStack.Peek().Follow(currentScope - variableScope);
+            }
+
+            var record = new ActivationRecord(
+                definition.Name,
+                RecordType.Definition,
+                definition.ScopeLevel + 1,
+                accesslink);
+
+            _callStack.Push(record);
+
+            double result = Visit((dynamic)definition.Expression);
+
+            _callStack.Pop();
+
+            return result;
         }
 
         #endregion Terminal expressions
@@ -256,10 +255,22 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             var arguments = function.Arguments.Select(expr => (double)Visit((dynamic)expr)).ToList();
 
+            ICallable implementation = castedSymbol.Map(x => x.Implementation).Reduce(default(ICallable));
+            if (_callStack.Peek().Type == RecordType.Definition)
+            {
+                int scopeLevel = _callStack.Peek().NestingLevel;
+                var symbol = _currentScope.Lookup(function.Name);
+                int declScope = symbol.Map(s => s.ScopeLevel).Reduce(scopeLevel);
+                implementation = symbol
+                    .Map(s => s as FunctionSymbol)
+                    .Map(s => s.Implementation)
+                    .Reduce(default(ICallable));
+            }
+
             _callStack.Push(record);
 
             double result = 0;
-            if (castedSymbol.Map(x => x.Implementation).Reduce(default(ICallable)) is ICallable func)
+            if (implementation is ICallable func)
             {
                 result = (double)func.Call(this, arguments.Cast<object>());
             }
