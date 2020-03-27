@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class SemanticAnalyzer
     {
         private readonly List<SemanticError> _errors = new List<SemanticError>();
-        private ScopedSymbolTable _globalScope;
+        private readonly ScopedSymbolTable _globalScope;
         private Maybe<ScopedSymbolTable> _currentScope = None.Value;
         private readonly Configuration _configuration;
 
@@ -154,10 +154,10 @@ namespace Wgaffa.DMToolkit.Interpreters
                 _errors.Add(SemanticError.VariableUnknownType(string.Empty));
             }
 
-            var userFunction = new UserFunctionSymbol(
+            var userFunction = new FunctionSymbol(
                 function.Identifier,
                 _currentScope.Bind(s => s.Lookup(function.ReturnType)),
-                function.Body,
+                new UserFunction(function),
                 parameters);
 
             _currentScope.Bind(s => s.Lookup(function.Identifier))
@@ -171,15 +171,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             parameters.ForEach(x => _currentScope.Do(scope => scope.Add(x)));
             IExpression body = Visit((dynamic)function.Body);
 
-            userFunction.Body = body;
-
             _currentScope = _currentScope.Bind(s => s.EnclosingScope);
 
-            return new FunctionExpression(
-                function.Identifier,
-                body,
-                function.ReturnType,
-                function.Parameters);
+            return function;
         }
 
         private IExpression Visit(FunctionCallExpression functionCall)

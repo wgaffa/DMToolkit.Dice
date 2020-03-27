@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Interpreters;
+using Wgaffa.DMToolkit.Native;
 using Wgaffa.DMToolkit.Parser;
 
 namespace DiceNotationParserTests
@@ -36,20 +37,20 @@ namespace DiceNotationParserTests
             var parameters = new Symbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
             _symbolTable.Add(realSymbol);
             _symbolTable.Add(intSymbol);
-            _symbolTable.Add(new BuiltinFunctionSymbol(
+            _symbolTable.Add(new FunctionSymbol(
                 "max",
                 realSymbol,
-                x => (double)((double)x["a"] > (double)x["b"] ? x["a"] : x["b"]),
+                new Max(),
                 parameters));
-            _symbolTable.Add(new BuiltinFunctionSymbol(
+            _symbolTable.Add(new FunctionSymbol(
                 "min",
                 realSymbol,
-                x => (double)((double)x["a"] <= (double)x["b"] ? x["a"] : x["b"]),
+                new Min(),
                 parameters));
-            _symbolTable.Add(new BuiltinFunctionSymbol(
+            _symbolTable.Add(new FunctionSymbol(
                 "print",
                 realSymbol,
-                x => { Console.WriteLine(x["a"]); return 0; },
+                new Print(),
                 new Symbol[] { new VariableSymbol("a", intSymbol) }));
 
             _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));

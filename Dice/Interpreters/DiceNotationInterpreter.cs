@@ -38,6 +38,8 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
         #endregion
 
+        internal ActivationRecord CurrentEnvironment => _callStack.Peek();
+
         #region Public API
 
         public double Interpret(IExpression expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
@@ -59,6 +61,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
         #endregion Public API
+
+        internal double Execute(IExpression expression)
+        {
+            return (double)Visit((dynamic)expression);
+        }
 
         #region Terminal expressions
 
@@ -224,18 +231,14 @@ namespace Wgaffa.DMToolkit.Interpreters
             _callStack.Push(record);
 
             double result = 0;
-            switch (castedSymbol.Reduce(default(FunctionSymbol)))
+            if (castedSymbol is ICallable func)
             {
-                case BuiltinFunctionSymbol builtin:
-                    result = builtin.Call(record);
-                    break;
-
-                case UserFunctionSymbol userFunction:
-                    result = Visit((dynamic)userFunction.Body);
-                    break;
-
-                default:
-                    break;
+                result = (double)func
+                    .Call(
+                        this,
+                        arguments
+                        .Map(x => x.Select(v => v.Second).ToArray())
+                        .Reduce(Array.Empty<IExpression>()));
             }
 
             _callStack.Pop();

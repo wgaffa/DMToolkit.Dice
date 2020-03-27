@@ -16,7 +16,6 @@ namespace Wgaffa.DMToolkit.Parser
             Subtraction,
             Multiplication,
             Division,
-            DropLowest,
         }
 
         private static readonly TextParser<IExpression> DiceParser =
@@ -202,23 +201,14 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static IExpression MakeBinary(OperatorType @operator, IExpression left, IExpression right)
         {
-            switch (@operator)
+            return @operator switch
             {
-                case OperatorType.Addition:
-                    return new AdditionExpression(left, right);
-
-                case OperatorType.Subtraction:
-                    return new SubtractionExpression(left, right);
-
-                case OperatorType.Multiplication:
-                    return new MultiplicationExpression(left, right);
-
-                case OperatorType.Division:
-                    return new DivisionExpression(left, right);
-
-                default:
-                    throw new InvalidOperationException();
-            }
+                OperatorType.Addition => new AdditionExpression(left, right),
+                OperatorType.Subtraction => new SubtractionExpression(left, right),
+                OperatorType.Multiplication => new MultiplicationExpression(left, right),
+                OperatorType.Division => new DivisionExpression(left, right),
+                _ => throw new InvalidOperationException(),
+            };
         }
 
         public static TokenListParser<DiceNotationToken, IExpression> Notation =
