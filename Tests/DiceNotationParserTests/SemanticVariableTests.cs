@@ -44,7 +44,7 @@ namespace DiceNotationParserTests
             var expression = DiceNotationParser.Notation.Parse(tokens);
 
             var symbolTable = new ScopedSymbolTable(new SetupBuiltinSymbols());
-            var configuration = new DiceNotationContext()
+            var configuration = new Configuration()
             {
                 SymbolTable = symbolTable
             };
@@ -73,7 +73,7 @@ namespace DiceNotationParserTests
             var program = DiceNotationParser.Notation.Parse(tokens);
 
             var global = new ScopedSymbolTable(new SetupBuiltinSymbols());
-            var configuration = new DiceNotationContext() { SymbolTable = global };
+            var configuration = new Configuration() { SymbolTable = global };
             var semantic = new SemanticAnalyzer(configuration);
 
             bool success = false;

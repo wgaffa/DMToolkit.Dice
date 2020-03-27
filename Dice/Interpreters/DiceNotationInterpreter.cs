@@ -15,7 +15,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private readonly Stack<ActivationRecord> _callStack = new Stack<ActivationRecord>();
         private ScopedSymbolTable _currentScope;
         private readonly Stack<RollResult> _rollResults = new Stack<RollResult>();
-        private readonly DiceNotationContext _configuration;
+        private readonly Configuration _configuration;
         private readonly ScopedSymbolTable _globalSymbolTable;
 
         #region Constructors
@@ -24,11 +24,11 @@ namespace Wgaffa.DMToolkit.Interpreters
         {}
 
         public DiceNotationInterpreter(ScopedSymbolTable symbolTable)
-            : this(symbolTable, new DiceNotationContext())
+            : this(symbolTable, new Configuration())
         {
         }
 
-        public DiceNotationInterpreter(ScopedSymbolTable symbolTable, DiceNotationContext configuration)
+        public DiceNotationInterpreter(ScopedSymbolTable symbolTable, Configuration configuration)
         {
             Guard.Against.Null(symbolTable, nameof(symbolTable));
             Guard.Against.Null(configuration, nameof(configuration));

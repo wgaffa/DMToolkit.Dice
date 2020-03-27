@@ -15,10 +15,10 @@ namespace Wgaffa.DMToolkit.Interpreters
         private readonly List<SemanticError> _errors = new List<SemanticError>();
         private ScopedSymbolTable _globalScope;
         private Maybe<ScopedSymbolTable> _currentScope = None.Value;
-        private readonly DiceNotationContext _configuration;
+        private readonly Configuration _configuration;
 
         #region Constructors
-        public SemanticAnalyzer(DiceNotationContext configuration)
+        public SemanticAnalyzer(Configuration configuration)
         {
             Guard.Against.Null(configuration, nameof(configuration));
 

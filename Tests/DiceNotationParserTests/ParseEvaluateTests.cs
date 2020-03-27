@@ -183,7 +183,7 @@ namespace DiceNotationParserTests
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokenlist);
 
-            var configuration = new DiceNotationContext()
+            var configuration = new Configuration()
             {
                 DiceRoller = _mockRoller.Object,
                 SymbolTable = _symbolTable,
