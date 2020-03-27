@@ -12,15 +12,18 @@ namespace Wgaffa.DMToolkit.Parser
 
         public int Depth => _symbols.Count;
         public int Level { get; }
-        public Maybe<ISymbolTable> EnclosingScope { get; }
+        public Maybe<ScopedSymbolTable> EnclosingScope { get; }
 
-        public ScopedSymbolTable(Maybe<ISymbolTable> enclosingScope = null, int scopeLevel = 1)
+        public ScopedSymbolTable(Maybe<ScopedSymbolTable> enclosingScope = null, int scopeLevel = 1)
         {
             EnclosingScope = enclosingScope.NoneIfNull();
             Level = scopeLevel;
         }
 
-        public ScopedSymbolTable(IEnumerable<Symbol> builtinSymbols, Maybe<ISymbolTable> enclosingScope = null, int scopeLevel = 1)
+        public ScopedSymbolTable(
+            IEnumerable<Symbol> builtinSymbols,
+            Maybe<ScopedSymbolTable> enclosingScope = null,
+            int scopeLevel = 1)
             : this(enclosingScope, scopeLevel)
         {
             Guard.Against.Null(builtinSymbols, nameof(builtinSymbols));

@@ -44,13 +44,13 @@ namespace DiceNotationParserTests
             var expression = DiceNotationParser.Notation.Parse(tokens);
 
             var symbolTable = new ScopedSymbolTable(new SetupBuiltinSymbols());
-            var semantic = new SemanticAnalyzer();
-            var context = new DiceNotationContext(expression)
+            var configuration = new Configuration()
             {
                 SymbolTable = symbolTable
             };
+            var semantic = new SemanticAnalyzer(configuration);
 
-            Result<IExpression, IList<SemanticError>> result = semantic.Analyze(context);
+            Result<IExpression, IList<SemanticError>> result = semantic.Analyze(expression);
 
             List<SemanticError> errors = new List<SemanticError>();
             result.OnError(l => errors.AddRange(l));
@@ -73,11 +73,11 @@ namespace DiceNotationParserTests
             var program = DiceNotationParser.Notation.Parse(tokens);
 
             var global = new ScopedSymbolTable(new SetupBuiltinSymbols());
-            var semantic = new SemanticAnalyzer();
-            var context = new DiceNotationContext(program) { SymbolTable = global };
+            var configuration = new Configuration() { SymbolTable = global };
+            var semantic = new SemanticAnalyzer(configuration);
 
             bool success = false;
-            var result = semantic.Analyze(context).OnSuccess(_ => success = true);
+            var result = semantic.Analyze(program).OnSuccess(_ => success = true);
 
             Assert.That(success, Is.True);
         }
