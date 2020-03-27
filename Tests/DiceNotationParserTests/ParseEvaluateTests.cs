@@ -14,8 +14,7 @@ namespace DiceNotationParserTests
     public class ParseEvaluateTests
     {
         private Mock<IDiceRoller> _mockRoller;
-        private ISymbolTable _symbolTable;
-        private DiceNotationInterpreter _interpreter;
+        private ScopedSymbolTable _symbolTable;
 
         [SetUp]
         public void SetUp()
@@ -65,8 +64,6 @@ namespace DiceNotationParserTests
             _symbolTable.Add(new VariableSymbol("ShieldBonus", intSymbol));
             _symbolTable.Add(new VariableSymbol("RangePenalty", intSymbol));
             _symbolTable.Add(new VariableSymbol("MaxDex", intSymbol));
-
-            _interpreter = new DiceNotationInterpreter();
         }
 
         public class NotationTestCaseData : IEnumerable
@@ -186,19 +183,21 @@ namespace DiceNotationParserTests
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);
             var expression = DiceNotationParser.Notation.Parse(tokenlist);
 
-            var context = new DiceNotationContext(expression)
+            var configuration = new DiceNotationContext()
             {
                 DiceRoller = _mockRoller.Object,
                 SymbolTable = _symbolTable,
             };
 
-            var semantic = new SemanticAnalyzer();
+            var semantic = new SemanticAnalyzer(configuration);
+            var ast = semantic.Analyze(expression);
+
             double result = 0;
-            var ast = semantic.Analyze(context);
+            var interpreter = new DiceNotationInterpreter(_symbolTable, configuration);
             ast.OnError(e => throw new Exception($"{e.Count} errors during semantic analyze"))
                 .Map(expr =>
-                _interpreter.Interpret(new DiceNotationContext(expr)
-                { SymbolTable = context.SymbolTable, DiceRoller = _mockRoller.Object },
+                interpreter.Interpret(
+                    expr,
                     new VariableSetup()))
                 .OnSuccess(r => result = r);
 

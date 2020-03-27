@@ -13,66 +13,80 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreter
     {
         private readonly Stack<ActivationRecord> _callStack = new Stack<ActivationRecord>();
-        private ISymbolTable _currentScope;
+        private ScopedSymbolTable _currentScope;
+        private readonly Stack<RollResult> _rollResults = new Stack<RollResult>();
+        private readonly DiceNotationContext _configuration;
+        private readonly ScopedSymbolTable _globalSymbolTable;
+
+        #region Constructors
+        public DiceNotationInterpreter()
+            : this(new ScopedSymbolTable())
+        {}
+
+        public DiceNotationInterpreter(ScopedSymbolTable symbolTable)
+            : this(symbolTable, new DiceNotationContext())
+        {
+        }
+
+        public DiceNotationInterpreter(ScopedSymbolTable symbolTable, DiceNotationContext configuration)
+        {
+            Guard.Against.Null(symbolTable, nameof(symbolTable));
+            Guard.Against.Null(configuration, nameof(configuration));
+
+            _configuration = configuration;
+            _globalSymbolTable = symbolTable;
+        }
+        #endregion
 
         #region Public API
 
-        public double Interpret(DiceNotationContext context, IEnumerable<KeyValuePair<string, double>> initialValues = null)
+        public double Interpret(IExpression expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
         {
-            Guard.Against.Null(context, nameof(context));
-            Guard.Against.Null(context.SymbolTable, nameof(context.SymbolTable));
+            Guard.Against.Null(expression, nameof(expression));
 
             var record = new ActivationRecord("main", RecordType.Program, 1);
             if (!(initialValues is null))
                 initialValues.Each(kv => record[kv.Key] = kv.Value);
 
-            _currentScope = context.SymbolTable;
+            _currentScope = _globalSymbolTable;
 
             _callStack.Push(record);
 
-            var result = (double)Visit((dynamic)context.Expression, context);
+            var result = (double)Visit((dynamic)expression);
 
             _callStack.Pop();
 
             return result;
         }
-
-        public double Interpret(IExpression expression)
-        {
-            Guard.Against.Null(expression, nameof(expression));
-
-            return (double)Visit((dynamic)expression, new DiceNotationContext(expression));
-        }
-
         #endregion Public API
 
         #region Terminal expressions
 
-        private double Visit(NumberExpression number, DiceNotationContext _)
+        private double Visit(NumberExpression number)
         {
             return number.Value;
         }
 
-        private double Visit(ListExpression list, DiceNotationContext context)
+        private double Visit(ListExpression list)
         {
-            return list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr, context));
+            return list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr));
         }
 
-        private double Visit(DiceExpression dice, DiceNotationContext context)
+        private double Visit(DiceExpression dice)
         {
-            var diceRoller = context.DiceRoller ?? dice.DiceRoller;
+            var diceRoller = _configuration.DiceRoller ?? dice.DiceRoller;
 
             var rolls = Enumerable
                 .Range(0, dice.NumberOfRolls)
                 .Select(_ => diceRoller.RollDice(dice.Dice))
                 .ToList();
 
-            context.RollResults.Add(new RollResult(rolls));
+            _rollResults.Push(new RollResult(rolls));
 
             return rolls.Sum();
         }
 
-        private double Visit(VariableExpression variable, DiceNotationContext context)
+        private double Visit(VariableExpression variable)
         {
             var record = _callStack.Peek();
             int currentScopeLevel = record.NestingLevel;
@@ -83,7 +97,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                     .Follow(currentScopeLevel - variableScope)
                     .Map(x => x[var.Name])
                     .Reduce((double)0),
-                DefinitionSymbol def => (double)Visit((dynamic)def.Expression, context),
+                DefinitionSymbol def => (double)Visit((dynamic)def.Expression),
                 _ => throw new InvalidOperationException()
             };
         }
@@ -92,94 +106,94 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Unary Expressions
 
-        private double Visit(NegateExpression negate, DiceNotationContext context)
+        private double Visit(NegateExpression negate)
         {
-            return (double)-Visit((dynamic)negate.Right, context);
+            return (double)-Visit((dynamic)negate.Right);
         }
 
-        private double Visit(DropExpression drop, DiceNotationContext context)
+        private double Visit(DropExpression drop)
         {
-            Visit((dynamic)drop.Right, context);
+            Visit((dynamic)drop.Right);
 
-            if (context.RollResults.Last() is RollResult roll)
-            {
-                var dropList = drop.Type.Strategy(roll.Keep);
-                var keepList = roll.Keep.Without(dropList);
-                RollResult newRoll = new RollResult(
-                    keepList,
-                    roll.Discard.Concat(dropList));
-                context.RollResults.Add(newRoll);
+            var roll = _rollResults.Pop();
 
-                return newRoll.Keep.Sum();
-            }
+            if (roll is null)
+                throw new InvalidOperationException("State of interpreter is out of sync, no rolls were made");
 
-            throw new InvalidOperationException();
+            var dropList = drop.Type.Strategy(roll.Keep);
+            var keepList = roll.Keep.Without(dropList);
+            RollResult newRoll = new RollResult(
+                keepList,
+                roll.Discard.Concat(dropList));
+            _rollResults.Push(newRoll);
+
+            return newRoll.Keep.Sum();
         }
 
-        private double Visit(KeepExpression keep, DiceNotationContext context)
+        private double Visit(KeepExpression keep)
         {
-            Visit((dynamic)keep.Right, context);
+            Visit((dynamic)keep.Right);
 
-            if (context.RollResults.Last() is RollResult roll)
+            var roll = _rollResults.Pop();
+
+            if (roll is null)
+                throw new InvalidOperationException("State of interpreter is out of sync, no rolls were made");
+
+            var keepList = roll.Keep.OrderByDescending(x => x).Take(keep.Count).ToList();
+            var dropped = roll.Keep.Without(keepList);
+
+            var newList = new List<int>();
+            foreach (var item in roll.Keep)
             {
-                var keepList = roll.Keep.OrderByDescending(x => x).Take(keep.Count).ToList();
-                var dropped = roll.Keep.Without(keepList);
-
-                var newList = new List<int>();
-                foreach (var item in roll.Keep)
+                if (keepList.Contains(item))
                 {
-                    if (keepList.Contains(item))
-                    {
-                        newList.Add(item);
-                        keepList.Remove(item);
-                    }
+                    newList.Add(item);
+                    keepList.Remove(item);
                 }
-
-                Debug.Assert(keepList.Count == 0);
-
-                context.RollResults.Add(new RollResult(
-                    newList,
-                    roll.Discard.AppendRange(dropped)));
-                return newList.Sum();
             }
 
-            throw new InvalidOperationException();
+            Debug.Assert(keepList.Count == 0);
+
+            _rollResults.Push(new RollResult(
+                newList,
+                roll.Discard.AppendRange(dropped)));
+            return newList.Sum();
         }
 
-        private double Visit(RepeatExpression repeat, DiceNotationContext context)
+        private double Visit(RepeatExpression repeat)
         {
             return (double)Enumerable
                 .Range(0, repeat.RepeatTimes)
-                .Aggregate(.0, (acc, _) => acc + Visit((dynamic)repeat.Right, context));
+                .Aggregate(.0, (acc, _) => acc + Visit((dynamic)repeat.Right));
         }
 
         #endregion Unary Expressions
 
         #region Binary Expressions
 
-        private double Visit(AdditionExpression addition, DiceNotationContext context)
+        private double Visit(AdditionExpression addition)
         {
-            return (double)(Visit((dynamic)addition.Left, context) + Visit((dynamic)addition.Right, context));
+            return (double)(Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right));
         }
 
-        private double Visit(SubtractionExpression subtraction, DiceNotationContext context)
+        private double Visit(SubtractionExpression subtraction)
         {
-            return (double)(Visit((dynamic)subtraction.Left, context) - Visit((dynamic)subtraction.Right, context));
+            return (double)(Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right));
         }
 
-        private double Visit(MultiplicationExpression multiplication, DiceNotationContext context)
+        private double Visit(MultiplicationExpression multiplication)
         {
-            return (double)(Visit((dynamic)multiplication.Left, context) * Visit((dynamic)multiplication.Right, context));
+            return (double)(Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right));
         }
 
-        private double Visit(DivisionExpression divition, DiceNotationContext context)
+        private double Visit(DivisionExpression divition)
         {
-            return (double)(Visit((dynamic)divition.Left, context) / Visit((dynamic)divition.Right, context));
+            return (double)(Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right));
         }
 
         #endregion Binary Expressions
 
-        public double Visit(FunctionCallExpression function, DiceNotationContext context)
+        public double Visit(FunctionCallExpression function)
         {
             Maybe<ActivationRecord> accesslink = None.Value;
             if (_callStack.Peek().NestingLevel < function.Symbol.Map(x => x.ScopeLevel).Reduce(0))
@@ -204,7 +218,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Map(funcSym => funcSym.Parameters)
                 .Map(parameters => parameters
                     .Zip(function.Arguments)
-                    .Each(x => record[x.First.Name] = Visit((dynamic)x.Second, context))
+                    .Each(x => record[x.First.Name] = Visit((dynamic)x.Second))
                     .ToList());
 
             _callStack.Push(record);
@@ -217,7 +231,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                     break;
 
                 case UserFunctionSymbol userFunction:
-                    result = Visit((dynamic)userFunction.Body, context);
+                    result = Visit((dynamic)userFunction.Body);
                     break;
 
                 default:
@@ -229,19 +243,19 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(VariableDeclarationExpression varDecl, DiceNotationContext context)
+        private double Visit(VariableDeclarationExpression varDecl)
         {
             var record = _callStack.Peek();
             var value = varDecl.InitialValue
-                .Map(expr => (double)Visit((dynamic)expr, context))
+                .Map(expr => (double)Visit((dynamic)expr))
                 .Map(v => varDecl.Names.Each(name => record[name] = v));
 
             return 0;
         }
 
-        private double Visit(AssignmentExpression assignment, DiceNotationContext context)
+        private double Visit(AssignmentExpression assignment)
         {
-            double result = Visit((dynamic)assignment.Expression, context);
+            double result = Visit((dynamic)assignment.Expression);
 
             var record = _callStack.Peek();
             int currentScopeLevel = record.NestingLevel;
@@ -255,23 +269,23 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(DefinitionExpression _, DiceNotationContext _1)
+        private double Visit(DefinitionExpression _)
         {
             return 0;
         }
 
-        private double Visit(CompoundExpression compound, DiceNotationContext context)
+        private double Visit(CompoundExpression compound)
         {
             double lastResult = 0;
             foreach (var block in compound.Expressions)
             {
-                lastResult = Visit((dynamic)block, context);
+                lastResult = Visit((dynamic)block);
             }
 
             return lastResult;
         }
 
-        private double Visit(FunctionExpression _, DiceNotationContext _1)
+        private double Visit(FunctionExpression _)
         {
             return 0;
         }
