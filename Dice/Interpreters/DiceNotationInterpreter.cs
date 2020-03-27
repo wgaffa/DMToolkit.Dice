@@ -96,8 +96,19 @@ namespace Wgaffa.DMToolkit.Interpreters
             Symbol varSymbol = variable.Symbol.Reduce(default(Symbol));
             if (record.Type == RecordType.Definition)
             {
-                varSymbol = _currentScope.Lookup(variable.Identifier).Reduce(default(Symbol));
-                variableScope = varSymbol.ScopeLevel;
+                var currentRecord = _callStack.Peek();
+                while (currentRecord != null)
+                {
+                    var nearestVariable = currentRecord.Find(variable.Identifier)
+                        .Map(x => (double)x);
+
+                    if (nearestVariable is Some<double> value)
+                        return value.Reduce(0);
+
+                    currentRecord = currentRecord.ControlLink.Reduce(default(ActivationRecord));
+                }
+
+                throw new InvalidOperationException($"state of interpreter is invalid, no runtime variable of {variable.Identifier} found");
             }
 
             return varSymbol switch
@@ -129,7 +140,8 @@ namespace Wgaffa.DMToolkit.Interpreters
                 definition.Name,
                 RecordType.Definition,
                 definition.ScopeLevel + 1,
-                accesslink);
+                accesslink)
+            { ControlLink = _callStack.Peek() };
 
             _callStack.Push(record);
 
@@ -245,27 +257,37 @@ namespace Wgaffa.DMToolkit.Interpreters
                 accesslink = _callStack.Peek().Follow(currentScope - variableScope);
             }
 
-            var record = new ActivationRecord(
-                function.Name,
-                RecordType.Function,
-                function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0),
-                accesslink);
-
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
             var arguments = function.Arguments.Select(expr => (double)Visit((dynamic)expr)).ToList();
 
+            int recordScope = function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0);
             ICallable implementation = castedSymbol.Map(x => x.Implementation).Reduce(default(ICallable));
             if (_callStack.Peek().Type == RecordType.Definition)
             {
-                int scopeLevel = _callStack.Peek().NestingLevel;
-                var symbol = _currentScope.Lookup(function.Name);
-                int declScope = symbol.Map(s => s.ScopeLevel).Reduce(scopeLevel);
-                implementation = symbol
-                    .Map(s => s as FunctionSymbol)
-                    .Map(s => s.Implementation)
-                    .Reduce(default(ICallable));
+                var currentRecord = _callStack.Peek();
+                while (currentRecord != null)
+                {
+                    int arity = function.Arguments.Count;
+                    var nearestFunction = currentRecord.Find(InternalFunctionVariables(function.Name, arity)).Reduce(default(object));
+
+                    if (nearestFunction is FunctionSymbol functionSymbol)
+                    {
+                        implementation = functionSymbol.Implementation;
+                        recordScope = functionSymbol.ScopeLevel + 1;
+                        break;
+                    }
+
+                    currentRecord = currentRecord.ControlLink.Reduce(default(ActivationRecord));
+                }
             }
+
+            var record = new ActivationRecord(
+                function.Name,
+                RecordType.Function,
+                recordScope,
+                accesslink)
+            { ControlLink = _callStack.Peek() };
 
             _callStack.Push(record);
 
@@ -322,9 +344,15 @@ namespace Wgaffa.DMToolkit.Interpreters
             return lastResult;
         }
 
-        private double Visit(FunctionExpression _)
+        private double Visit(FunctionExpression function)
         {
+            var record = _callStack.Peek();
+
+            record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
             return 0;
         }
+
+        private string InternalFunctionVariables(string identifier, int arity = 0)
+            => $"__func_{identifier}/{arity}";
     }
 }

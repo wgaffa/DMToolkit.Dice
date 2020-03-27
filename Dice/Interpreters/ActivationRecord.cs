@@ -18,7 +18,8 @@ namespace Wgaffa.DMToolkit.Interpreters
         public string Name { get; }
         public RecordType Type { get; }
         public int NestingLevel { get; }
-        public Maybe<ActivationRecord> AccessLink { get; }
+        public Maybe<ActivationRecord> AccessLink { get; internal set; } = None.Value;
+        public Maybe<ActivationRecord> ControlLink { get; internal set; } = None.Value;
 
         public object this[string identifier]
         {
@@ -44,8 +45,8 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         public Maybe<object> Find(string identifier) =>
             _members.TryGetValue(identifier, out var obj)
-            ? obj
-            : None.Value;
+            ? Maybe<object>.Some(obj)
+            : (Maybe<object>)Maybe<object>.None();
 
         public Maybe<ActivationRecord> Follow(int count)
         {

@@ -153,10 +153,11 @@ namespace Wgaffa.DMToolkit.Interpreters
                 _currentScope.Bind(s => s.Lookup(function.ReturnType)),
                 new UserFunction(function),
                 parameters);
+            function.Symbol = userFunction;
 
             _currentScope.Bind(s => s.Lookup(function.Identifier))
                 .Match(
-                ifSome: s => SemanticError.VariableAlreadyDeclared(s.Name),
+                ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                 ifNone: () => _currentScope.Match(s => s.Add(userFunction), () => { }));
 
             int scopeLevel = _currentScope.Map(s => s.Level + 1).Reduce(1);
