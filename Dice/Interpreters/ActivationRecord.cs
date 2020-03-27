@@ -8,6 +8,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     {
         Program,
         Function,
+        Definition,
     }
 
     public class ActivationRecord

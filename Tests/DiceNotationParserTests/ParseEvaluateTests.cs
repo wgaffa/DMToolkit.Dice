@@ -149,6 +149,8 @@ namespace DiceNotationParserTests
                     .Returns(17);
                 yield return new TestCaseData("def Attack = 1d20 + STRMOD; Attack;")
                     .Returns(5);
+                yield return new TestCaseData("def Block = 5 + max(4, STRMOD); Block;")
+                    .Returns(7);
             }
         }
 

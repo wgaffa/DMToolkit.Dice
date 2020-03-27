@@ -90,17 +90,55 @@ namespace Wgaffa.DMToolkit.Interpreters
         private double Visit(VariableExpression variable)
         {
             var record = _callStack.Peek();
+
             int currentScopeLevel = record.NestingLevel;
             int variableScope = variable.Symbol.Map(s => s.ScopeLevel).Reduce(currentScopeLevel);
-            return variable.Symbol.Reduce(default(Symbol)) switch
+            Symbol varSymbol = variable.Symbol.Reduce(default(Symbol));
+            if (record.Type == RecordType.Definition)
+            {
+                varSymbol = _currentScope.Lookup(variable.Identifier).Reduce(default(Symbol));
+                variableScope = varSymbol.ScopeLevel;
+            }
+
+            int j = 5;
+            return varSymbol switch
             {
                 VariableSymbol var => (double)record
                     .Follow(currentScopeLevel - variableScope)
                     .Map(x => x[var.Name])
                     .Reduce((double)0),
-                DefinitionSymbol def => (double)Visit((dynamic)def.Expression),
+                DefinitionSymbol def => RunDefinition(def),
                 _ => throw new InvalidOperationException()
             };
+
+            double RunDefinition(DefinitionSymbol definition)
+            {
+                Maybe<ActivationRecord> accesslink = None.Value;
+                if (_callStack.Peek().NestingLevel < definition.ScopeLevel)
+                {
+                    accesslink = _callStack.Peek().AccessLink;
+                }
+                else
+                {
+                    int currentScope = _callStack.Peek().NestingLevel;
+                    int variableScope = definition.ScopeLevel;
+                    accesslink = _callStack.Peek().Follow(currentScope - variableScope);
+                }
+
+                var record = new ActivationRecord(
+                    definition.Name,
+                    RecordType.Definition,
+                    definition.ScopeLevel + 1,
+                    accesslink);
+
+                _callStack.Push(record);
+
+                double result = Visit((dynamic)definition.Expression);
+
+                _callStack.Pop();
+
+                return result;
+            }
         }
 
         #endregion Terminal expressions
