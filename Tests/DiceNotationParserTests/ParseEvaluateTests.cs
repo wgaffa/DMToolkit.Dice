@@ -147,6 +147,8 @@ namespace DiceNotationParserTests
                     .Returns(10);
                 yield return new TestCaseData("def Attack = (d20 + 5) * 1.5; Attack + 5;")
                     .Returns(17);
+                yield return new TestCaseData("def Attack = 1d20 + STRMOD; Attack;")
+                    .Returns(5);
             }
         }
 
@@ -194,7 +196,7 @@ namespace DiceNotationParserTests
             var ast = semantic.Analyze(expression);
 
             double result = 0;
-            var interpreter = new DiceNotationInterpreter(_symbolTable, configuration);
+            var interpreter = new DiceNotationInterpreter(configuration);
             ast.OnError(e => throw new Exception($"{e.Count} errors during semantic analyze"))
                 .Map(expr =>
                 interpreter.Interpret(

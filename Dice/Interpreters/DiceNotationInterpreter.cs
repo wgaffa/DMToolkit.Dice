@@ -20,21 +20,15 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Constructors
         public DiceNotationInterpreter()
-            : this(new ScopedSymbolTable())
+            : this(new Configuration())
         {}
 
-        public DiceNotationInterpreter(ScopedSymbolTable symbolTable)
-            : this(symbolTable, new Configuration())
+        public DiceNotationInterpreter(Configuration configuration)
         {
-        }
-
-        public DiceNotationInterpreter(ScopedSymbolTable symbolTable, Configuration configuration)
-        {
-            Guard.Against.Null(symbolTable, nameof(symbolTable));
             Guard.Against.Null(configuration, nameof(configuration));
 
             _configuration = configuration;
-            _globalSymbolTable = symbolTable;
+            _globalSymbolTable = (ScopedSymbolTable)configuration.SymbolTable;
         }
         #endregion
 
@@ -221,24 +215,15 @@ namespace Wgaffa.DMToolkit.Interpreters
                 accesslink);
 
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
-            var arguments = castedSymbol
-                .Map(funcSym => funcSym.Parameters)
-                .Map(parameters => parameters
-                    .Zip(function.Arguments)
-                    .Each(x => record[x.First.Name] = Visit((dynamic)x.Second))
-                    .ToList());
+
+            var arguments = function.Arguments.Select(expr => (double)Visit((dynamic)expr)).ToList();
 
             _callStack.Push(record);
 
             double result = 0;
-            if (castedSymbol is ICallable func)
+            if (castedSymbol.Map(x => x.Implementation).Reduce(default(ICallable)) is ICallable func)
             {
-                result = (double)func
-                    .Call(
-                        this,
-                        arguments
-                        .Map(x => x.Select(v => v.Second).ToArray())
-                        .Reduce(Array.Empty<IExpression>()));
+                result = (double)func.Call(this, arguments.Cast<object>());
             }
 
             _callStack.Pop();
