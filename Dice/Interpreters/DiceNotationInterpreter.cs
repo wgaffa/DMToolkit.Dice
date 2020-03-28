@@ -46,6 +46,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _currentScope = _globalSymbolTable;
 
+            _currentScope
+                .OfType<FunctionSymbol>()
+                .Each(s => record[InternalFunctionVariables(s.Name, s.Parameters.Count)] = s);
+
             _callStack.Push(record);
 
             var result = (double)Visit((dynamic)expression);
