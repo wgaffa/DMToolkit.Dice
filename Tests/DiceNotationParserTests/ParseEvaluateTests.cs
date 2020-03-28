@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Interpreters;
+using Wgaffa.DMToolkit.Native;
 using Wgaffa.DMToolkit.Parser;
 
 namespace DiceNotationParserTests
@@ -36,20 +37,20 @@ namespace DiceNotationParserTests
             var parameters = new Symbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
             _symbolTable.Add(realSymbol);
             _symbolTable.Add(intSymbol);
-            _symbolTable.Add(new BuiltinFunctionSymbol(
+            _symbolTable.Add(new FunctionSymbol(
                 "max",
                 realSymbol,
-                x => (double)((double)x["a"] > (double)x["b"] ? x["a"] : x["b"]),
+                new Max(),
                 parameters));
-            _symbolTable.Add(new BuiltinFunctionSymbol(
+            _symbolTable.Add(new FunctionSymbol(
                 "min",
                 realSymbol,
-                x => (double)((double)x["a"] <= (double)x["b"] ? x["a"] : x["b"]),
+                new Min(),
                 parameters));
-            _symbolTable.Add(new BuiltinFunctionSymbol(
+            _symbolTable.Add(new FunctionSymbol(
                 "print",
                 realSymbol,
-                x => { Console.WriteLine(x["a"]); return 0; },
+                new Print(),
                 new Symbol[] { new VariableSymbol("a", intSymbol) }));
 
             _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));
@@ -146,6 +147,18 @@ namespace DiceNotationParserTests
                     .Returns(10);
                 yield return new TestCaseData("def Attack = (d20 + 5) * 1.5; Attack + 5;")
                     .Returns(17);
+                yield return new TestCaseData("def Attack = 1d20 + STRMOD; Attack;")
+                    .Returns(5);
+                yield return new TestCaseData("def Block = 5 + max(4, STRMOD); Block;")
+                    .Returns(9);
+                yield return new TestCaseData("int Max(int a, int b) 5; end def Parry = 5 + Max(4, STRMOD); Parry;")
+                    .Returns(10);
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) 20; end x = Durdle; end P(); end D(); x;")
+                    .Returns(25);
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + STRMOD; int P() STRMOD = 1; x = Durdle; end P(); end D(); x;")
+                    .Returns(6);
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) b; end STRMOD = 3; x = Durdle; end P(); end D(); x;")
+                    .Returns(8);
             }
         }
 
@@ -193,7 +206,7 @@ namespace DiceNotationParserTests
             var ast = semantic.Analyze(expression);
 
             double result = 0;
-            var interpreter = new DiceNotationInterpreter(_symbolTable, configuration);
+            var interpreter = new DiceNotationInterpreter(configuration);
             ast.OnError(e => throw new Exception($"{e.Count} errors during semantic analyze"))
                 .Map(expr =>
                 interpreter.Interpret(

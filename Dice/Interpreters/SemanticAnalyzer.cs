@@ -13,7 +13,7 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class SemanticAnalyzer
     {
         private readonly List<SemanticError> _errors = new List<SemanticError>();
-        private ScopedSymbolTable _globalScope;
+        private readonly ScopedSymbolTable _globalScope;
         private Maybe<ScopedSymbolTable> _currentScope = None.Value;
         private readonly Configuration _configuration;
 
@@ -23,7 +23,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             Guard.Against.Null(configuration, nameof(configuration));
 
             _configuration = configuration;
-            _globalScope = new ScopedSymbolTable(configuration.SymbolTable);
+            _globalScope = (ScopedSymbolTable)configuration.SymbolTable;
         }
         #endregion
 
@@ -33,46 +33,39 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _currentScope = _globalScope;
 
-            var result = Visit((dynamic)expression);
+            Visit((dynamic)expression);
 
             if (_errors.Count > 0)
                 return _errors;
             else
-                return result;
+                return Result<IExpression, IList<SemanticError>>.Ok(expression);
         }
 
         private IExpression Visit(IExpression expr)
             => expr;
 
-        private IExpression Visit(AdditionExpression addition)
-            => new AdditionExpression(
-                Visit((dynamic)addition.Left),
-                Visit((dynamic)addition.Right));
+        private IExpression Visit(BinaryExpression binary)
+        {
+            Visit((dynamic)binary.Left);
+            Visit((dynamic)binary.Right);
 
-        private IExpression Visit(SubtractionExpression subtraction)
-            => new SubtractionExpression(
-                Visit((dynamic)subtraction.Left),
-                Visit((dynamic)subtraction.Right));
+            return binary;
+        }
 
-        private IExpression Visit(MultiplicationExpression multiplication)
-                    => new MultiplicationExpression(
-                        Visit((dynamic)multiplication.Left),
-                        Visit((dynamic)multiplication.Right));
+        private IExpression Visit(NegateExpression negate)
+        {
+            Visit((dynamic)negate.Right);
 
-        private IExpression Visit(DivisionExpression division)
-                    => new DivisionExpression(
-                        Visit((dynamic)division.Left),
-                        Visit((dynamic)division.Right));
-
-        private IExpression Visit(NegateExpression negate) =>
-            new NegateExpression(Visit((dynamic)negate.Right));
+            return negate;
+        }
 
         private IExpression Visit(CompoundExpression compound)
         {
             var list = compound.Expressions
-                .Select(expr => (IExpression)Visit((dynamic)expr));
+                .Select(expr => (IExpression)Visit((dynamic)expr))
+                .ToList();
 
-            return new CompoundExpression(list);
+            return compound;
         }
 
         private IExpression Visit(VariableDeclarationExpression varDecl)
@@ -85,7 +78,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Map(type =>
                     varDecl.Names.Select(name => new VariableSymbol(name, Maybe<Symbol>.Some(type))))
                 .Map(vars => vars.Each(v =>
-                    _currentScope.Bind(s => ((ScopedSymbolTable)s).LookupCurrent(v.Name))
+                    _currentScope.Bind(s => s.LookupCurrent(v.Name))
                     .Match(
                         ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                         ifNone: () => _currentScope.Match(s => s.Add(v), () => { }))
@@ -115,9 +108,10 @@ namespace Wgaffa.DMToolkit.Interpreters
                 ifSome: s => variableSymbol = s,
                 ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
 
-            IExpression expr = Visit((dynamic)assignment.Expression);
+            Visit((dynamic)assignment.Expression);
+            assignment.Symbol = variableSymbol;
 
-            return new AssignmentExpression(assignment.Identifier, expr) { Symbol = variableSymbol };
+            return assignment;
         }
 
         private IExpression Visit(DefinitionExpression definition)
@@ -126,19 +120,19 @@ namespace Wgaffa.DMToolkit.Interpreters
             {
                 case Some<Symbol> some:
                     _errors.Add(SemanticError.VariableAlreadyDeclared(some.Reduce(default(Symbol)).Name));
-                    return definition;
+                    break;
 
                 case None<Symbol> none:
                     var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
                     _currentScope.Match(s => s.Add(definitionSymbol), () => { });
-                    return new DefinitionExpression(
-                        definition.Name,
-                        definition.Expression,
-                        Maybe<Symbol>.Some(definitionSymbol));
+                    definition.Symbol = definitionSymbol;
+                    break;
 
                 default:
                     throw new InvalidOperationException();
             }
+
+            return definition;
         }
 
         private IExpression Visit(FunctionExpression function)
@@ -154,45 +148,39 @@ namespace Wgaffa.DMToolkit.Interpreters
                 _errors.Add(SemanticError.VariableUnknownType(string.Empty));
             }
 
-            var userFunction = new UserFunctionSymbol(
+            var userFunction = new FunctionSymbol(
                 function.Identifier,
                 _currentScope.Bind(s => s.Lookup(function.ReturnType)),
-                function.Body,
+                new UserFunction(function),
                 parameters);
+            function.Symbol = userFunction;
 
-            _currentScope.Bind(s => s.Lookup(function.Identifier))
+            _currentScope.Bind(s => s.LookupCurrent(function.Identifier))
                 .Match(
-                ifSome: s => SemanticError.VariableAlreadyDeclared(s.Name),
+                ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                 ifNone: () => _currentScope.Match(s => s.Add(userFunction), () => { }));
 
             int scopeLevel = _currentScope.Map(s => s.Level + 1).Reduce(1);
             _currentScope = new ScopedSymbolTable(_currentScope.Reduce(default(ScopedSymbolTable)), scopeLevel);
 
             parameters.ForEach(x => _currentScope.Do(scope => scope.Add(x)));
-            IExpression body = Visit((dynamic)function.Body);
-
-            userFunction.Body = body;
+            Visit((dynamic)function.Body);
 
             _currentScope = _currentScope.Bind(s => s.EnclosingScope);
 
-            return new FunctionExpression(
-                function.Identifier,
-                body,
-                function.ReturnType,
-                function.Parameters);
+            return function;
         }
 
         private IExpression Visit(FunctionCallExpression functionCall)
         {
-            Maybe<Symbol> functionSymbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
-            var callExpression = new FunctionCallExpression(
-                functionCall.Name,
-                functionCall.Arguments
-                    .Select(arg => (IExpression)Visit((dynamic)arg)));
+            functionCall.Symbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
 
-            callExpression.Symbol = functionSymbol;
+            foreach (var argument in functionCall.Arguments)
+            {
+                Visit((dynamic)argument);
+            }
 
-            return callExpression;
+            return functionCall;
         }
     }
 }

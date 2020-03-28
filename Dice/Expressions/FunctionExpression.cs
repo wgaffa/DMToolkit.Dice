@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using System.Collections.Generic;
 using System.Linq;
+using Wgaffa.DMToolkit.Parser;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
@@ -8,6 +9,7 @@ namespace Wgaffa.DMToolkit.Expressions
     {
         private readonly List<KeyValuePair<string, string>> _parameters =
             new List<KeyValuePair<string, string>>();
+        internal FunctionSymbol Symbol;
 
         public string Identifier { get; }
         public IExpression Body { get; }

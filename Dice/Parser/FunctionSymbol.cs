@@ -2,23 +2,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
 {
-    public abstract class FunctionSymbol : Symbol, IEquatable<FunctionSymbol>
+    public class FunctionSymbol : Symbol, IEquatable<FunctionSymbol>
     {
         protected readonly List<Symbol> _parameters = new List<Symbol>();
 
         public IReadOnlyList<Symbol> Parameters => _parameters.AsReadOnly();
 
-        protected FunctionSymbol(string name, Maybe<Symbol> type)
+        public ICallable Implementation { get; }
+
+        public FunctionSymbol(string name, Maybe<Symbol> type, ICallable implementation)
             : base(name, type)
         {
+            Guard.Against.Null(implementation, nameof(implementation));
+
+            Implementation = implementation;
         }
 
-        protected FunctionSymbol(string name, Maybe<Symbol> type, IEnumerable<Symbol> parameters)
-            : this(name, type)
+        public FunctionSymbol(string name, Maybe<Symbol> type, ICallable implementation, IEnumerable<Symbol> parameters)
+            : this(name, type, implementation)
         {
             Guard.Against.Null(parameters, nameof(parameters));
 
@@ -36,7 +42,8 @@ namespace Wgaffa.DMToolkit.Parser
 
             return Name == other.Name
                 && Type.Equals(other.Type)
-                && _parameters.SequenceEqual(other._parameters);
+                && _parameters.SequenceEqual(other._parameters)
+                && EqualityComparer<ICallable>.Default.Equals(Implementation, other.Implementation);
         }
 
         public override bool Equals(object obj)
@@ -59,6 +66,7 @@ namespace Wgaffa.DMToolkit.Parser
                 hash = hash * 213 + Name.GetHashCode();
                 hash = hash * 213 + Type.GetHashCode();
                 hash = hash * 213 + _parameters.Aggregate(hash, (acc, symbol) => acc * 213 + symbol.GetHashCode());
+                hash = hash * 213 + Implementation.GetHashCode();
 
                 return hash;
             }

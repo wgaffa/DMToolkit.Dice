@@ -8,22 +8,15 @@ namespace Wgaffa.DMToolkit.Expressions
     {
         public string Name { get; }
         public IExpression Expression { get; }
-        public Maybe<Symbol> Symbol { get; }
+        internal Symbol Symbol { get; set; }
 
         public DefinitionExpression(string name, IExpression expression)
-            : this(name, expression, None.Value)
-        {
-        }
-
-        public DefinitionExpression(string name, IExpression expression, Maybe<Symbol> symbol)
         {
             Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Guard.Against.Null(expression, nameof(expression));
-            Guard.Against.Null(symbol, nameof(symbol));
 
             Name = name;
             Expression = expression;
-            Symbol = symbol;
         }
 
         public override string ToString()

@@ -20,23 +20,19 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Constructors
         public DiceNotationInterpreter()
-            : this(new ScopedSymbolTable())
+            : this(new Configuration())
         {}
 
-        public DiceNotationInterpreter(ScopedSymbolTable symbolTable)
-            : this(symbolTable, new Configuration())
+        public DiceNotationInterpreter(Configuration configuration)
         {
-        }
-
-        public DiceNotationInterpreter(ScopedSymbolTable symbolTable, Configuration configuration)
-        {
-            Guard.Against.Null(symbolTable, nameof(symbolTable));
             Guard.Against.Null(configuration, nameof(configuration));
 
             _configuration = configuration;
-            _globalSymbolTable = symbolTable;
+            _globalSymbolTable = (ScopedSymbolTable)configuration.SymbolTable;
         }
         #endregion
+
+        internal ActivationRecord CurrentEnvironment => _callStack.Peek();
 
         #region Public API
 
@@ -50,6 +46,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _currentScope = _globalSymbolTable;
 
+            _currentScope
+                .OfType<FunctionSymbol>()
+                .Each(s => record[InternalFunctionVariables(s.Name, s.Parameters.Count)] = s);
+
             _callStack.Push(record);
 
             var result = (double)Visit((dynamic)expression);
@@ -59,6 +59,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
         #endregion Public API
+
+        internal double Execute(IExpression expression)
+        {
+            return (double)Visit((dynamic)expression);
+        }
 
         #region Terminal expressions
 
@@ -89,17 +94,66 @@ namespace Wgaffa.DMToolkit.Interpreters
         private double Visit(VariableExpression variable)
         {
             var record = _callStack.Peek();
+
             int currentScopeLevel = record.NestingLevel;
             int variableScope = variable.Symbol.Map(s => s.ScopeLevel).Reduce(currentScopeLevel);
-            return variable.Symbol.Reduce(default(Symbol)) switch
+            Symbol varSymbol = variable.Symbol.Reduce(default(Symbol));
+            if (record.Type == RecordType.Definition)
+            {
+                var currentRecord = _callStack.Peek();
+                while (currentRecord != null)
+                {
+                    var nearestVariable = currentRecord.Find(variable.Identifier)
+                        .Map(x => (double)x);
+
+                    if (nearestVariable is Some<double> value)
+                        return value.Reduce(0);
+
+                    currentRecord = currentRecord.ControlLink.Reduce(default(ActivationRecord));
+                }
+
+                throw new InvalidOperationException($"state of interpreter is invalid, no runtime variable of {variable.Identifier} found");
+            }
+
+            return varSymbol switch
             {
                 VariableSymbol var => (double)record
                     .Follow(currentScopeLevel - variableScope)
                     .Map(x => x[var.Name])
                     .Reduce((double)0),
-                DefinitionSymbol def => (double)Visit((dynamic)def.Expression),
+                DefinitionSymbol def => RunDefinition(def),
                 _ => throw new InvalidOperationException()
             };
+        }
+
+        private double RunDefinition(DefinitionSymbol definition)
+        {
+            Maybe<ActivationRecord> accesslink;
+            if (_callStack.Peek().NestingLevel < definition.ScopeLevel)
+            {
+                accesslink = _callStack.Peek().AccessLink;
+            }
+            else
+            {
+                int currentScope = _callStack.Peek().NestingLevel;
+                int variableScope = definition.ScopeLevel;
+                accesslink = _callStack.Peek().Follow(currentScope - variableScope);
+            }
+
+            var record = new ActivationRecord(
+                definition.Name,
+                RecordType.Definition,
+                definition.ScopeLevel + 1,
+                accesslink)
+            { ControlLink = _callStack.Peek() };
+
+            _callStack.Push(record);
+
+            double result = Visit((dynamic)definition.Expression);
+
+            _callStack.Pop();
+
+            return result;
         }
 
         #endregion Terminal expressions
@@ -207,35 +261,44 @@ namespace Wgaffa.DMToolkit.Interpreters
                 accesslink = _callStack.Peek().Follow(currentScope - variableScope);
             }
 
+            var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
+
+            var arguments = function.Arguments.Select(expr => (double)Visit((dynamic)expr)).ToList();
+
+            int recordScope = function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0);
+            ICallable implementation = castedSymbol.Map(x => x.Implementation).Reduce(default(ICallable));
+            if (_callStack.Peek().Type == RecordType.Definition)
+            {
+                var currentRecord = _callStack.Peek();
+                while (currentRecord != null)
+                {
+                    int arity = function.Arguments.Count;
+                    var nearestFunction = currentRecord.Find(InternalFunctionVariables(function.Name, arity)).Reduce(default(object));
+
+                    if (nearestFunction is FunctionSymbol functionSymbol)
+                    {
+                        implementation = functionSymbol.Implementation;
+                        recordScope = functionSymbol.ScopeLevel + 1;
+                        break;
+                    }
+
+                    currentRecord = currentRecord.ControlLink.Reduce(default(ActivationRecord));
+                }
+            }
+
             var record = new ActivationRecord(
                 function.Name,
                 RecordType.Function,
-                function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0),
-                accesslink);
-
-            var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
-            var arguments = castedSymbol
-                .Map(funcSym => funcSym.Parameters)
-                .Map(parameters => parameters
-                    .Zip(function.Arguments)
-                    .Each(x => record[x.First.Name] = Visit((dynamic)x.Second))
-                    .ToList());
+                recordScope,
+                accesslink)
+            { ControlLink = _callStack.Peek() };
 
             _callStack.Push(record);
 
             double result = 0;
-            switch (castedSymbol.Reduce(default(FunctionSymbol)))
+            if (implementation is ICallable func)
             {
-                case BuiltinFunctionSymbol builtin:
-                    result = builtin.Call(record);
-                    break;
-
-                case UserFunctionSymbol userFunction:
-                    result = Visit((dynamic)userFunction.Body);
-                    break;
-
-                default:
-                    break;
+                result = (double)func.Call(this, arguments.Cast<object>());
             }
 
             _callStack.Pop();
@@ -285,9 +348,15 @@ namespace Wgaffa.DMToolkit.Interpreters
             return lastResult;
         }
 
-        private double Visit(FunctionExpression _)
+        private double Visit(FunctionExpression function)
         {
+            var record = _callStack.Peek();
+
+            record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
             return 0;
         }
+
+        private string InternalFunctionVariables(string identifier, int arity = 0)
+            => $"__func_{identifier}/{arity}";
     }
 }
