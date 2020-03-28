@@ -157,7 +157,7 @@ namespace DiceNotationParserTests
                     .Returns(25);
                 yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + STRMOD; int P() STRMOD = 1; x = Durdle; end P(); end D(); x;")
                     .Returns(6);
-                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max2(4, STRMOD); int P() int max2(int a, int b) b; end STRMOD = 3; x = Durdle; end P(); end D(); x;")
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) b; end STRMOD = 3; x = Durdle; end P(); end D(); x;")
                     .Returns(8);
             }
         }

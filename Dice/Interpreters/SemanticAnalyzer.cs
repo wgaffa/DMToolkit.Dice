@@ -155,7 +155,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 parameters);
             function.Symbol = userFunction;
 
-            _currentScope.Bind(s => s.Lookup(function.Identifier))
+            _currentScope.Bind(s => s.LookupCurrent(function.Identifier))
                 .Match(
                 ifSome: s => _errors.Add(SemanticError.VariableAlreadyDeclared(s.Name)),
                 ifNone: () => _currentScope.Match(s => s.Add(userFunction), () => { }));
