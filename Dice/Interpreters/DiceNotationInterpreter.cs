@@ -20,9 +20,10 @@ namespace Wgaffa.DMToolkit.Interpreters
         internal ActivationRecord CurrentEnvironment => _callStack.Peek();
 
         #region Constructors
+
         public DiceNotationInterpreter()
             : this(new Configuration())
-        {}
+        { }
 
         public DiceNotationInterpreter(Configuration configuration)
         {
@@ -31,7 +32,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             _configuration = configuration;
             _globalSymbolTable = (ScopedSymbolTable)configuration.SymbolTable;
         }
-        #endregion
+
+        #endregion Constructors
+
         #region Public API
 
         public double Interpret(IExpression expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
@@ -54,7 +57,9 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return result;
         }
+
         #endregion Public API
+
         #region Terminal expressions
 
         private double Visit(NumberExpression number)
@@ -103,6 +108,7 @@ namespace Wgaffa.DMToolkit.Interpreters
                 _ => throw new InvalidOperationException()
             };
         }
+
         #endregion Terminal expressions
 
         #region Unary Expressions
@@ -196,7 +202,6 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         public double Visit(FunctionCallExpression function)
         {
-
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
             var arguments = function.Arguments.Select(expr => (double)Visit((dynamic)expr)).ToList();
@@ -284,6 +289,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
 
         #region Internal methods
+
         private string InternalFunctionVariables(string identifier, int arity = 0)
             => $"__func_{identifier}/{arity}";
 
@@ -341,6 +347,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             return (double)Visit((dynamic)expression);
         }
-        #endregion
+
+        #endregion Internal methods
     }
 }
