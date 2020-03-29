@@ -13,7 +13,6 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class DiceNotationInterpreter
     {
         private readonly Stack<ActivationRecord> _callStack = new Stack<ActivationRecord>();
-        private ScopedSymbolTable _currentScope;
         private readonly Stack<RollResult> _rollResults = new Stack<RollResult>();
         private readonly Configuration _configuration;
         private readonly ScopedSymbolTable _globalSymbolTable;
@@ -44,9 +43,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             if (!(initialValues is null))
                 initialValues.Each(kv => record[kv.Key] = kv.Value);
 
-            _currentScope = _globalSymbolTable;
-
-            _currentScope
+            _globalSymbolTable
                 .OfType<FunctionSymbol>()
                 .Each(s => record[InternalFunctionVariables(s.Name, s.Parameters.Count)] = s);
 
