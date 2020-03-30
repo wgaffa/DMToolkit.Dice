@@ -98,9 +98,16 @@ namespace Wgaffa.DMToolkit.Parser
                     else
                         yield return Result.Value(DiceNotationToken.Identifier, beginIdentifier, next.Location);
                 }
+                else if (ch == '"')
+                {
+                    var endString = QuotedString.CStyle(next.Location).Remainder;
+
+                    yield return Result.Value(DiceNotationToken.String, next.Location, endString);
+                    next = endString.ConsumeChar();
+                }
                 else
                 {
-                    yield return Result.Empty<DiceNotationToken>(next.Location, new[] { "number", "operator", "dice" });
+                    yield return Result.Empty<DiceNotationToken>(next.Location, new[] { "number", "operator", "dice", "literal" });
                 }
 
                 next = SkipWhiteSpace(next.Location);
