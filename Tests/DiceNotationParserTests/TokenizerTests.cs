@@ -148,7 +148,12 @@ namespace DiceNotationParserTests
         }
 
         private static readonly List<string> InvalidTestCaseData = new List<string>
-        { "5d", ".5", "2d6.5" };
+        {
+            "5d",
+            ".5",
+            "2d6.5",
+            @"""unmatched string",
+        };
 
         [TestCaseSource(nameof(InvalidTestCaseData))]
         public void InvalidToken_ShouldThrowParseException(string input)

@@ -100,10 +100,14 @@ namespace Wgaffa.DMToolkit.Parser
                 }
                 else if (ch == '"')
                 {
-                    var endString = QuotedString.CStyle(next.Location).Remainder;
+                    var endString = QuotedString.CStyle(next.Location);
 
-                    yield return Result.Value(DiceNotationToken.String, next.Location, endString);
-                    next = endString.ConsumeChar();
+                    if (endString.HasValue)
+                        yield return Result.Value(DiceNotationToken.String, next.Remainder, endString.Remainder);
+                    else
+                        yield return Result.Empty<DiceNotationToken>(next.Remainder, new string[] { "\"" });
+
+                    next = endString.Remainder.ConsumeChar();
                 }
                 else
                 {

@@ -56,6 +56,10 @@ namespace Wgaffa.DMToolkit.Parser
             from identifier in Token.EqualTo(DiceNotationToken.Identifier)
             select identifier.ToStringValue();
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> String =
+            from str in Token.EqualTo(DiceNotationToken.String)
+            select (IExpression)new StringLiteral(str.ToStringValue());
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Reference =
             from name in Variable
             select (IExpression)new VariableExpression(name);
@@ -84,7 +88,7 @@ namespace Wgaffa.DMToolkit.Parser
             .Select(n => (IExpression)new NumberExpression(n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
-            DiceNotation.Or(Reference).Or(Number);
+            DiceNotation.Or(Reference).Or(Number).Or(String);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Factor =
             (from lparen in Token.EqualTo(DiceNotationToken.LParen)
@@ -107,7 +111,7 @@ namespace Wgaffa.DMToolkit.Parser
             .Named("repeat");
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> FunctionCall =
-            from identifier in Token.EqualTo(DiceNotationToken.Identifier).Apply(Superpower.Parsers.Identifier.CStyle)
+            from identifier in Token.EqualTo(DiceNotationToken.Identifier).Apply(Identifier.CStyle)
             from lparen in Token.EqualTo(DiceNotationToken.LParen)
             from expr in Expr.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
