@@ -103,9 +103,9 @@ namespace Wgaffa.DMToolkit.Parser
                     var endString = QuotedString.CStyle(next.Location);
 
                     if (endString.HasValue)
-                        yield return Result.Value(DiceNotationToken.String, next.Remainder, endString.Remainder);
+                        yield return Result.Value(DiceNotationToken.String, next.Location, endString.Remainder);
                     else
-                        yield return Result.Empty<DiceNotationToken>(next.Remainder, new string[] { "\"" });
+                        yield return Result.Empty<DiceNotationToken>(next.Location, new string[] { "\"" });
 
                     next = endString.Remainder.ConsumeChar();
                 }

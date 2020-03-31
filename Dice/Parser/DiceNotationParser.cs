@@ -58,7 +58,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> String =
             from str in Token.EqualTo(DiceNotationToken.String)
-            select (IExpression)new StringLiteral(str.ToStringValue());
+            select (IExpression)new StringLiteral(str.ToStringValue().Substring(1, str.ToStringValue().Length-1));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Reference =
             from name in Variable
