@@ -34,6 +34,8 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData(":").Returns(1);
                 yield return new TestCaseData("=").Returns(1);
                 yield return new TestCaseData("3.2452").Returns(1);
+                yield return new TestCaseData(@"""This is a string""").Returns(1);
+                yield return new TestCaseData(@"""This is \""a string\"" for me""").Returns(1);
             }
         }
 
@@ -146,7 +148,12 @@ namespace DiceNotationParserTests
         }
 
         private static readonly List<string> InvalidTestCaseData = new List<string>
-        { "5d", ".5", "2d6.5" };
+        {
+            "5d",
+            ".5",
+            "2d6.5",
+            @"""unmatched string",
+        };
 
         [TestCaseSource(nameof(InvalidTestCaseData))]
         public void InvalidToken_ShouldThrowParseException(string input)

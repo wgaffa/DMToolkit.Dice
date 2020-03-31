@@ -9,7 +9,11 @@ namespace Wgaffa.DMToolkit.Parser
 {
 	public enum DiceNotationToken
 	{
+		[Token(Category = "literal")]
 		Number,
+
+		[Token(Category = "literal")]
+		String,
 
 		[Token(Category = "operator", Example = "+")]
 		Plus,
