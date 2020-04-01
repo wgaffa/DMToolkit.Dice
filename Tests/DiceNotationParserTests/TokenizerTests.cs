@@ -47,9 +47,6 @@ namespace DiceNotationParserTests
             return tokenList.Count();
         }
 
-
-        // Read more https://github.com/nunit/docs/wiki/TestCaseSource-Attribute and https://github.com/nunit/docs/wiki/TestCaseData
-
         public class TokenKindTestCaseData : IEnumerable
         {
             public IEnumerator GetEnumerator()

@@ -11,7 +11,7 @@ namespace Wgaffa.DMToolkit.Expressions
     {
         public IExpression Left { get; }
 
-        public BinaryExpression(IExpression left, IExpression right) : base(right)
+        protected BinaryExpression(IExpression left, IExpression right) : base(right)
         {
             Guard.Against.Null(left, nameof(left));
 

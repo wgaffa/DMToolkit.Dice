@@ -5,14 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
+using Wgaffa.DMToolkit.Statements;
 
 namespace Wgaffa.DMToolkit.Interpreters
 {
     public class UserFunction : ICallable
     {
-        private readonly FunctionExpression _declaration;
+        private readonly Function _declaration;
 
-        public UserFunction(FunctionExpression declaration)
+        public UserFunction(Function declaration)
         {
             _declaration = declaration;
         }

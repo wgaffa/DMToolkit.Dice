@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.DMToolkit.Statements;
 
 namespace DiceNotationParserTests
 {
@@ -15,77 +16,77 @@ namespace DiceNotationParserTests
             public IEnumerator GetEnumerator()
             {
                 yield return new TestCaseData("5")
-                    .Returns(typeof(NumberExpression));
+                    .Returns(typeof(Number));
                 yield return new TestCaseData("5.2")
-                    .Returns(typeof(NumberExpression));
+                    .Returns(typeof(Number));
                 yield return new TestCaseData("3d8")
-                    .Returns(typeof(DiceExpression));
+                    .Returns(typeof(DiceRoll));
                 yield return new TestCaseData("d6")
-                    .Returns(typeof(DiceExpression));
+                    .Returns(typeof(DiceRoll));
                 yield return new TestCaseData("5 + 2d6")
-                    .Returns(typeof(AdditionExpression));
+                    .Returns(typeof(Addition));
                 yield return new TestCaseData("7 - 3")
-                    .Returns(typeof(SubtractionExpression));
+                    .Returns(typeof(Subtraction));
                 yield return new TestCaseData("2 * 3")
-                    .Returns(typeof(MultiplicationExpression));
+                    .Returns(typeof(Multiplication));
                 yield return new TestCaseData("10/2")
-                    .Returns(typeof(DivisionExpression));
+                    .Returns(typeof(Division));
                 yield return new TestCaseData("5 * 2 + 3")
-                    .Returns(typeof(AdditionExpression));
+                    .Returns(typeof(Addition));
                 yield return new TestCaseData("3 + 5 * 2")
-                    .Returns(typeof(AdditionExpression));
+                    .Returns(typeof(Addition));
                 yield return new TestCaseData("-6 + 3")
-                    .Returns(typeof(AdditionExpression));
+                    .Returns(typeof(Addition));
                 yield return new TestCaseData("7 * -3")
-                    .Returns(typeof(MultiplicationExpression));
+                    .Returns(typeof(Multiplication));
                 yield return new TestCaseData("(5+3)*2")
-                    .Returns(typeof(MultiplicationExpression));
+                    .Returns(typeof(Multiplication));
                 yield return new TestCaseData("2x3d4")
-                    .Returns(typeof(RepeatExpression));
+                    .Returns(typeof(Repeat));
                 yield return new TestCaseData("2x(2+3)")
-                    .Returns(typeof(RepeatExpression));
+                    .Returns(typeof(Repeat));
                 yield return new TestCaseData("[2+5, -3, 2d4 + 2]")
                     .Returns(typeof(ListExpression));
                 yield return new TestCaseData("2x[5, 2d8]")
-                    .Returns(typeof(RepeatExpression));
+                    .Returns(typeof(Repeat));
                 yield return new TestCaseData("d%")
-                    .Returns(typeof(DiceExpression));
+                    .Returns(typeof(DiceRoll));
                 yield return new TestCaseData("2d6-L")
-                    .Returns(typeof(DropExpression));
+                    .Returns(typeof(Drop));
                 yield return new TestCaseData("2d6-STR")
-                    .Returns(typeof(SubtractionExpression));
+                    .Returns(typeof(Subtraction));
                 yield return new TestCaseData("2d6-d4")
-                    .Returns(typeof(SubtractionExpression));
+                    .Returns(typeof(Subtraction));
                 yield return new TestCaseData("L-L")
-                    .Returns(typeof(SubtractionExpression));
+                    .Returns(typeof(Subtraction));
                 yield return new TestCaseData("3d8 - H")
-                    .Returns(typeof(DropExpression));
+                    .Returns(typeof(Drop));
                 yield return new TestCaseData("4d6(k3)")
-                    .Returns(typeof(KeepExpression));
+                    .Returns(typeof(Keep));
                 yield return new TestCaseData("max(4, 2+4)")
-                    .Returns(typeof(FunctionCallExpression));
+                    .Returns(typeof(FunctionCall));
                 yield return new TestCaseData("5 + max(3, 2)")
-                    .Returns(typeof(AdditionExpression));
+                    .Returns(typeof(Addition));
                 yield return new TestCaseData("real foo;")
-                    .Returns(typeof(VariableDeclarationExpression));
+                    .Returns(typeof(VariableDeclaration));
                 yield return new TestCaseData("real foo; int bar;")
-                    .Returns(typeof(CompoundExpression));
+                    .Returns(typeof(Block));
                 yield return new TestCaseData("foo = 6")
-                    .Returns(typeof(AssignmentExpression));
+                    .Returns(typeof(Assignment));
                 yield return new TestCaseData("real foo, bar;")
-                    .Returns(typeof(VariableDeclarationExpression));
+                    .Returns(typeof(VariableDeclaration));
                 yield return new TestCaseData("int foo = 5;")
-                    .Returns(typeof(VariableDeclarationExpression));
+                    .Returns(typeof(VariableDeclaration));
                 yield return new TestCaseData("def StandardRoll = 10 + d6;")
-                    .Returns(typeof(DefinitionExpression));
+                    .Returns(typeof(Definition));
                 yield return new TestCaseData("int Test(int a, real b) a + b; end")
-                    .Returns(typeof(FunctionExpression));
+                    .Returns(typeof(Function));
                 yield return new TestCaseData("real foo = 5; real Bar() 5; end")
-                    .Returns(typeof(CompoundExpression));
+                    .Returns(typeof(Block));
                 yield return new TestCaseData(@"""Some form of string""")
-                    .Returns(typeof(StringLiteral));
+                    .Returns(typeof(Wgaffa.DMToolkit.Expressions.String));
                 yield return new TestCaseData(@"""Another \""quoted\"" string""")
-                    .Returns(typeof(StringLiteral));
+                    .Returns(typeof(Wgaffa.DMToolkit.Expressions.String));
             }
         }
 

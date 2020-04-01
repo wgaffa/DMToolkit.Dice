@@ -2,11 +2,11 @@
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class KeepExpression : UnaryExpression
+    public class Keep : UnaryExpression
     {
         public int Count { get; }
 
-        public KeepExpression(IExpression right, int count)
+        public Keep(IExpression right, int count)
             : base(right)
         {
             Guard.Against.Negative(count, nameof(count));

@@ -6,6 +6,7 @@ using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.DMToolkit.Statements;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -62,7 +63,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Terminal expressions
 
-        private double Visit(NumberExpression number)
+        private double Visit(Number number)
         {
             return number.Value;
         }
@@ -72,7 +73,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr));
         }
 
-        private double Visit(DiceExpression dice)
+        private double Visit(DiceRoll dice)
         {
             var diceRoller = _configuration.DiceRoller ?? dice.DiceRoller;
 
@@ -86,7 +87,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return rolls.Sum();
         }
 
-        private double Visit(VariableExpression variable)
+        private double Visit(Variable variable)
         {
             var record = _callStack.Peek();
 
@@ -113,12 +114,12 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Unary Expressions
 
-        private double Visit(NegateExpression negate)
+        private double Visit(Negate negate)
         {
             return (double)-Visit((dynamic)negate.Right);
         }
 
-        private double Visit(DropExpression drop)
+        private double Visit(Drop drop)
         {
             Visit((dynamic)drop.Right);
 
@@ -137,7 +138,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return newRoll.Keep.Sum();
         }
 
-        private double Visit(KeepExpression keep)
+        private double Visit(Keep keep)
         {
             Visit((dynamic)keep.Right);
 
@@ -167,7 +168,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return newList.Sum();
         }
 
-        private double Visit(RepeatExpression repeat)
+        private double Visit(Repeat repeat)
         {
             return (double)Enumerable
                 .Range(0, repeat.RepeatTimes)
@@ -178,29 +179,29 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Binary Expressions
 
-        private double Visit(AdditionExpression addition)
+        private double Visit(Addition addition)
         {
             return (double)(Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right));
         }
 
-        private double Visit(SubtractionExpression subtraction)
+        private double Visit(Subtraction subtraction)
         {
             return (double)(Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right));
         }
 
-        private double Visit(MultiplicationExpression multiplication)
+        private double Visit(Multiplication multiplication)
         {
             return (double)(Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right));
         }
 
-        private double Visit(DivisionExpression divition)
+        private double Visit(Division divition)
         {
             return (double)(Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right));
         }
 
         #endregion Binary Expressions
 
-        public double Visit(FunctionCallExpression function)
+        public double Visit(FunctionCall function)
         {
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
@@ -238,7 +239,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(VariableDeclarationExpression varDecl)
+        private double Visit(VariableDeclaration varDecl)
         {
             var record = _callStack.Peek();
             var value = varDecl.InitialValue
@@ -248,7 +249,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return 0;
         }
 
-        private double Visit(AssignmentExpression assignment)
+        private double Visit(Assignment assignment)
         {
             double result = Visit((dynamic)assignment.Expression);
 
@@ -264,15 +265,15 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(DefinitionExpression _)
+        private double Visit(Definition _)
         {
             return 0;
         }
 
-        private double Visit(CompoundExpression compound)
+        private double Visit(Block compound)
         {
             double lastResult = 0;
-            foreach (var block in compound.Expressions)
+            foreach (var block in compound.Body)
             {
                 lastResult = Visit((dynamic)block);
             }
@@ -280,7 +281,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return lastResult;
         }
 
-        private double Visit(FunctionExpression function)
+        private double Visit(Function function)
         {
             var record = _callStack.Peek();
 

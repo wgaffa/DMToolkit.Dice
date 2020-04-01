@@ -6,6 +6,7 @@ using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Interpreters.Errors;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.DMToolkit.Statements;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -52,23 +53,23 @@ namespace Wgaffa.DMToolkit.Interpreters
             return binary;
         }
 
-        private IExpression Visit(NegateExpression negate)
+        private IExpression Visit(Negate negate)
         {
             Visit((dynamic)negate.Right);
 
             return negate;
         }
 
-        private IExpression Visit(CompoundExpression compound)
+        private IExpression Visit(Block compound)
         {
-            var list = compound.Expressions
+            var list = compound.Body
                 .Select(expr => (IExpression)Visit((dynamic)expr))
                 .ToList();
 
             return compound;
         }
 
-        private IExpression Visit(VariableDeclarationExpression varDecl)
+        private IExpression Visit(VariableDeclaration varDecl)
         {
             var typeSymbol = _currentScope.Bind(
                 s => s.Lookup(varDecl.Type));
@@ -90,7 +91,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return varDecl;
         }
 
-        private IExpression Visit(VariableExpression variable)
+        private IExpression Visit(Variable variable)
         {
             var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
             symbol.Match(
@@ -100,7 +101,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return variable;
         }
 
-        private IExpression Visit(AssignmentExpression assignment)
+        private IExpression Visit(Assignment assignment)
         {
             Maybe<Symbol> variableSymbol = None.Value;
             _currentScope.Bind(s => s.Lookup(assignment.Identifier))
@@ -114,7 +115,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return assignment;
         }
 
-        private IExpression Visit(DefinitionExpression definition)
+        private IExpression Visit(Definition definition)
         {
             switch (_currentScope.Bind(s => s.Lookup(definition.Name)))
             {
@@ -135,7 +136,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return definition;
         }
 
-        private IExpression Visit(FunctionExpression function)
+        private IExpression Visit(Function function)
         {
             var parameters = function.Parameters
                 .Select(x => new { Id = x.Value, Symbol = _currentScope.Bind(s => s.Lookup(x.Key)) })
@@ -171,7 +172,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return function;
         }
 
-        private IExpression Visit(FunctionCallExpression functionCall)
+        private IExpression Visit(FunctionCall functionCall)
         {
             functionCall.Symbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
 

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class DropType : SmartEnum<DropType>
+    public sealed class DropType : SmartEnum<DropType>
     {
         public static readonly DropType Lowest = new DropType("lowest", 1, rolls => new int[] { rolls.Min() });
         public static readonly DropType Highest = new DropType("highest", 1, rolls => new int[] { rolls.Max() });

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
+using Wgaffa.DMToolkit.Statements;
 
 namespace GenDot
 {
@@ -38,12 +39,12 @@ namespace GenDot
             return _counter++;
         }
 
-        private int Visit(CompoundExpression compound)
+        private int Visit(Block compound)
         {
             int id = _counter++;
             _body.Append(Node(id, compound));
 
-            var ids = compound.Expressions.Select(expr => (int)Visit((dynamic)expr));
+            var ids = compound.Body.Select(expr => (int)Visit((dynamic)expr));
 
             foreach (var item in ids)
             {
@@ -53,7 +54,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(VariableDeclarationExpression vardecl)
+        private int Visit(VariableDeclaration vardecl)
         {
             int id = _counter++;
             _body.Append(Node(id, vardecl, string.Join(", ", vardecl.Names)));
@@ -65,7 +66,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(FunctionExpression function)
+        private int Visit(Function function)
         {
             int id = _counter++;
             _body.Append(Node(id, function, function.Identifier));
@@ -77,7 +78,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(FunctionCallExpression functionCall)
+        private int Visit(FunctionCall functionCall)
         {
             int id = _counter++;
             _body.Append(Node(id, functionCall, functionCall.Name));
@@ -92,7 +93,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(DefinitionExpression definition)
+        private int Visit(Definition definition)
         {
             int id = _counter++;
             _body.Append(Node(id, definition, definition.Name));
@@ -104,14 +105,14 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(VariableExpression variable)
+        private int Visit(Variable variable)
         {
             _body.Append(Node(_counter, variable, variable.Identifier));
 
             return _counter++;
         }
 
-        private int Visit(AssignmentExpression assignment)
+        private int Visit(Assignment assignment)
         {
             int id = _counter++;
             _body.Append(Node(id, assignment, assignment.Identifier));
@@ -123,7 +124,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(NumberExpression number)
+        private int Visit(Number number)
         {
             _body.Append(Node(_counter, number, number.Value.ToString()));
             return _counter++;

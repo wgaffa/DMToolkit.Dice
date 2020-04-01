@@ -1,8 +1,8 @@
 ﻿namespace Wgaffa.DMToolkit.Expressions
 {
-    public class SubtractionExpression : BinaryExpression
+    public class Subtraction : BinaryExpression
     {
-        public SubtractionExpression(IExpression left, IExpression right) : base(left, right)
+        public Subtraction(IExpression left, IExpression right) : base(left, right)
         {
         }
 

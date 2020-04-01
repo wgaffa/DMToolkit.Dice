@@ -1,8 +1,8 @@
 ﻿namespace Wgaffa.DMToolkit.Expressions
 {
-    public class DivisionExpression : BinaryExpression
+    public class Division : BinaryExpression
     {
-        public DivisionExpression(IExpression left, IExpression right) : base(left, right)
+        public Division(IExpression left, IExpression right) : base(left, right)
         {
         }
 

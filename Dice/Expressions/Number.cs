@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class NumberExpression : IExpression
+    public class Number : IExpression
     {
         public double Value { get; }
 
-        public NumberExpression(double value)
+        public Number(double value)
         {
             Value = value;
         }

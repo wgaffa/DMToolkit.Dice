@@ -1,16 +1,16 @@
 ﻿using Ardalis.GuardClauses;
+using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Parser;
-using Wgaffa.Functional;
 
-namespace Wgaffa.DMToolkit.Expressions
+namespace Wgaffa.DMToolkit.Statements
 {
-    public class DefinitionExpression : IExpression
+    public class Definition : IStatement
     {
         public string Name { get; }
         public IExpression Expression { get; }
         internal Symbol Symbol { get; set; }
 
-        public DefinitionExpression(string name, IExpression expression)
+        public Definition(string name, IExpression expression)
         {
             Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Guard.Against.Null(expression, nameof(expression));

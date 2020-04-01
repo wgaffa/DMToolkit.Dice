@@ -4,13 +4,13 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class AssignmentExpression : IExpression
+    public class Assignment : IExpression
     {
         public string Identifier { get; }
         public IExpression Expression { get; }
         public Maybe<Symbol> Symbol { get; internal set; } = None.Value;
 
-        public AssignmentExpression(string identifier, IExpression expression)
+        public Assignment(string identifier, IExpression expression)
         {
             Guard.Against.NullOrWhiteSpace(identifier, nameof(identifier));
             Guard.Against.Null(expression, nameof(expression));

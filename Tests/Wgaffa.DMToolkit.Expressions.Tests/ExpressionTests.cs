@@ -17,7 +17,7 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void Ctor_NumberExpression_ShouldSetValue()
         {
-            var number = new NumberExpression(3.5f);
+            var number = new Number(3.5f);
 
             Assert.That(number.Value, Is.EqualTo(3.5));
         }
@@ -25,30 +25,30 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void NegateOperation_ShouldSetRightSide()
         {
-            var five = new NumberExpression(5);
-            var negativeFive = new NegateExpression(five);
+            var five = new Number(5);
+            var negativeFive = new Negate(five);
 
-            Assert.That(negativeFive.Right, Is.InstanceOf<NumberExpression>());
+            Assert.That(negativeFive.Right, Is.InstanceOf<Number>());
         }
 
         [Test]
         public void NegateExpression_ShoulThrowArgumentNullException_GivenNull()
         {
-            Assert.That(() => new NegateExpression(null), Throws.ArgumentNullException);
+            Assert.That(() => new Negate(null), Throws.ArgumentNullException);
         }
 
         [TestCase(0)]
         [TestCase(-6)]
         public void DiceExpression_ShouldThrowArgumentException_GivenNonPositiveRolls(int rolls)
         {
-            Assert.That(() => new DiceExpression(new Dice(6), rolls), Throws.ArgumentException);
+            Assert.That(() => new DiceRoll(new Dice(6), rolls), Throws.ArgumentException);
         }
 
         [Test]
         public void DiceExpression_ShouldSetNumberOfRolls()
         {
             var dice = new Dice(6);
-            var diceExpression = new DiceExpression(dice, 4);
+            var diceExpression = new DiceRoll(dice, 4);
 
             Assert.That(diceExpression.NumberOfRolls, Is.EqualTo(4));
         }
@@ -56,7 +56,7 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void DiceExpression_ShouldSetDice()
         {
-            var diceExpression = new DiceExpression(new Dice(6));
+            var diceExpression = new DiceRoll(new Dice(6));
 
             Assert.That(diceExpression.Dice, Is.EqualTo(new Dice(6)));
         }
@@ -65,19 +65,19 @@ namespace Wgaffa.DMTools.Tests
         [TestCase(-5)]
         public void RepeatExpression_ShouldThrowArgumentException_GivenInvalidRange(int repeat)
         {
-            Assert.That(() => new RepeatExpression(new NumberExpression(5), repeat), Throws.ArgumentException);
+            Assert.That(() => new Repeat(new Number(5), repeat), Throws.ArgumentException);
         }
 
         [Test]
         public void RepeatExpression_ShouldThrowArgumentNullException_GivenNullExpression()
         {
-            Assert.That(() => new RepeatExpression(null, 3), Throws.ArgumentNullException);
+            Assert.That(() => new Repeat(null, 3), Throws.ArgumentNullException);
         }
 
         [Test]
         public void RepeatExpression_ShouldSetRepeatTimes()
         {
-            var repeat = new RepeatExpression(new NumberExpression(5), 3);
+            var repeat = new Repeat(new Number(5), 3);
 
             Assert.That(repeat.RepeatTimes, Is.EqualTo(3));
         }
@@ -85,10 +85,10 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void AdditionExpression_ShouldSetLeft()
         {
-            var left = new NumberExpression(3);
-            var right = new NumberExpression(5);
+            var left = new Number(3);
+            var right = new Number(5);
 
-            var addition = new AdditionExpression(left, right);
+            var addition = new Addition(left, right);
 
             var expected = left;
             Assert.That(addition.Left, Is.EqualTo(expected));
@@ -97,13 +97,13 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void AdditionExpression_ShouldThrowArgumentNullException_GivenNullLeft()
         {
-            Assert.That(() => new AdditionExpression(null, new NumberExpression(5)), Throws.ArgumentNullException);
+            Assert.That(() => new Addition(null, new Number(5)), Throws.ArgumentNullException);
         }
 
         [Test]
         public void AdditionExpression_ShouldThrowArgumentNullException_GivenNullRight()
         {
-            Assert.That(() => new AdditionExpression(new NumberExpression(3), null), Throws.ArgumentNullException);
+            Assert.That(() => new Addition(new Number(3), null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -117,9 +117,9 @@ namespace Wgaffa.DMTools.Tests
         {
             var numbers = new List<IExpression>
             {
-                new NumberExpression(2),
-                new NumberExpression(3.5f),
-                new NumberExpression(3)
+                new Number(2),
+                new Number(3.5f),
+                new Number(3)
             };
             var listExpression = new ListExpression(numbers);
 
@@ -133,7 +133,7 @@ namespace Wgaffa.DMTools.Tests
         {
             var mockRoller = new Mock<IDiceRoller>();
 
-            var expr = new DiceExpression(mockRoller.Object, new Dice(6), 2);
+            var expr = new DiceRoll(mockRoller.Object, new Dice(6), 2);
 
             Assert.That(expr.DiceRoller, Is.SameAs(mockRoller.Object));
         }
@@ -141,7 +141,7 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void KeepExpression_ShouldSetCount()
         {
-            var keepExpression = new KeepExpression(new DiceExpression(Dice.d20, 3), 5);
+            var keepExpression = new Keep(new DiceRoll(Dice.d20, 3), 5);
 
             Assert.That(keepExpression.Count, Is.EqualTo(5));
         }
@@ -149,7 +149,7 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void KeepExpression_ShouldThrowArgumentError_GivenNegativeCount()
         {
-            Assert.That(() => new KeepExpression(new DiceExpression(Dice.d20, 3), -3), Throws.ArgumentException);
+            Assert.That(() => new Keep(new DiceRoll(Dice.d20, 3), -3), Throws.ArgumentException);
         }
     }
 }

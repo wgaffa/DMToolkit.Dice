@@ -1,8 +1,8 @@
 ﻿namespace Wgaffa.DMToolkit.Expressions
 {
-    public class MultiplicationExpression : BinaryExpression
+    public class Multiplication : BinaryExpression
     {
-        public MultiplicationExpression(IExpression left, IExpression right) : base(left, right)
+        public Multiplication(IExpression left, IExpression right) : base(left, right)
         {
         }
 

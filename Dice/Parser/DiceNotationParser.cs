@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
+using Wgaffa.DMToolkit.Statements;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
@@ -22,7 +23,7 @@ namespace Wgaffa.DMToolkit.Parser
             from rolls in Numerics.IntegerInt32.OptionalOrDefault(1)
             from _ in Character.EqualTo('d')
             from sides in Numerics.IntegerInt32.Or(Character.EqualTo('%').Value(100))
-            select (IExpression)new DiceExpression(new Dice(sides), rolls);
+            select (IExpression)new DiceRoll(new Dice(sides), rolls);
 
         private static readonly TextParser<int> RepeatParser =
             from repeat in Numerics.IntegerInt32
@@ -58,11 +59,11 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> String =
             from str in Token.EqualTo(DiceNotationToken.String)
-            select (IExpression)new StringLiteral(str.ToStringValue()[1..]);
+            select (IExpression)new Expressions.String(str.ToStringValue()[1..]);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Reference =
             from name in Variable
-            select (IExpression)new VariableExpression(name);
+            select (IExpression)new Variable(name);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Dice =
             Token.EqualTo(DiceNotationToken.Dice)
@@ -72,12 +73,12 @@ namespace Wgaffa.DMToolkit.Parser
             from lparen in Token.EqualTo(DiceNotationToken.LParen)
             from count in Token.EqualTo(DiceNotationToken.Identifier).Apply(KeepCount)
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
-            select (IExpression)new KeepExpression(expr, count);
+            select (IExpression)new Keep(expr, count);
 
         private static TokenListParser<DiceNotationToken, IExpression> Drop(IExpression expr) =>
             from minus in Token.EqualTo(DiceNotationToken.Minus)
             from drop in DropHighest.Or(DropLowest)
-            select (IExpression)new DropExpression(expr, drop);
+            select (IExpression)new Drop(expr, drop);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> DiceNotation =
             Dice.Then(d => Keep(d).Or(Drop(d).Try()).OptionalOrDefault(d));
@@ -85,7 +86,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Number =
             Token.EqualTo(DiceNotationToken.Number)
             .Apply(Numerics.DecimalDouble)
-            .Select(n => (IExpression)new NumberExpression(n));
+            .Select(n => (IExpression)new Number(n));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Constant =
             DiceNotation.Or(Reference).Or(Number).Or(String);
@@ -107,7 +108,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Repeat =
             Token.EqualTo(DiceNotationToken.Repeat)
             .Apply(RepeatParser)
-            .Then(x => List.Or(Factor).Select(f => (IExpression)new RepeatExpression(f, x)))
+            .Then(x => List.Or(Factor).Select(f => (IExpression)new Repeat(f, x)))
             .Named("repeat");
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> FunctionCall =
@@ -115,13 +116,13 @@ namespace Wgaffa.DMToolkit.Parser
             from lparen in Token.EqualTo(DiceNotationToken.LParen)
             from expr in Expr.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
-            select (IExpression)new FunctionCallExpression(identifier.ToStringValue(), expr);
+            select (IExpression)new FunctionCall(identifier.ToStringValue(), expr);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Operand =
             (
             from _ in Token.EqualTo(DiceNotationToken.Minus)
             from factor in Factor
-            select (IExpression)new NegateExpression(factor)
+            select (IExpression)new Negate(factor)
             )
             .Or(List)
             .Or(Repeat)
@@ -140,7 +141,7 @@ namespace Wgaffa.DMToolkit.Parser
             from name in Token.EqualTo(DiceNotationToken.Identifier)
             from eq in Token.EqualTo(DiceNotationToken.Equal)
             from expr in Expr
-            select (IExpression)new DefinitionExpression(name.ToStringValue(), expr);
+            select (IExpression)new Definition(name.ToStringValue(), expr);
 
         private static readonly TokenListParser<DiceNotationToken, KeyValuePair<string, string>[]> Params =
             (from type in Token.EqualTo(DiceNotationToken.Identifier)
@@ -156,24 +157,24 @@ namespace Wgaffa.DMToolkit.Parser
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
             from body in Parse.Ref(() => Block)
             from end in Token.EqualToValue(DiceNotationToken.Keyword, "end")
-            select (IExpression)new FunctionExpression(name.ToStringValue(), body, type.ToStringValue(), par);
+            select (IExpression)new Function(name.ToStringValue(), body, type.ToStringValue(), par);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> VarDecl =
             (from type in Token.EqualTo(DiceNotationToken.Identifier)
              from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
-             select (IExpression)new VariableDeclarationExpression(names, type.ToStringValue()))
+             select (IExpression)new VariableDeclaration(names, type.ToStringValue()))
             .Then(expr =>
                 (from eq in Token.EqualTo(DiceNotationToken.Equal)
                  from value in Expr
-                 let varDecl = (VariableDeclarationExpression)expr
-                 select (IExpression)new VariableDeclarationExpression(varDecl.Names, varDecl.Type, Maybe<IExpression>.Some(value)))
+                 let varDecl = (VariableDeclaration)expr
+                 select (IExpression)new VariableDeclaration(varDecl.Names, varDecl.Type, Maybe<IExpression>.Some(value)))
                 .OptionalOrDefault(expr));
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
             from name in Variable
             from equal in Token.EqualTo(DiceNotationToken.Equal)
             from right in Expr
-            select (IExpression)new AssignmentExpression(name, right);
+            select (IExpression)new Assignment(name, right);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Stmt =
             VarDecl.Try()
@@ -195,7 +196,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Block =
             from stmts in StatementList
-            select stmts.Length == 1 ? stmts[0] : new CompoundExpression(stmts);
+            select stmts.Length == 1 ? stmts[0] : new Block(stmts);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> OnelineStatement =
             (from stmt in Stmt
@@ -207,10 +208,10 @@ namespace Wgaffa.DMToolkit.Parser
         {
             return @operator switch
             {
-                OperatorType.Addition => new AdditionExpression(left, right),
-                OperatorType.Subtraction => new SubtractionExpression(left, right),
-                OperatorType.Multiplication => new MultiplicationExpression(left, right),
-                OperatorType.Division => new DivisionExpression(left, right),
+                OperatorType.Addition => new Addition(left, right),
+                OperatorType.Subtraction => new Subtraction(left, right),
+                OperatorType.Multiplication => new Multiplication(left, right),
+                OperatorType.Division => new Division(left, right),
                 _ => throw new InvalidOperationException(),
             };
         }
