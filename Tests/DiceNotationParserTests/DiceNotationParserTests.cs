@@ -94,7 +94,7 @@ namespace DiceNotationParserTests
         public Type Parse_ShouldSucceed(string input)
         {
             var tokens = new DiceNotationTokenizer().Tokenize(input);
-            var result = DiceNotationParser.Notation.Parse(tokens);
+            var result = DiceNotationParser.Program.Parse(tokens);
 
             return result.GetType();
         }
@@ -118,7 +118,7 @@ namespace DiceNotationParserTests
             var tokenizer = new DiceNotationTokenizer();
             var tokenlist = tokenizer.Tokenize(input);
 
-            Assert.That(() => DiceNotationParser.Notation.Parse(tokenlist), Throws.TypeOf<ParseException>());
+            Assert.That(() => DiceNotationParser.Program.Parse(tokenlist), Throws.TypeOf<ParseException>());
         }
     }
 }

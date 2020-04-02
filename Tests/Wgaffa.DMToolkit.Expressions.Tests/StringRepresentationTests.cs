@@ -94,13 +94,16 @@ namespace Wgaffa.DMTools.Tests
                     .Returns("<keep: 3 <dice: rolls=5, d10>>");
                 yield return new TestCaseData(
                     new Block(
-                        new IExpression[]
+                        new IStatement[]
                         {
-                            new Addition(
-                                new Number(3),
-                                new Number(2)),
-                            new DiceRoll(Dice.d20),
-                            new Assignment("foo", new Number(5)),
+                            new ExpressionStatement(
+                                new Addition(
+                                    new Number(3),
+                                    new Number(2))),
+                            new ExpressionStatement(
+                                new DiceRoll(Dice.d20)),
+                            new ExpressionStatement(
+                                new Assignment("foo", new Number(5))),
                         }))
                     .Returns("<block: <+ <num: 3> <num: 2>> <dice: rolls=1, d20> <assign: var=foo value=<num: 5>>>");
                 yield return new TestCaseData(
@@ -110,17 +113,19 @@ namespace Wgaffa.DMTools.Tests
                 yield return new TestCaseData(
                     new Function(
                         "foo",
-                        new Addition(
-                            new Number(3),
-                            new Number(5)),
+                        new ExpressionStatement(
+                            new Addition(
+                                new Number(3),
+                                new Number(5))),
                         "int"))
                     .Returns("<func: var=foo return=int body=<+ <num: 3> <num: 5>>>");
                 yield return new TestCaseData(
                     new Function(
                         "foo",
-                        new Addition(
-                            new Number(3),
-                            new Number(5)),
+                        new ExpressionStatement(
+                            new Addition(
+                                new Number(3),
+                                new Number(5))),
                         "int",
                         new KeyValuePair<string, string>[]
                         {

@@ -194,7 +194,7 @@ namespace DiceNotationParserTests
         public double Evaluate_ShouldReturnCorrect(string input)
         {
             var tokenlist = new DiceNotationTokenizer().Tokenize(input);
-            var expression = DiceNotationParser.Notation.Parse(tokenlist);
+            var expression = DiceNotationParser.Program.Parse(tokenlist);
 
             var configuration = new Configuration()
             {

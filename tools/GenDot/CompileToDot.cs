@@ -23,12 +23,12 @@ namespace GenDot
             _name = name;
         }
 
-        public string Evaluate(IExpression expression)
+        public string Evaluate(IStatement expression)
         {
             var header = $"digraph {_name} {{\n";
             const string footer = "}";
 
-            int program = Visit((dynamic)expression);
+            Visit((dynamic)expression);
 
             return header + _body.ToString() + footer;
         }
@@ -156,21 +156,21 @@ namespace GenDot
             return id;
         }
 
-        private static string GetName(IExpression expression)
+        private static string GetName(object expression)
         {
             return expression.GetType().Name;
         }
 
-        private static string Label(IExpression expression) =>
+        private static string Label(object expression) =>
             $"[label=\"{GetName(expression)}\"]";
 
-        private static string Label(IExpression expression, string meta) =>
+        private static string Label(object expression, string meta) =>
             $"[label=\"{GetName(expression)}\\n{meta}\"]";
 
-        private static string Node(int id, IExpression expression) =>
+        private static string Node(int id, object expression) =>
             $"\tnode{id} {Label(expression)}\n";
 
-        private static string Node(int id, IExpression expression, string meta) =>
+        private static string Node(int id, object expression, string meta) =>
             $"\tnode{id} {Label(expression, meta)}\n";
 
         private static string Link(int from, int to) =>

@@ -38,7 +38,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Public API
 
-        public double Interpret(IExpression expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
+        public double Interpret(IStatement expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
         {
             Guard.Against.Null(expression, nameof(expression));
 
@@ -344,7 +344,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             }
         }
 
-        internal double Execute(IExpression expression)
+        internal double Execute(IStatement expression)
         {
             return (double)Visit((dynamic)expression);
         }

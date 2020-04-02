@@ -28,7 +28,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         }
         #endregion
 
-        public Result<IExpression, IList<SemanticError>> Analyze(IExpression expression)
+        public Result<IStatement, IList<SemanticError>> Analyze(IStatement expression)
         {
             _errors.Clear();
 
@@ -39,7 +39,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             if (_errors.Count > 0)
                 return _errors;
             else
-                return Result<IExpression, IList<SemanticError>>.Ok(expression);
+                return Result<IStatement, IList<SemanticError>>.Ok(expression);
         }
 
         private IExpression Visit(IExpression expr)
@@ -60,7 +60,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return negate;
         }
 
-        private IExpression Visit(Block compound)
+        private IStatement Visit(Block compound)
         {
             var list = compound.Body
                 .Select(expr => (IExpression)Visit((dynamic)expr))
@@ -69,7 +69,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return compound;
         }
 
-        private IExpression Visit(VariableDeclaration varDecl)
+        private IStatement Visit(VariableDeclaration varDecl)
         {
             var typeSymbol = _currentScope.Bind(
                 s => s.Lookup(varDecl.Type));
@@ -115,7 +115,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return assignment;
         }
 
-        private IExpression Visit(Definition definition)
+        private IStatement Visit(Definition definition)
         {
             switch (_currentScope.Bind(s => s.Lookup(definition.Name)))
             {
@@ -136,7 +136,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return definition;
         }
 
-        private IExpression Visit(Function function)
+        private IStatement Visit(Function function)
         {
             var parameters = function.Parameters
                 .Select(x => new { Id = x.Value, Symbol = _currentScope.Bind(s => s.Lookup(x.Key)) })

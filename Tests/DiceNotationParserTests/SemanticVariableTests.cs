@@ -6,6 +6,7 @@ using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Interpreters;
 using Wgaffa.DMToolkit.Interpreters.Errors;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.DMToolkit.Statements;
 using Wgaffa.Functional;
 
 namespace DiceNotationParserTests
@@ -41,7 +42,7 @@ namespace DiceNotationParserTests
         public void Analyze_ShouldReturnError_GivenInvalidString(string input)
         {
             var tokens = new DiceNotationTokenizer().Tokenize(input);
-            var expression = DiceNotationParser.Notation.Parse(tokens);
+            var expression = DiceNotationParser.Program.Parse(tokens);
 
             var symbolTable = new ScopedSymbolTable(new SetupBuiltinSymbols());
             var configuration = new Configuration()
@@ -50,7 +51,7 @@ namespace DiceNotationParserTests
             };
             var semantic = new SemanticAnalyzer(configuration);
 
-            Result<IExpression, IList<SemanticError>> result = semantic.Analyze(expression);
+            Result<IStatement, IList<SemanticError>> result = semantic.Analyze(expression);
 
             List<SemanticError> errors = new List<SemanticError>();
             result.OnError(l => errors.AddRange(l));
@@ -70,7 +71,7 @@ namespace DiceNotationParserTests
         public void Analyze_ShouldSucceed(string input)
         {
             var tokens = new DiceNotationTokenizer().Tokenize(input);
-            var program = DiceNotationParser.Notation.Parse(tokens);
+            var program = DiceNotationParser.Program.Parse(tokens);
 
             var global = new ScopedSymbolTable(new SetupBuiltinSymbols());
             var configuration = new Configuration() { SymbolTable = global };
