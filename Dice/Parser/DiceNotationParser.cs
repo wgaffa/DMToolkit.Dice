@@ -136,11 +136,21 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
             Parse.Chain(Addition.Or(Subtraction), Term, MakeBinary);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
+            from name in Variable
+            from equal in Token.EqualTo(DiceNotationToken.Equal)
+            from right in Expr
+            select (IExpression)new Assignment(name, right);
+
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Expression =
+            Assign.Try().Or(Expr);
+
         private static readonly TokenListParser<DiceNotationToken, IStatement> Definition =
             from def in Token.EqualToValue(DiceNotationToken.Keyword, "def")
             from name in Token.EqualTo(DiceNotationToken.Identifier)
             from eq in Token.EqualTo(DiceNotationToken.Equal)
             from expr in Expr
+            from semi in Token.EqualTo(DiceNotationToken.SemiColon)
             select (IStatement)new Definition(name.ToStringValue(), expr);
 
         private static readonly TokenListParser<DiceNotationToken, KeyValuePair<string, string>[]> Params =
@@ -156,46 +166,43 @@ namespace Wgaffa.DMToolkit.Parser
             from par in Params
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
             from body in Parse.Ref(() => Block)
-            from end in Token.EqualToValue(DiceNotationToken.Keyword, "end")
             select (IStatement)new Function(name.ToStringValue(), body, type.ToStringValue(), par);
 
-        private static readonly TokenListParser<DiceNotationToken, IStatement> VarDecl =
-            (from type in Token.EqualTo(DiceNotationToken.Identifier)
-             from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
-             select (IStatement)new VariableDeclaration(names, type.ToStringValue()))
-            .Then(expr =>
-                (from eq in Token.EqualTo(DiceNotationToken.Equal)
-                 from value in Expr
-                 let varDecl = (VariableDeclaration)expr
-                 select (IStatement)new VariableDeclaration(varDecl.Names, varDecl.Type, Maybe<IExpression>.Some(value)))
-                .OptionalOrDefault(expr));
+        private static readonly TokenListParser<DiceNotationToken, (string[] names, string type)> VariableDeclaration =
+            from type in Token.EqualTo(DiceNotationToken.Identifier)
+            from names in Variable.AtLeastOnceDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+            select (names, type.ToStringValue());
 
-        private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
-            from name in Variable
-            from equal in Token.EqualTo(DiceNotationToken.Equal)
-            from right in Expr
-            select (IExpression)new Assignment(name, right);
+        private static readonly TokenListParser<DiceNotationToken, Maybe<IExpression>> VariableInitializer =
+            from eq in Token.EqualTo(DiceNotationToken.Equal)
+            from value in Expr
+            select (Maybe<IExpression>)Maybe<IExpression>.Some(value);
+
+        private static readonly TokenListParser<DiceNotationToken, IStatement> VarDecl =
+            from decl in VariableDeclaration
+            from init in VariableInitializer.OptionalOrDefault(None.Value)
+            from semi in Token.EqualTo(DiceNotationToken.SemiColon)
+            select (IStatement)new VariableDeclaration(decl.names, decl.type, init);
 
         private static readonly TokenListParser<DiceNotationToken, IStatement> ExpressionStatement =
-            from expr in Expr
+            from expr in Expression
             from semi in Token.EqualTo(DiceNotationToken.SemiColon)
             select (IStatement)new ExpressionStatement(expr);
+
+        private static readonly TokenListParser<DiceNotationToken, IStatement> Statement =
+            ExpressionStatement
+            .Named("statement");
+
+        private static readonly TokenListParser<DiceNotationToken, IStatement> Declaration =
+            FuncDecl.Try()
+            .Or(VarDecl.Try())
+            .Or(Definition)
+            .Or(Statement);
 
         private static readonly TokenListParser<DiceNotationToken, IStatement> Block =
             from stmts in Declaration.Many()
             from end in Token.EqualToValue(DiceNotationToken.Keyword, "end")
             select stmts.Length == 1 ? stmts[0] : new Block(stmts);
-
-        private static readonly TokenListParser<DiceNotationToken, IStatement> Statement =
-            ExpressionStatement
-            .Or(Block)
-            .Named("statement");
-
-        private static readonly TokenListParser<DiceNotationToken, IStatement> Declaration =
-            FuncDecl.Try()
-            .Or(VarDecl)
-            .Or(Definition)
-            .Or(Statement);
 
         private static IExpression MakeBinary(OperatorType @operator, IExpression left, IExpression right)
         {
@@ -211,7 +218,7 @@ namespace Wgaffa.DMToolkit.Parser
 
         public static TokenListParser<DiceNotationToken, IStatement> Program =
             (from declarations in Declaration.Many()
-            select declarations.Length == 1 ? declarations[0] : (IStatement)new Block(declarations))
+            select declarations.Length == 1 ? declarations[0] : new Block(declarations))
             .AtEnd();
     }
 }
