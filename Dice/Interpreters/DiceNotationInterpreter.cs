@@ -201,12 +201,52 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #endregion Binary Expressions
 
-        public double Visit(ExpressionStatement statement)
+        #region Statements
+
+        private double Visit(ExpressionStatement statement)
         {
             return (double)Visit((dynamic)statement.Expression);
         }
 
-        public double Visit(FunctionCall function)
+        private double Visit(VariableDeclaration varDecl)
+        {
+            var record = _callStack.Peek();
+            var value = varDecl.InitialValue
+                .Map(expr => (double)Visit((dynamic)expr))
+                .Map(v => varDecl.Names.Each(name => record[name] = v));
+
+            return 0;
+        }
+
+        private double Visit(Definition _)
+        {
+            return 0;
+        }
+
+        private double Visit(Function function)
+        {
+            var record = _callStack.Peek();
+
+            record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
+            return 0;
+        }
+
+        private double Visit(Block compound)
+        {
+            double lastResult = 0;
+            foreach (var block in compound.Body)
+            {
+                lastResult = Visit((dynamic)block);
+            }
+
+            return lastResult;
+        }
+
+        #endregion Statements
+
+        #region Expressions
+
+        private double Visit(FunctionCall function)
         {
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
@@ -244,16 +284,6 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(VariableDeclaration varDecl)
-        {
-            var record = _callStack.Peek();
-            var value = varDecl.InitialValue
-                .Map(expr => (double)Visit((dynamic)expr))
-                .Map(v => varDecl.Names.Each(name => record[name] = v));
-
-            return 0;
-        }
-
         private double Visit(Assignment assignment)
         {
             double result = Visit((dynamic)assignment.Expression);
@@ -270,29 +300,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(Definition _)
-        {
-            return 0;
-        }
-
-        private double Visit(Block compound)
-        {
-            double lastResult = 0;
-            foreach (var block in compound.Body)
-            {
-                lastResult = Visit((dynamic)block);
-            }
-
-            return lastResult;
-        }
-
-        private double Visit(Function function)
-        {
-            var record = _callStack.Peek();
-
-            record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
-            return 0;
-        }
+        #endregion Expressions
 
         #region Internal methods
 

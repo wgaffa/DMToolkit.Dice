@@ -19,6 +19,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private readonly Configuration _configuration;
 
         #region Constructors
+
         public SemanticAnalyzer(Configuration configuration)
         {
             Guard.Against.Null(configuration, nameof(configuration));
@@ -26,7 +27,8 @@ namespace Wgaffa.DMToolkit.Interpreters
             _configuration = configuration;
             _globalScope = (ScopedSymbolTable)configuration.SymbolTable;
         }
-        #endregion
+
+        #endregion Constructors
 
         public Result<IStatement, IList<SemanticError>> Analyze(IStatement expression)
         {
@@ -48,34 +50,13 @@ namespace Wgaffa.DMToolkit.Interpreters
         private IStatement Visit(IStatement statement)
             => statement;
 
+        #region Statements
+
         private IStatement Visit(ExpressionStatement statement)
         {
             Visit((dynamic)statement.Expression);
 
             return statement;
-        }
-        private IExpression Visit(BinaryExpression binary)
-        {
-            Visit((dynamic)binary.Left);
-            Visit((dynamic)binary.Right);
-
-            return binary;
-        }
-
-        private IExpression Visit(Negate negate)
-        {
-            Visit((dynamic)negate.Right);
-
-            return negate;
-        }
-
-        private IStatement Visit(Block compound)
-        {
-            var list = compound.Body
-                .Select(expr => (IStatement)Visit((dynamic)expr))
-                .ToList();
-
-            return compound;
         }
 
         private IStatement Visit(VariableDeclaration varDecl)
@@ -98,51 +79,6 @@ namespace Wgaffa.DMToolkit.Interpreters
                 .Map(expr => Visit((dynamic)expr));
 
             return varDecl;
-        }
-
-        private IExpression Visit(Variable variable)
-        {
-            var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
-            symbol.Match(
-                ifSome: s => variable.Symbol = s,
-                ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Identifier)));
-
-            return variable;
-        }
-
-        private IExpression Visit(Assignment assignment)
-        {
-            Maybe<Symbol> variableSymbol = None.Value;
-            _currentScope.Bind(s => s.Lookup(assignment.Identifier))
-                .Match(
-                ifSome: s => variableSymbol = s,
-                ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
-
-            Visit((dynamic)assignment.Expression);
-            assignment.Symbol = variableSymbol;
-
-            return assignment;
-        }
-
-        private IStatement Visit(Definition definition)
-        {
-            switch (_currentScope.Bind(s => s.Lookup(definition.Name)))
-            {
-                case Some<Symbol> some:
-                    _errors.Add(SemanticError.VariableAlreadyDeclared(some.Reduce(default(Symbol)).Name));
-                    break;
-
-                case None<Symbol> none:
-                    var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
-                    _currentScope.Match(s => s.Add(definitionSymbol), () => { });
-                    definition.Symbol = definitionSymbol;
-                    break;
-
-                default:
-                    throw new InvalidOperationException();
-            }
-
-            return definition;
         }
 
         private IStatement Visit(Function function)
@@ -181,6 +117,79 @@ namespace Wgaffa.DMToolkit.Interpreters
             return function;
         }
 
+        private IStatement Visit(Block compound)
+        {
+            var list = compound.Body
+                .Select(expr => (IStatement)Visit((dynamic)expr))
+                .ToList();
+
+            return compound;
+        }
+
+        private IStatement Visit(Definition definition)
+        {
+            switch (_currentScope.Bind(s => s.Lookup(definition.Name)))
+            {
+                case Some<Symbol> some:
+                    _errors.Add(SemanticError.VariableAlreadyDeclared(some.Reduce(default(Symbol)).Name));
+                    break;
+
+                case None<Symbol> none:
+                    var definitionSymbol = new DefinitionSymbol(definition.Name, definition.Expression);
+                    _currentScope.Match(s => s.Add(definitionSymbol), () => { });
+                    definition.Symbol = definitionSymbol;
+                    break;
+
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            return definition;
+        }
+
+        #endregion Statements
+
+        #region Expressions
+
+        private IExpression Visit(BinaryExpression binary)
+        {
+            Visit((dynamic)binary.Left);
+            Visit((dynamic)binary.Right);
+
+            return binary;
+        }
+
+        private IExpression Visit(Negate negate)
+        {
+            Visit((dynamic)negate.Right);
+
+            return negate;
+        }
+
+        private IExpression Visit(Variable variable)
+        {
+            var symbol = _currentScope.Bind(s => s.Lookup(variable.Identifier));
+            symbol.Match(
+                ifSome: s => variable.Symbol = s,
+                ifNone: () => _errors.Add(SemanticError.VariableUndefined(variable.Identifier)));
+
+            return variable;
+        }
+
+        private IExpression Visit(Assignment assignment)
+        {
+            Maybe<Symbol> variableSymbol = None.Value;
+            _currentScope.Bind(s => s.Lookup(assignment.Identifier))
+                .Match(
+                ifSome: s => variableSymbol = s,
+                ifNone: () => _errors.Add(SemanticError.VariableUndefined(assignment.Identifier)));
+
+            Visit((dynamic)assignment.Expression);
+            assignment.Symbol = variableSymbol;
+
+            return assignment;
+        }
+
         private IExpression Visit(FunctionCall functionCall)
         {
             functionCall.Symbol = _currentScope.Bind(s => s.Lookup(functionCall.Name));
@@ -192,5 +201,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             return functionCall;
         }
+
+        #endregion Expressions
     }
 }
