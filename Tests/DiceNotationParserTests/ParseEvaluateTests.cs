@@ -71,15 +71,15 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("1+5")
+                yield return new TestCaseData("1+5;")
                     .Returns(6);
-                yield return new TestCaseData("1.5 * d6")
+                yield return new TestCaseData("1.5 * d6;")
                     .Returns(4.5);
-                yield return new TestCaseData("6d20-L")
+                yield return new TestCaseData("6d20-L;")
                     .Returns(49);
-                yield return new TestCaseData("4d20-H")
+                yield return new TestCaseData("4d20-H;")
                     .Returns(30);
-                yield return new TestCaseData("4d20(k3)")
+                yield return new TestCaseData("4d20(k3);")
                     .Returns(45);
             }
         }
@@ -88,19 +88,19 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("d20 + INTMOD + Ranks + ClassSkill + Misc")
+                yield return new TestCaseData("d20 + INTMOD + Ranks + ClassSkill + Misc;")
                     .Returns(11)
                     .SetName("Skill check roll");
-                yield return new TestCaseData("d20 + STRMOD + BAB + Size")
+                yield return new TestCaseData("d20 + STRMOD + BAB + Size;")
                     .Returns(10)
                     .SetName("Attackroll melee small");
-                yield return new TestCaseData("d20 + DEXMOD + BAB + Size + RangePenalty")
+                yield return new TestCaseData("d20 + DEXMOD + BAB + Size + RangePenalty;")
                     .Returns(8)
                     .SetName("Attackroll ranged small");
-                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + DEXMOD + Size + Misc")
+                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + DEXMOD + Size + Misc;")
                     .Returns(22)
                     .SetName("ArmorBonus");
-                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + max(0, min(DEXMOD, MaxDex)) + Size + Misc")
+                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + max(0, min(DEXMOD, MaxDex)) + Size + Misc;")
                     .Returns(20)
                     .SetName("ArmorBonus with MaxDex");
             }
@@ -110,7 +110,7 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("5+max(7, 3+8)")
+                yield return new TestCaseData("5+max(7, 3+8);")
                     .Returns(16);
                 yield return new TestCaseData("int Add5(int a) a + 5; end Add5(10);")
                     .Returns(15);

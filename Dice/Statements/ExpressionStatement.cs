@@ -13,5 +13,10 @@ namespace Wgaffa.DMToolkit.Statements
 
             Expression = expression;
         }
+
+        public override string ToString()
+        {
+            return Expression.ToString();
+        }
     }
 }

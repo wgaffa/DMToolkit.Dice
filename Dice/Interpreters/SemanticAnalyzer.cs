@@ -45,6 +45,15 @@ namespace Wgaffa.DMToolkit.Interpreters
         private IExpression Visit(IExpression expr)
             => expr;
 
+        private IStatement Visit(IStatement statement)
+            => statement;
+
+        private IStatement Visit(ExpressionStatement statement)
+        {
+            Visit((dynamic)statement.Expression);
+
+            return statement;
+        }
         private IExpression Visit(BinaryExpression binary)
         {
             Visit((dynamic)binary.Left);
@@ -63,7 +72,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private IStatement Visit(Block compound)
         {
             var list = compound.Body
-                .Select(expr => (IExpression)Visit((dynamic)expr))
+                .Select(expr => (IStatement)Visit((dynamic)expr))
                 .ToList();
 
             return compound;

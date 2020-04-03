@@ -29,12 +29,12 @@ namespace DiceNotationParserTests
 
         public static readonly List<string> InvalidVariableTestCaseData = new List<string>()
         {
-            "foo",
+            "foo;",
             "fake foo;",
             "int bar, bar;",
-            "foo = 3",
+            "foo = 3;",
             "int foo; foo = bar;",
-            "int foo, bar = zar",
+            "int foo, bar = zar;",
             "int foo; def foo = 10;",
         };
 

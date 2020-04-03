@@ -201,6 +201,11 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #endregion Binary Expressions
 
+        public double Visit(ExpressionStatement statement)
+        {
+            return (double)Visit((dynamic)statement.Expression);
+        }
+
         public double Visit(FunctionCall function)
         {
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);

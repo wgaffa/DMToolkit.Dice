@@ -9,7 +9,7 @@ namespace Wgaffa.DMTools.Tests
 {
     public class StringRepresentationTests
     {
-        public class StringTestCaseData : IEnumerable
+        public class ExpressionStringTestCaseData : IEnumerable
         {
             public IEnumerator GetEnumerator()
             {
@@ -51,6 +51,49 @@ namespace Wgaffa.DMTools.Tests
                     new Variable("foo"))
                     .Returns("<var: foo>");
                 yield return new TestCaseData(
+                    new Assignment(
+                        "foo",
+                        new Multiplication(
+                            new Addition(
+                                new Number(5.2),
+                                new Number(2.3)),
+                            new Number(2))))
+                    .Returns(
+                    "<assign: var=foo value=<* <+ <num: 5.2> <num: 2.3>> <num: 2>>>");
+                yield return new TestCaseData(
+                    new Drop(
+                        new DiceRoll(Dice.d6, 4)))
+                    .Returns("<drop: lowest <dice: rolls=4, d6>>");
+                yield return new TestCaseData(
+                    new Drop(
+                        new DiceRoll(Dice.d6, 4), DropType.Highest))
+                    .Returns("<drop: highest <dice: rolls=4, d6>>");
+                yield return new TestCaseData(
+                    new Keep(
+                        new DiceRoll(Dice.d10, 5), 3))
+                    .Returns("<keep: 3 <dice: rolls=5, d10>>");
+                yield return new TestCaseData(
+                    new Repeat(
+                        new DiceRoll(Dice.d6, 2), 2))
+                    .Returns("<repeat: 2 <dice: rolls=2, d6>>");
+                yield return new TestCaseData(
+                    new FunctionCall(
+                        "foo",
+                        new IExpression[]
+                        {
+                            new Subtraction(
+                                new Number(5),
+                                new Number(2))
+                        }))
+                    .Returns("<call: foo args=<- <num: 5> <num: 2>>>");
+            }
+        }
+
+        public class StatementStringTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData(
                     new VariableDeclaration(
                         new string[] { "foo", "bar" },
                         "int",
@@ -64,34 +107,12 @@ namespace Wgaffa.DMTools.Tests
                         "real"))
                     .Returns("<decl_var: type=real names=foo>");
                 yield return new TestCaseData(
-                    new Assignment(
-                        "foo",
-                        new Multiplication(
-                            new Addition(
-                                new Number(5.2),
-                                new Number(2.3)),
-                            new Number(2))))
-                    .Returns(
-                    "<assign: var=foo value=<* <+ <num: 5.2> <num: 2.3>> <num: 2>>>");
-                yield return new TestCaseData(
                     new Definition(
                         "foo",
                         new Addition(
                             new DiceRoll(Dice.d8, 2),
                             new Number(3))))
                     .Returns("<decl_def: var=foo value=<+ <dice: rolls=2, d8> <num: 3>>>");
-                yield return new TestCaseData(
-                    new Drop(
-                        new DiceRoll(Dice.d6, 4)))
-                    .Returns("<drop: lowest <dice: rolls=4, d6>>");
-                yield return new TestCaseData(
-                    new Drop(
-                        new DiceRoll(Dice.d6, 4), DropType.Highest))
-                    .Returns("<drop: highest <dice: rolls=4, d6>>");
-                yield return new TestCaseData(
-                    new Keep(
-                        new DiceRoll(Dice.d10, 5), 3))
-                    .Returns("<keep: 3 <dice: rolls=5, d10>>");
                 yield return new TestCaseData(
                     new Block(
                         new IStatement[]
@@ -106,10 +127,6 @@ namespace Wgaffa.DMTools.Tests
                                 new Assignment("foo", new Number(5))),
                         }))
                     .Returns("<block: <+ <num: 3> <num: 2>> <dice: rolls=1, d20> <assign: var=foo value=<num: 5>>>");
-                yield return new TestCaseData(
-                    new Repeat(
-                        new DiceRoll(Dice.d6, 2), 2))
-                    .Returns("<repeat: 2 <dice: rolls=2, d6>>");
                 yield return new TestCaseData(
                     new Function(
                         "foo",
@@ -133,23 +150,19 @@ namespace Wgaffa.DMTools.Tests
                             new KeyValuePair<string, string>("int", "b")
                         }))
                     .Returns("<func: var=foo return=int body=<+ <num: 3> <num: 5>> params=int:a int:b>");
-                yield return new TestCaseData(
-                    new FunctionCall(
-                        "foo",
-                        new IExpression[]
-                        {
-                            new Subtraction(
-                                new Number(5),
-                                new Number(2))
-                        }))
-                    .Returns("<call: foo args=<- <num: 5> <num: 2>>>");
             }
         }
 
-        [TestCaseSource(typeof(StringTestCaseData))]
+        [TestCaseSource(typeof(ExpressionStringTestCaseData))]
         public string ToString_ShouldReturnInternalRepresentation(IExpression expression)
         {
             return expression.ToString();
+        }
+
+        [TestCaseSource(typeof(StatementStringTestCaseData))]
+        public string ToString_ShouldReturnInternalRepresentation_GivenStatement(IStatement statement)
+        {
+            return statement.ToString();
         }
     }
 }
