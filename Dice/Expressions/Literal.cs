@@ -2,18 +2,18 @@
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class Number : IExpression
+    public class Literal : IExpression
     {
-        public double Value { get; }
+        public object Value { get; }
 
-        public Number(double value)
+        public Literal(object value)
         {
             Value = value;
         }
 
         public override string ToString()
         {
-            return $"<num: {Value.ToString(CultureInfo.InvariantCulture)}>";
+            return $"<literal: {Value}>";
         }
     }
 }

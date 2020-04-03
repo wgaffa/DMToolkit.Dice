@@ -17,7 +17,7 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void Ctor_NumberExpression_ShouldSetValue()
         {
-            var number = new Number(3.5f);
+            var number = new Literal(3.5f);
 
             Assert.That(number.Value, Is.EqualTo(3.5));
         }
@@ -25,10 +25,10 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void NegateOperation_ShouldSetRightSide()
         {
-            var five = new Number(5);
+            var five = new Literal(5);
             var negativeFive = new Negate(five);
 
-            Assert.That(negativeFive.Right, Is.InstanceOf<Number>());
+            Assert.That(negativeFive.Right, Is.InstanceOf<Literal>());
         }
 
         [Test]
@@ -65,7 +65,7 @@ namespace Wgaffa.DMTools.Tests
         [TestCase(-5)]
         public void RepeatExpression_ShouldThrowArgumentException_GivenInvalidRange(int repeat)
         {
-            Assert.That(() => new Repeat(new Number(5), repeat), Throws.ArgumentException);
+            Assert.That(() => new Repeat(new Literal(5), repeat), Throws.ArgumentException);
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void RepeatExpression_ShouldSetRepeatTimes()
         {
-            var repeat = new Repeat(new Number(5), 3);
+            var repeat = new Repeat(new Literal(5), 3);
 
             Assert.That(repeat.RepeatTimes, Is.EqualTo(3));
         }
@@ -85,8 +85,8 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void AdditionExpression_ShouldSetLeft()
         {
-            var left = new Number(3);
-            var right = new Number(5);
+            var left = new Literal(3);
+            var right = new Literal(5);
 
             var addition = new Addition(left, right);
 
@@ -97,13 +97,13 @@ namespace Wgaffa.DMTools.Tests
         [Test]
         public void AdditionExpression_ShouldThrowArgumentNullException_GivenNullLeft()
         {
-            Assert.That(() => new Addition(null, new Number(5)), Throws.ArgumentNullException);
+            Assert.That(() => new Addition(null, new Literal(5)), Throws.ArgumentNullException);
         }
 
         [Test]
         public void AdditionExpression_ShouldThrowArgumentNullException_GivenNullRight()
         {
-            Assert.That(() => new Addition(new Number(3), null), Throws.ArgumentNullException);
+            Assert.That(() => new Addition(new Literal(3), null), Throws.ArgumentNullException);
         }
 
         [Test]
@@ -117,9 +117,9 @@ namespace Wgaffa.DMTools.Tests
         {
             var numbers = new List<IExpression>
             {
-                new Number(2),
-                new Number(3.5f),
-                new Number(3)
+                new Literal(2),
+                new Literal(3.5f),
+                new Literal(3)
             };
             var listExpression = new ListExpression(numbers);
 

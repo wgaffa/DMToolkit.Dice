@@ -142,7 +142,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(Number number)
+        private int Visit(Literal number)
         {
             _body.Append(Node(_counter, number, number.Value.ToString()));
             return _counter++;

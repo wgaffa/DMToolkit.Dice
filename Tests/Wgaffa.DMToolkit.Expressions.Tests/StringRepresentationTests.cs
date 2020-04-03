@@ -14,39 +14,39 @@ namespace Wgaffa.DMTools.Tests
             public IEnumerator GetEnumerator()
             {
                 yield return new TestCaseData(
-                    new Number(5.3))
-                    .Returns("<num: 5.3>");
+                    new Literal(5.3))
+                    .Returns("<literal: 5.3>");
                 yield return new TestCaseData(
-                    new Number(5.255555))
-                    .Returns("<num: 5.255555>");
+                    new Literal(5.255555))
+                    .Returns("<literal: 5.255555>");
                 yield return new TestCaseData(
                     new DiceRoll(Dice.d10))
                     .Returns("<dice: rolls=1, d10>");
                 yield return new TestCaseData(
                     new Negate(
-                        new Number(4)))
-                    .Returns("<negate <num: 4>>");
+                        new Literal(4)))
+                    .Returns("<negate <literal: 4>>");
                 yield return new TestCaseData(
                     new Addition(
                         new DiceRoll(Dice.d4, 3),
                         new Negate(
-                            new Number(3.2))))
-                    .Returns("<+ <dice: rolls=3, d4> <negate <num: 3.2>>>");
+                            new Literal(3.2))))
+                    .Returns("<+ <dice: rolls=3, d4> <negate <literal: 3.2>>>");
                 yield return new TestCaseData(
                     new Subtraction(
-                        new Number(3),
-                        new Number(1)))
-                    .Returns("<- <num: 3> <num: 1>>");
+                        new Literal(3),
+                        new Literal(1)))
+                    .Returns("<- <literal: 3> <literal: 1>>");
                 yield return new TestCaseData(
                     new Multiplication(
                         new DiceRoll(Dice.d6, 2),
-                        new Number(1.5)))
-                    .Returns("<* <dice: rolls=2, d6> <num: 1.5>>");
+                        new Literal(1.5)))
+                    .Returns("<* <dice: rolls=2, d6> <literal: 1.5>>");
                 yield return new TestCaseData(
                     new Division(
                         new DiceRoll(Dice.d6, 6),
-                        new Number(2)))
-                    .Returns("</ <dice: rolls=6, d6> <num: 2>>");
+                        new Literal(2)))
+                    .Returns("</ <dice: rolls=6, d6> <literal: 2>>");
                 yield return new TestCaseData(
                     new Variable("foo"))
                     .Returns("<var: foo>");
@@ -55,11 +55,11 @@ namespace Wgaffa.DMTools.Tests
                         "foo",
                         new Multiplication(
                             new Addition(
-                                new Number(5.2),
-                                new Number(2.3)),
-                            new Number(2))))
+                                new Literal(5.2),
+                                new Literal(2.3)),
+                            new Literal(2))))
                     .Returns(
-                    "<assign: var=foo value=<* <+ <num: 5.2> <num: 2.3>> <num: 2>>>");
+                    "<assign: var=foo value=<* <+ <literal: 5.2> <literal: 2.3>> <literal: 2>>>");
                 yield return new TestCaseData(
                     new Drop(
                         new DiceRoll(Dice.d6, 4)))
@@ -82,10 +82,10 @@ namespace Wgaffa.DMTools.Tests
                         new IExpression[]
                         {
                             new Subtraction(
-                                new Number(5),
-                                new Number(2))
+                                new Literal(5),
+                                new Literal(2))
                         }))
-                    .Returns("<call: foo args=<- <num: 5> <num: 2>>>");
+                    .Returns("<call: foo args=<- <literal: 5> <literal: 2>>>");
             }
         }
 
@@ -98,9 +98,9 @@ namespace Wgaffa.DMTools.Tests
                         new string[] { "foo", "bar" },
                         "int",
                         new Addition(
-                            new Number(3),
+                            new Literal(3),
                             new DiceRoll(Dice.d20))))
-                    .Returns("<decl_var: type=int names=foo, bar assign=<+ <num: 3> <dice: rolls=1, d20>>>");
+                    .Returns("<decl_var: type=int names=foo, bar assign=<+ <literal: 3> <dice: rolls=1, d20>>>");
                 yield return new TestCaseData(
                     new VariableDeclaration(
                         new string[] { "foo" },
@@ -111,45 +111,45 @@ namespace Wgaffa.DMTools.Tests
                         "foo",
                         new Addition(
                             new DiceRoll(Dice.d8, 2),
-                            new Number(3))))
-                    .Returns("<decl_def: var=foo value=<+ <dice: rolls=2, d8> <num: 3>>>");
+                            new Literal(3))))
+                    .Returns("<decl_def: var=foo value=<+ <dice: rolls=2, d8> <literal: 3>>>");
                 yield return new TestCaseData(
                     new Block(
                         new IStatement[]
                         {
                             new ExpressionStatement(
                                 new Addition(
-                                    new Number(3),
-                                    new Number(2))),
+                                    new Literal(3),
+                                    new Literal(2))),
                             new ExpressionStatement(
                                 new DiceRoll(Dice.d20)),
                             new ExpressionStatement(
-                                new Assignment("foo", new Number(5))),
+                                new Assignment("foo", new Literal(5))),
                         }))
-                    .Returns("<block: <+ <num: 3> <num: 2>> <dice: rolls=1, d20> <assign: var=foo value=<num: 5>>>");
+                    .Returns("<block: <+ <literal: 3> <literal: 2>> <dice: rolls=1, d20> <assign: var=foo value=<literal: 5>>>");
                 yield return new TestCaseData(
                     new Function(
                         "foo",
                         new ExpressionStatement(
                             new Addition(
-                                new Number(3),
-                                new Number(5))),
+                                new Literal(3),
+                                new Literal(5))),
                         "int"))
-                    .Returns("<func: var=foo return=int body=<+ <num: 3> <num: 5>>>");
+                    .Returns("<func: var=foo return=int body=<+ <literal: 3> <literal: 5>>>");
                 yield return new TestCaseData(
                     new Function(
                         "foo",
                         new ExpressionStatement(
                             new Addition(
-                                new Number(3),
-                                new Number(5))),
+                                new Literal(3),
+                                new Literal(5))),
                         "int",
                         new KeyValuePair<string, string>[]
                         {
                             new KeyValuePair<string, string>("int", "a"),
                             new KeyValuePair<string, string>("int", "b")
                         }))
-                    .Returns("<func: var=foo return=int body=<+ <num: 3> <num: 5>> params=int:a int:b>");
+                    .Returns("<func: var=foo return=int body=<+ <literal: 3> <literal: 5>> params=int:a int:b>");
             }
         }
 

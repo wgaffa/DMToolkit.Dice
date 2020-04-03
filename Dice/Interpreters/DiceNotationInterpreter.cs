@@ -63,17 +63,17 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Terminal expressions
 
-        private double Visit(Number number)
+        private object Visit(Literal literal)
         {
-            return number.Value;
+            return literal.Value;
         }
 
-        private double Visit(ListExpression list)
+        private object Visit(ListExpression list)
         {
             return list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr));
         }
 
-        private double Visit(DiceRoll dice)
+        private object Visit(DiceRoll dice)
         {
             var diceRoller = _configuration.DiceRoller ?? dice.DiceRoller;
 
@@ -87,7 +87,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return rolls.Sum();
         }
 
-        private double Visit(Variable variable)
+        private object Visit(Variable variable)
         {
             var record = _callStack.Peek();
 
@@ -114,12 +114,12 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Unary Expressions
 
-        private double Visit(Negate negate)
+        private object Visit(Negate negate)
         {
             return (double)-Visit((dynamic)negate.Right);
         }
 
-        private double Visit(Drop drop)
+        private object Visit(Drop drop)
         {
             Visit((dynamic)drop.Right);
 
@@ -138,7 +138,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return newRoll.Keep.Sum();
         }
 
-        private double Visit(Keep keep)
+        private object Visit(Keep keep)
         {
             Visit((dynamic)keep.Right);
 
@@ -168,7 +168,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return newList.Sum();
         }
 
-        private double Visit(Repeat repeat)
+        private object Visit(Repeat repeat)
         {
             return (double)Enumerable
                 .Range(0, repeat.RepeatTimes)
@@ -179,22 +179,22 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Binary Expressions
 
-        private double Visit(Addition addition)
+        private object Visit(Addition addition)
         {
             return (double)(Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right));
         }
 
-        private double Visit(Subtraction subtraction)
+        private object Visit(Subtraction subtraction)
         {
             return (double)(Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right));
         }
 
-        private double Visit(Multiplication multiplication)
+        private object Visit(Multiplication multiplication)
         {
             return (double)(Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right));
         }
 
-        private double Visit(Division divition)
+        private object Visit(Division divition)
         {
             return (double)(Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right));
         }
@@ -203,43 +203,36 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Statements
 
-        private double Visit(ExpressionStatement statement)
+        private void Visit(ExpressionStatement statement)
         {
-            return (double)Visit((dynamic)statement.Expression);
+            Visit((dynamic)statement.Expression);
         }
 
-        private double Visit(VariableDeclaration varDecl)
+        private void Visit(VariableDeclaration varDecl)
         {
             var record = _callStack.Peek();
             var value = varDecl.InitialValue
                 .Map(expr => (double)Visit((dynamic)expr))
                 .Map(v => varDecl.Names.Each(name => record[name] = v));
-
-            return 0;
         }
 
-        private double Visit(Definition _)
+        private void Visit(Definition _)
         {
-            return 0;
         }
 
-        private double Visit(Function function)
+        private void Visit(Function function)
         {
             var record = _callStack.Peek();
 
             record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
-            return 0;
         }
 
-        private double Visit(Block compound)
+        private void Visit(Block compound)
         {
-            double lastResult = 0;
             foreach (var block in compound.Body)
             {
-                lastResult = Visit((dynamic)block);
+                Visit((dynamic)block);
             }
-
-            return lastResult;
         }
 
         #endregion Statements
