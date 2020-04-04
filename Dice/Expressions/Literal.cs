@@ -13,7 +13,10 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public override string ToString()
         {
-            return $"<literal: {Value}>";
+            var value = Value.GetType() == typeof(double)
+                ? ((double)Value).ToString(CultureInfo.InvariantCulture)
+                : Value.ToString();
+            return $"<literal: {value}>";
         }
     }
 }
