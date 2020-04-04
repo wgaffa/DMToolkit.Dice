@@ -99,10 +99,10 @@ namespace Wgaffa.DMToolkit.Interpreters
             int variableScope = variable.Symbol.Map(s => s.ScopeLevel).Reduce(currentScopeLevel);
             return varSymbol switch
             {
-                VariableSymbol var => (double)record
+                VariableSymbol var => record
                     .Follow(currentScopeLevel - variableScope)
                     .Map(x => x[var.Name])
-                    .Reduce((double)0),
+                    .Reduce(null),
                 DefinitionSymbol def => RunDefinition(def),
                 _ => throw new InvalidOperationException()
             };
@@ -231,6 +231,11 @@ namespace Wgaffa.DMToolkit.Interpreters
             {
                 Visit((dynamic)block);
             }
+        }
+
+        private void Visit(Return ret)
+        {
+            _callStack.Peek().ReturnValue = (object)Visit((dynamic)ret.Expression);
         }
 
         #endregion Statements

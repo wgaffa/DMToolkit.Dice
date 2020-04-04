@@ -114,9 +114,9 @@ namespace DiceNotationParserTests
             {
                 yield return new TestCaseData("print(5+max(7, 3+8));")
                     .Returns(16);
-                yield return new TestCaseData("print(int Add5(int a) a + 5; end Add5(10));")
+                yield return new TestCaseData("int Add5(int a) return a + 5; end print(Add5(10));")
                     .Returns(15);
-                yield return new TestCaseData("print(real Pi() 3.14; end Pi());")
+                yield return new TestCaseData("real Pi() return 3.14; end print(Pi());")
                     .Returns(3.14);
             }
         }
@@ -153,13 +153,13 @@ namespace DiceNotationParserTests
                     .Returns(5);
                 yield return new TestCaseData("def Block = 5 + max(4, STRMOD); print(Block);")
                     .Returns(9);
-                yield return new TestCaseData("int Max(int a, int b) 5; end def Parry = 5 + Max(4, STRMOD); print(Parry);")
+                yield return new TestCaseData("int Max(int a, int b) return 5; end def Parry = 5 + Max(4, STRMOD); print(Parry);")
                     .Returns(10);
-                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) 20; end x = Durdle; end P(); end D(); print(x);")
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) return 20; end x = Durdle; end P(); end D(); print(x);")
                     .Returns(25);
                 yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + STRMOD; int P() STRMOD = 1; x = Durdle; end P(); end D(); print(x);")
                     .Returns(6);
-                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) b; end STRMOD = 3; x = Durdle; end P(); end D(); print(x);")
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) return b; end STRMOD = 3; x = Durdle; end P(); end D(); print(x);")
                     .Returns(8);
             }
         }

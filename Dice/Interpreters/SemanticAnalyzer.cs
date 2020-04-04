@@ -147,6 +147,13 @@ namespace Wgaffa.DMToolkit.Interpreters
             return definition;
         }
 
+        private IStatement Visit(Return ret)
+        {
+            Visit((dynamic)ret.Expression);
+
+            return ret;
+        }
+
         #endregion Statements
 
         #region Expressions
