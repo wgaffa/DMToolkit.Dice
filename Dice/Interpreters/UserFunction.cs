@@ -32,7 +32,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             interpreter.Execute(_declaration.Body);
 
-            return null;
+            return env.ReturnValue;
         }
     }
 }

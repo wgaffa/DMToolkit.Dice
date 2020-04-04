@@ -237,7 +237,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Expressions
 
-        private double Visit(FunctionCall function)
+        private object Visit(FunctionCall function)
         {
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
@@ -264,10 +264,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            double result = 0;
+            object result = null;
             if (implementation is ICallable func)
             {
-                func.Call(this, arguments.Cast<object>());
+                result = func.Call(this, arguments.Cast<object>());
             }
 
             _callStack.Pop();
@@ -275,9 +275,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(Assignment assignment)
+        private object Visit(Assignment assignment)
         {
-            double result = Visit((dynamic)assignment.Expression);
+            object result = Visit((dynamic)assignment.Expression);
 
             var record = _callStack.Peek();
             int currentScopeLevel = record.NestingLevel;
@@ -298,7 +298,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         private string InternalFunctionVariables(string identifier, int arity = 0)
             => $"__func_{identifier}/{arity}";
 
-        private double RunDefinition(DefinitionSymbol definition)
+        private object RunDefinition(DefinitionSymbol definition)
         {
             Maybe<ActivationRecord> accesslink = FindAccessLink(definition);
 
@@ -311,7 +311,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            double result = Visit((dynamic)definition.Expression);
+            object result = Visit((dynamic)definition.Expression);
 
             _callStack.Pop();
 
