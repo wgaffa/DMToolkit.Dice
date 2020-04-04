@@ -30,7 +30,9 @@ namespace Wgaffa.DMToolkit.Interpreters
                 env[_declaration.Parameters[i].Value] = argumentList[i];
             }
 
-            return interpreter.Execute(_declaration.Body);
+            interpreter.Execute(_declaration.Body);
+
+            return null;
         }
     }
 }

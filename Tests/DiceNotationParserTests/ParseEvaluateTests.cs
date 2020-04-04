@@ -4,6 +4,7 @@ using Superpower;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Wgaffa.DMToolkit;
 using Wgaffa.DMToolkit.DiceRollers;
 using Wgaffa.DMToolkit.Interpreters;
@@ -34,6 +35,7 @@ namespace DiceNotationParserTests
             _symbolTable = new ScopedSymbolTable();
             var realSymbol = new BuiltinTypeSymbol("real");
             var intSymbol = new BuiltinTypeSymbol("int");
+            var stringSymbol = new BuiltinTypeSymbol("string");
             var parameters = new Symbol[] { new VariableSymbol("a", realSymbol), new VariableSymbol("b", realSymbol) };
             _symbolTable.Add(realSymbol);
             _symbolTable.Add(intSymbol);
@@ -51,7 +53,7 @@ namespace DiceNotationParserTests
                 "print",
                 realSymbol,
                 new Print(),
-                new Symbol[] { new VariableSymbol("a", intSymbol) }));
+                new Symbol[] { new VariableSymbol("a", stringSymbol) }));
 
             _symbolTable.Add(new VariableSymbol("INTMOD", intSymbol));
             _symbolTable.Add(new VariableSymbol("STRMOD", intSymbol));
@@ -71,15 +73,15 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("1+5;")
+                yield return new TestCaseData("print(1+5);")
                     .Returns(6);
-                yield return new TestCaseData("1.5 * d6;")
+                yield return new TestCaseData("print(1.5 * d6);")
                     .Returns(4.5);
-                yield return new TestCaseData("6d20-L;")
+                yield return new TestCaseData("print(6d20-L);")
                     .Returns(49);
-                yield return new TestCaseData("4d20-H;")
+                yield return new TestCaseData("print(4d20-H);")
                     .Returns(30);
-                yield return new TestCaseData("4d20(k3);")
+                yield return new TestCaseData("print(4d20(k3));")
                     .Returns(45);
             }
         }
@@ -88,19 +90,19 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("d20 + INTMOD + Ranks + ClassSkill + Misc;")
+                yield return new TestCaseData("print(d20 + INTMOD + Ranks + ClassSkill + Misc);")
                     .Returns(11)
                     .SetName("Skill check roll");
-                yield return new TestCaseData("d20 + STRMOD + BAB + Size;")
+                yield return new TestCaseData("print(d20 + STRMOD + BAB + Size);")
                     .Returns(10)
                     .SetName("Attackroll melee small");
-                yield return new TestCaseData("d20 + DEXMOD + BAB + Size + RangePenalty;")
+                yield return new TestCaseData("print(d20 + DEXMOD + BAB + Size + RangePenalty);")
                     .Returns(8)
                     .SetName("Attackroll ranged small");
-                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + DEXMOD + Size + Misc;")
+                yield return new TestCaseData("print(10 + ArmorBonus + ShieldBonus + DEXMOD + Size + Misc);")
                     .Returns(22)
                     .SetName("ArmorBonus");
-                yield return new TestCaseData("10 + ArmorBonus + ShieldBonus + max(0, min(DEXMOD, MaxDex)) + Size + Misc;")
+                yield return new TestCaseData("print(10 + ArmorBonus + ShieldBonus + max(0, min(DEXMOD, MaxDex)) + Size + Misc);")
                     .Returns(20)
                     .SetName("ArmorBonus with MaxDex");
             }
@@ -110,11 +112,11 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("5+max(7, 3+8);")
+                yield return new TestCaseData("print(5+max(7, 3+8));")
                     .Returns(16);
-                yield return new TestCaseData("int Add5(int a) a + 5; end Add5(10);")
+                yield return new TestCaseData("print(int Add5(int a) a + 5; end Add5(10));")
                     .Returns(15);
-                yield return new TestCaseData("real Pi() 3.14; end Pi();")
+                yield return new TestCaseData("print(real Pi() 3.14; end Pi());")
                     .Returns(3.14);
             }
         }
@@ -123,14 +125,14 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("real foo = 5.5; real Bar(real a) foo = a; end Bar(3.2); foo;")
+                yield return new TestCaseData("real foo = 5.5; real Bar(real a) foo = a; end Bar(3.2); print(foo);")
                     .Returns(3.2);
                 yield return new TestCaseData("int x = 3; " +
                     "int P() x = x - 1; end " +
                     "int Q() " +
                     "   int y = x; int R() x = x + 1; y = y + x; P(); end " +
                     "R(); P(); end " +
-                    "x = 2; Q(); x;")
+                    "x = 2; Q(); print(x);")
                     .Returns(1);
             }
         }
@@ -139,25 +141,25 @@ namespace DiceNotationParserTests
         {
             public IEnumerator GetEnumerator()
             {
-                yield return new TestCaseData("real foo; foo = 5.2;")
+                yield return new TestCaseData("real foo; foo = 5.2; print(foo);")
                     .Returns(5.2);
-                yield return new TestCaseData("int foo, bar; foo = 5; bar = 2d6; foo+bar;")
+                yield return new TestCaseData("int foo, bar; foo = 5; bar = 2d6; print(foo+bar);")
                     .Returns(17);
-                yield return new TestCaseData("int foo, bar = 5; foo+bar;")
+                yield return new TestCaseData("int foo, bar = 5; print(foo+bar);")
                     .Returns(10);
-                yield return new TestCaseData("def Attack = (d20 + 5) * 1.5; Attack + 5;")
+                yield return new TestCaseData("def Attack = (d20 + 5) * 1.5; print(Attack + 5);")
                     .Returns(17);
-                yield return new TestCaseData("def Attack = 1d20 + STRMOD; Attack;")
+                yield return new TestCaseData("def Attack = 1d20 + STRMOD; print(Attack);")
                     .Returns(5);
-                yield return new TestCaseData("def Block = 5 + max(4, STRMOD); Block;")
+                yield return new TestCaseData("def Block = 5 + max(4, STRMOD); print(Block);")
                     .Returns(9);
-                yield return new TestCaseData("int Max(int a, int b) 5; end def Parry = 5 + Max(4, STRMOD); Parry;")
+                yield return new TestCaseData("int Max(int a, int b) 5; end def Parry = 5 + Max(4, STRMOD); print(Parry);")
                     .Returns(10);
-                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) 20; end x = Durdle; end P(); end D(); x;")
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) 20; end x = Durdle; end P(); end D(); print(x);")
                     .Returns(25);
-                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + STRMOD; int P() STRMOD = 1; x = Durdle; end P(); end D(); x;")
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + STRMOD; int P() STRMOD = 1; x = Durdle; end P(); end D(); print(x);")
                     .Returns(6);
-                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) b; end STRMOD = 3; x = Durdle; end P(); end D(); x;")
+                yield return new TestCaseData("int x = 5; int D() def Durdle = 5 + max(4, STRMOD); int P() int max(int a, int b) b; end STRMOD = 3; x = Durdle; end P(); end D(); print(x);")
                     .Returns(8);
             }
         }
@@ -205,16 +207,17 @@ namespace DiceNotationParserTests
             var semantic = new SemanticAnalyzer(configuration);
             var ast = semantic.Analyze(expression);
 
-            double result = 0;
+            using StringWriter sw = new StringWriter();
+            Console.SetOut(sw);
+
             var interpreter = new DiceNotationInterpreter(configuration);
             ast.OnError(e => throw new Exception($"{e.Count} errors during semantic analyze"))
-                .Map(expr =>
+                .OnSuccess(expr =>
                 interpreter.Interpret(
                     expr,
-                    new VariableSetup()))
-                .OnSuccess(r => result = r);
+                    new VariableSetup()));
 
-            return result;
+            return Convert.ToDouble(sw.ToString());
         }
     }
 }

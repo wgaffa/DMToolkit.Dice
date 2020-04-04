@@ -38,7 +38,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Public API
 
-        public double Interpret(IStatement expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
+        public void Interpret(IStatement expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
         {
             Guard.Against.Null(expression, nameof(expression));
 
@@ -52,11 +52,9 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            var result = (double)Visit((dynamic)expression);
+            Visit((dynamic)expression);
 
             _callStack.Pop();
-
-            return result;
         }
 
         #endregion Public API
@@ -269,7 +267,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             double result = 0;
             if (implementation is ICallable func)
             {
-                result = (double)func.Call(this, arguments.Cast<object>());
+                func.Call(this, arguments.Cast<object>());
             }
 
             _callStack.Pop();
@@ -350,9 +348,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             }
         }
 
-        internal double Execute(IStatement expression)
+        internal void Execute(IStatement expression)
         {
-            return (double)Visit((dynamic)expression);
+            Visit((dynamic)expression);
         }
 
         #endregion Internal methods
