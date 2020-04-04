@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Statements;
+using Wgaffa.DMToolkit.Types;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Parser
@@ -189,8 +190,15 @@ namespace Wgaffa.DMToolkit.Parser
             from semi in Token.EqualTo(DiceNotationToken.SemiColon)
             select (IStatement)new ExpressionStatement(expr);
 
+        private static readonly TokenListParser<DiceNotationToken, IStatement> ReturnStatement =
+            from ret in Token.EqualToValue(DiceNotationToken.Keyword, "return")
+            from expr in Expression.OptionalOrDefault(new Literal(Unit.Value))
+            from semi in Token.EqualTo(DiceNotationToken.SemiColon)
+            select (IStatement)new Return(expr);
+
         private static readonly TokenListParser<DiceNotationToken, IStatement> Statement =
             ExpressionStatement
+            .Or(ReturnStatement)
             .Named("statement");
 
         private static readonly TokenListParser<DiceNotationToken, IStatement> Declaration =

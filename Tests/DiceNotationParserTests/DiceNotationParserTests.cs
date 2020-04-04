@@ -51,6 +51,8 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("real foo = 5; real Bar() 5; end");
                 yield return new TestCaseData(@"""Some form of string"";");
                 yield return new TestCaseData(@"""Another \""quoted\"" string"";");
+                yield return new TestCaseData("return;");
+                yield return new TestCaseData("return 5+2d6;");
             }
         }
 
