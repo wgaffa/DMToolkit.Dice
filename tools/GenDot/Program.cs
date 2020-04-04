@@ -6,9 +6,9 @@ using Wgaffa.DMToolkit.Parser;
 
 namespace GenDot
 {
-    static class Program
+    public static class Program
     {
-        static int Main(string[] args)
+        public static int Main(string[] args)
         {
             if (args.Length < 1)
             {
@@ -20,7 +20,7 @@ namespace GenDot
             var filename = args[0];
 
             var tokens = new DiceNotationTokenizer().Tokenize(ReadFile(filename));
-            var program = DiceNotationParser.Notation.Parse(tokens);
+            var program = DiceNotationParser.Program.Parse(tokens);
 
             var dotGenerator = new CompileToDot("AST");
             Console.WriteLine(dotGenerator.Evaluate(program));

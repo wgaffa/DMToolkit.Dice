@@ -1,12 +1,13 @@
 ﻿using Ardalis.GuardClauses;
 using System.Collections.Generic;
 using System.Linq;
+using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.Functional;
 
-namespace Wgaffa.DMToolkit.Expressions
+namespace Wgaffa.DMToolkit.Statements
 {
-    public class VariableDeclarationExpression : IExpression
+    public class VariableDeclaration : IStatement
     {
         private readonly List<string> _names = new List<string>();
 
@@ -14,7 +15,7 @@ namespace Wgaffa.DMToolkit.Expressions
         public string Type { get; }
         public Maybe<IExpression> InitialValue { get; }
 
-        public VariableDeclarationExpression(IEnumerable<string> names, string type, Maybe<IExpression> initialValue = null)
+        public VariableDeclaration(IEnumerable<string> names, string type, Maybe<IExpression> initialValue = null)
         {
             Guard.Against.Null(names, nameof(names));
             Guard.Against.Null(type, nameof(type));

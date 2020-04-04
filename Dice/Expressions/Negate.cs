@@ -1,8 +1,8 @@
 ﻿namespace Wgaffa.DMToolkit.Expressions
 {
-    public class NegateExpression : UnaryExpression
+    public class Negate : UnaryExpression
     {
-        public NegateExpression(IExpression right)
+        public Negate(IExpression right)
             : base(right)
         {
         }

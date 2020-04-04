@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using System.Collections.Generic;
+using Wgaffa.DMToolkit.Types;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -14,6 +15,8 @@ namespace Wgaffa.DMToolkit.Interpreters
     public class ActivationRecord
     {
         private readonly Dictionary<string, object> _members = new Dictionary<string, object>();
+
+        internal object ReturnValue = Unit.Value;
 
         public string Name { get; }
         public RecordType Type { get; }

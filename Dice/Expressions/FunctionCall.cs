@@ -6,7 +6,7 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class FunctionCallExpression : IExpression
+    public class FunctionCall : IExpression
     {
         private readonly List<IExpression> _arguments = new List<IExpression>();
 
@@ -15,7 +15,7 @@ namespace Wgaffa.DMToolkit.Expressions
 
         public IReadOnlyList<IExpression> Arguments => _arguments.AsReadOnly();
 
-        public FunctionCallExpression(string name, IEnumerable<IExpression> arguments)
+        public FunctionCall(string name, IEnumerable<IExpression> arguments)
         {
             Guard.Against.NullOrWhiteSpace(name, nameof(name));
             Guard.Against.Null(arguments, nameof(arguments));

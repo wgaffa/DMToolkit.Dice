@@ -6,6 +6,7 @@ using System.Linq;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Parser;
+using Wgaffa.DMToolkit.Statements;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -37,7 +38,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Public API
 
-        public double Interpret(IExpression expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
+        public void Interpret(IStatement expression, IEnumerable<KeyValuePair<string, double>> initialValues = null)
         {
             Guard.Against.Null(expression, nameof(expression));
 
@@ -51,28 +52,26 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            var result = (double)Visit((dynamic)expression);
+            Visit((dynamic)expression);
 
             _callStack.Pop();
-
-            return result;
         }
 
         #endregion Public API
 
         #region Terminal expressions
 
-        private double Visit(NumberExpression number)
+        private object Visit(Literal literal)
         {
-            return number.Value;
+            return literal.Value;
         }
 
-        private double Visit(ListExpression list)
+        private object Visit(ListExpression list)
         {
             return list.Expressions.Aggregate(.0, (acc, expr) => acc + Visit((dynamic)expr));
         }
 
-        private double Visit(DiceExpression dice)
+        private object Visit(DiceRoll dice)
         {
             var diceRoller = _configuration.DiceRoller ?? dice.DiceRoller;
 
@@ -86,7 +85,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return rolls.Sum();
         }
 
-        private double Visit(VariableExpression variable)
+        private object Visit(Variable variable)
         {
             var record = _callStack.Peek();
 
@@ -100,10 +99,10 @@ namespace Wgaffa.DMToolkit.Interpreters
             int variableScope = variable.Symbol.Map(s => s.ScopeLevel).Reduce(currentScopeLevel);
             return varSymbol switch
             {
-                VariableSymbol var => (double)record
+                VariableSymbol var => record
                     .Follow(currentScopeLevel - variableScope)
                     .Map(x => x[var.Name])
-                    .Reduce((double)0),
+                    .Reduce(null),
                 DefinitionSymbol def => RunDefinition(def),
                 _ => throw new InvalidOperationException()
             };
@@ -113,12 +112,12 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Unary Expressions
 
-        private double Visit(NegateExpression negate)
+        private object Visit(Negate negate)
         {
             return (double)-Visit((dynamic)negate.Right);
         }
 
-        private double Visit(DropExpression drop)
+        private object Visit(Drop drop)
         {
             Visit((dynamic)drop.Right);
 
@@ -137,7 +136,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return newRoll.Keep.Sum();
         }
 
-        private double Visit(KeepExpression keep)
+        private object Visit(Keep keep)
         {
             Visit((dynamic)keep.Right);
 
@@ -167,7 +166,7 @@ namespace Wgaffa.DMToolkit.Interpreters
             return newList.Sum();
         }
 
-        private double Visit(RepeatExpression repeat)
+        private object Visit(Repeat repeat)
         {
             return (double)Enumerable
                 .Range(0, repeat.RepeatTimes)
@@ -178,29 +177,72 @@ namespace Wgaffa.DMToolkit.Interpreters
 
         #region Binary Expressions
 
-        private double Visit(AdditionExpression addition)
+        private object Visit(Addition addition)
         {
             return (double)(Visit((dynamic)addition.Left) + Visit((dynamic)addition.Right));
         }
 
-        private double Visit(SubtractionExpression subtraction)
+        private object Visit(Subtraction subtraction)
         {
             return (double)(Visit((dynamic)subtraction.Left) - Visit((dynamic)subtraction.Right));
         }
 
-        private double Visit(MultiplicationExpression multiplication)
+        private object Visit(Multiplication multiplication)
         {
             return (double)(Visit((dynamic)multiplication.Left) * Visit((dynamic)multiplication.Right));
         }
 
-        private double Visit(DivisionExpression divition)
+        private object Visit(Division divition)
         {
             return (double)(Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right));
         }
 
         #endregion Binary Expressions
 
-        public double Visit(FunctionCallExpression function)
+        #region Statements
+
+        private void Visit(ExpressionStatement statement)
+        {
+            Visit((dynamic)statement.Expression);
+        }
+
+        private void Visit(VariableDeclaration varDecl)
+        {
+            var record = _callStack.Peek();
+            var value = varDecl.InitialValue
+                .Map(expr => (double)Visit((dynamic)expr))
+                .Map(v => varDecl.Names.Each(name => record[name] = v));
+        }
+
+        private void Visit(Definition _)
+        {
+        }
+
+        private void Visit(Function function)
+        {
+            var record = _callStack.Peek();
+
+            record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
+        }
+
+        private void Visit(Block compound)
+        {
+            foreach (var block in compound.Body)
+            {
+                Visit((dynamic)block);
+            }
+        }
+
+        private void Visit(Return ret)
+        {
+            _callStack.Peek().ReturnValue = (object)Visit((dynamic)ret.Expression);
+        }
+
+        #endregion Statements
+
+        #region Expressions
+
+        private object Visit(FunctionCall function)
         {
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
@@ -227,10 +269,10 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            double result = 0;
+            object result = null;
             if (implementation is ICallable func)
             {
-                result = (double)func.Call(this, arguments.Cast<object>());
+                result = func.Call(this, arguments.Cast<object>());
             }
 
             _callStack.Pop();
@@ -238,19 +280,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(VariableDeclarationExpression varDecl)
+        private object Visit(Assignment assignment)
         {
-            var record = _callStack.Peek();
-            var value = varDecl.InitialValue
-                .Map(expr => (double)Visit((dynamic)expr))
-                .Map(v => varDecl.Names.Each(name => record[name] = v));
-
-            return 0;
-        }
-
-        private double Visit(AssignmentExpression assignment)
-        {
-            double result = Visit((dynamic)assignment.Expression);
+            object result = Visit((dynamic)assignment.Expression);
 
             var record = _callStack.Peek();
             int currentScopeLevel = record.NestingLevel;
@@ -264,36 +296,14 @@ namespace Wgaffa.DMToolkit.Interpreters
             return result;
         }
 
-        private double Visit(DefinitionExpression _)
-        {
-            return 0;
-        }
-
-        private double Visit(CompoundExpression compound)
-        {
-            double lastResult = 0;
-            foreach (var block in compound.Expressions)
-            {
-                lastResult = Visit((dynamic)block);
-            }
-
-            return lastResult;
-        }
-
-        private double Visit(FunctionExpression function)
-        {
-            var record = _callStack.Peek();
-
-            record[InternalFunctionVariables(function.Identifier, function.Parameters.Count)] = function.Symbol;
-            return 0;
-        }
+        #endregion Expressions
 
         #region Internal methods
 
         private string InternalFunctionVariables(string identifier, int arity = 0)
             => $"__func_{identifier}/{arity}";
 
-        private double RunDefinition(DefinitionSymbol definition)
+        private object RunDefinition(DefinitionSymbol definition)
         {
             Maybe<ActivationRecord> accesslink = FindAccessLink(definition);
 
@@ -306,7 +316,7 @@ namespace Wgaffa.DMToolkit.Interpreters
 
             _callStack.Push(record);
 
-            double result = Visit((dynamic)definition.Expression);
+            object result = Visit((dynamic)definition.Expression);
 
             _callStack.Pop();
 
@@ -343,9 +353,9 @@ namespace Wgaffa.DMToolkit.Interpreters
             }
         }
 
-        internal double Execute(IExpression expression)
+        internal void Execute(IStatement expression)
         {
-            return (double)Visit((dynamic)expression);
+            Visit((dynamic)expression);
         }
 
         #endregion Internal methods

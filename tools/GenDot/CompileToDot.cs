@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
+using Wgaffa.DMToolkit.Statements;
 
 namespace GenDot
 {
@@ -22,12 +23,12 @@ namespace GenDot
             _name = name;
         }
 
-        public string Evaluate(IExpression expression)
+        public string Evaluate(IStatement expression)
         {
             var header = $"digraph {_name} {{\n";
             const string footer = "}";
 
-            int program = Visit((dynamic)expression);
+            Visit((dynamic)expression);
 
             return header + _body.ToString() + footer;
         }
@@ -38,12 +39,30 @@ namespace GenDot
             return _counter++;
         }
 
-        private int Visit(CompoundExpression compound)
+        private int Visit(IStatement expression)
+        {
+            _body.Append(Node(_counter, expression, "default"));
+            return _counter++;
+        }
+
+        private int Visit(ExpressionStatement expr)
+        {
+            int id = _counter++;
+            _body.Append(Node(id, expr));
+
+            int exprId = Visit((dynamic)expr.Expression);
+
+            _body.Append(Link(id, exprId));
+
+            return id;
+        }
+
+        private int Visit(Block compound)
         {
             int id = _counter++;
             _body.Append(Node(id, compound));
 
-            var ids = compound.Expressions.Select(expr => (int)Visit((dynamic)expr));
+            var ids = compound.Body.Select(expr => (int)Visit((dynamic)expr));
 
             foreach (var item in ids)
             {
@@ -53,7 +72,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(VariableDeclarationExpression vardecl)
+        private int Visit(VariableDeclaration vardecl)
         {
             int id = _counter++;
             _body.Append(Node(id, vardecl, string.Join(", ", vardecl.Names)));
@@ -65,7 +84,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(FunctionExpression function)
+        private int Visit(Function function)
         {
             int id = _counter++;
             _body.Append(Node(id, function, function.Identifier));
@@ -77,7 +96,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(FunctionCallExpression functionCall)
+        private int Visit(FunctionCall functionCall)
         {
             int id = _counter++;
             _body.Append(Node(id, functionCall, functionCall.Name));
@@ -92,7 +111,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(DefinitionExpression definition)
+        private int Visit(Definition definition)
         {
             int id = _counter++;
             _body.Append(Node(id, definition, definition.Name));
@@ -104,14 +123,14 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(VariableExpression variable)
+        private int Visit(Variable variable)
         {
             _body.Append(Node(_counter, variable, variable.Identifier));
 
             return _counter++;
         }
 
-        private int Visit(AssignmentExpression assignment)
+        private int Visit(Assignment assignment)
         {
             int id = _counter++;
             _body.Append(Node(id, assignment, assignment.Identifier));
@@ -123,7 +142,7 @@ namespace GenDot
             return id;
         }
 
-        private int Visit(NumberExpression number)
+        private int Visit(Literal number)
         {
             _body.Append(Node(_counter, number, number.Value.ToString()));
             return _counter++;
@@ -155,21 +174,21 @@ namespace GenDot
             return id;
         }
 
-        private static string GetName(IExpression expression)
+        private static string GetName(object expression)
         {
             return expression.GetType().Name;
         }
 
-        private static string Label(IExpression expression) =>
+        private static string Label(object expression) =>
             $"[label=\"{GetName(expression)}\"]";
 
-        private static string Label(IExpression expression, string meta) =>
+        private static string Label(object expression, string meta) =>
             $"[label=\"{GetName(expression)}\\n{meta}\"]";
 
-        private static string Node(int id, IExpression expression) =>
+        private static string Node(int id, object expression) =>
             $"\tnode{id} {Label(expression)}\n";
 
-        private static string Node(int id, IExpression expression, string meta) =>
+        private static string Node(int id, object expression, string meta) =>
             $"\tnode{id} {Label(expression, meta)}\n";
 
         private static string Link(int from, int to) =>

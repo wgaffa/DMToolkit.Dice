@@ -2,11 +2,11 @@
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class StringLiteral : IExpression
+    public class String : IExpression
     {
         public string Value { get; }
 
-        public StringLiteral(string value)
+        public String(string value)
         {
             Guard.Against.Null(value, nameof(value));
 

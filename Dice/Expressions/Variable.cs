@@ -4,17 +4,17 @@ using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Expressions
 {
-    public class VariableExpression : IExpression
+    public class Variable : IExpression
     {
         public string Identifier { get; }
         public Maybe<Symbol> Symbol { get; internal set; }
 
-        public VariableExpression(string identifier)
+        public Variable(string identifier)
             : this(identifier, None.Value)
         {
         }
 
-        public VariableExpression(string identifier, Maybe<Symbol> symbol)
+        public Variable(string identifier, Maybe<Symbol> symbol)
         {
             Guard.Against.NullOrWhiteSpace(identifier, nameof(identifier));
             Guard.Against.Null(symbol, nameof(symbol));
