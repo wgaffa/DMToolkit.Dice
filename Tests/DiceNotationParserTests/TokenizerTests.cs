@@ -36,6 +36,7 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData("3.2452").Returns(1);
                 yield return new TestCaseData(@"""This is a string""").Returns(1);
                 yield return new TestCaseData(@"""This is \""a string\"" for me""").Returns(1);
+                yield return new TestCaseData("!").Returns(1);
             }
         }
 
@@ -91,6 +92,8 @@ namespace DiceNotationParserTests
                     .Returns(DiceNotationToken.Keyword);
                 yield return new TestCaseData("return")
                     .Returns(DiceNotationToken.Keyword);
+                yield return new TestCaseData("!")
+                    .Returns(DiceNotationToken.Exclamation);
             }
         }
 

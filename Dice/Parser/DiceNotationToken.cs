@@ -54,6 +54,9 @@ namespace Wgaffa.DMToolkit.Parser
 		[Token(Example = "=")]
 		Equal,
 
+		[Token(Example = "!")]
+		Exclamation,
+
 		Dice,
 
 		[Token(Category = "repeat")]
