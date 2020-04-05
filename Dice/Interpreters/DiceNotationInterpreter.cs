@@ -7,6 +7,7 @@ using Wgaffa.DMToolkit.Expressions;
 using Wgaffa.DMToolkit.Extensions;
 using Wgaffa.DMToolkit.Parser;
 using Wgaffa.DMToolkit.Statements;
+using Wgaffa.DMToolkit.Types;
 using Wgaffa.Functional;
 
 namespace Wgaffa.DMToolkit.Interpreters
@@ -197,6 +198,16 @@ namespace Wgaffa.DMToolkit.Interpreters
             return (double)(Visit((dynamic)divition.Left) / Visit((dynamic)divition.Right));
         }
 
+        private object Visit(Equality equality)
+        {
+            object left = Visit((dynamic)equality.Left);
+            object right = Visit((dynamic)equality.Right);
+            if (equality.Comparison == EqualityComparison.Equality)
+                return left.Equals(right);
+            else
+                return !left.Equals(right);
+        }
+
         #endregion Binary Expressions
 
         #region Statements
@@ -246,7 +257,7 @@ namespace Wgaffa.DMToolkit.Interpreters
         {
             var castedSymbol = function.Symbol.Map(s => s as FunctionSymbol);
 
-            var arguments = function.Arguments.Select(expr => (double)Visit((dynamic)expr)).ToList();
+            var arguments = function.Arguments.Select(expr => (object)Visit((dynamic)expr)).ToList();
 
             int recordScope = function.Symbol.Map(x => x.ScopeLevel + 1).Reduce(0);
             ICallable implementation = castedSymbol.Map(x => x.Implementation).Reduce(default(ICallable));

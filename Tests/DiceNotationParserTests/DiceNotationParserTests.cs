@@ -53,6 +53,9 @@ namespace DiceNotationParserTests
                 yield return new TestCaseData(@"""Another \""quoted\"" string"";");
                 yield return new TestCaseData("return;");
                 yield return new TestCaseData("return 5+2d6;");
+                yield return new TestCaseData("5+2 == 7;");
+                yield return new TestCaseData("foo == 7;");
+                yield return new TestCaseData("foo != 5d6(k2);");
             }
         }
 

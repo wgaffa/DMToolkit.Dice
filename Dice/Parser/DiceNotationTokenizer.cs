@@ -24,6 +24,7 @@ namespace Wgaffa.DMToolkit.Parser
             [';'] = DiceNotationToken.SemiColon,
             [':'] = DiceNotationToken.Colon,
             ['='] = DiceNotationToken.Equal,
+            ['!'] = DiceNotationToken.Exclamation,
         };
 
         private readonly static List<string> _keywords = new List<string>()

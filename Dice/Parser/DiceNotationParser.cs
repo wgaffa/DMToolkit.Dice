@@ -18,6 +18,8 @@ namespace Wgaffa.DMToolkit.Parser
             Subtraction,
             Multiplication,
             Division,
+            Equal,
+            NotEqual,
         }
 
         private static readonly TextParser<IExpression> DiceParser =
@@ -47,6 +49,16 @@ namespace Wgaffa.DMToolkit.Parser
 
         private static readonly TokenListParser<DiceNotationToken, OperatorType> Division =
             Token.EqualTo(DiceNotationToken.Divide).Value(OperatorType.Division);
+
+        private static readonly TokenListParser<DiceNotationToken, OperatorType> Equal =
+            from _ in Token.EqualTo(DiceNotationToken.Equal)
+            from _1 in Token.EqualTo(DiceNotationToken.Equal)
+            select OperatorType.Equal;
+
+        private static readonly TokenListParser<DiceNotationToken, OperatorType> NotEqual =
+            from _ in Token.EqualTo(DiceNotationToken.Exclamation)
+            from _1 in Token.EqualTo(DiceNotationToken.Equal)
+            select OperatorType.NotEqual;
 
         private static readonly TokenListParser<DiceNotationToken, DropType> DropLowest =
             Token.EqualToValue(DiceNotationToken.Identifier, "L").Value(DropType.Lowest);
@@ -115,7 +127,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> FunctionCall =
             from identifier in Token.EqualTo(DiceNotationToken.Identifier).Apply(Identifier.CStyle)
             from lparen in Token.EqualTo(DiceNotationToken.LParen)
-            from expr in Expr.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+            from expr in Expression.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
             select (IExpression)new FunctionCall(identifier.ToStringValue(), expr);
 
@@ -137,14 +149,18 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> Expr =
             Parse.Chain(Addition.Or(Subtraction), Term, MakeBinary);
 
+        private static readonly TokenListParser<DiceNotationToken, IExpression> Equality =
+            Parse.Chain(Equal.Or(NotEqual), Expr, MakeBinary);
+
         private static readonly TokenListParser<DiceNotationToken, IExpression> Assign =
-            from name in Variable
+            (from name in Variable
             from equal in Token.EqualTo(DiceNotationToken.Equal)
             from right in Expr
-            select (IExpression)new Assignment(name, right);
+            select (IExpression)new Assignment(name, right)).Try()
+            .Or(Equality);
 
         private static readonly TokenListParser<DiceNotationToken, IExpression> Expression =
-            Assign.Try().Or(Expr);
+            Assign;
 
         private static readonly TokenListParser<DiceNotationToken, IStatement> Definition =
             from def in Token.EqualToValue(DiceNotationToken.Keyword, "def")
@@ -212,17 +228,17 @@ namespace Wgaffa.DMToolkit.Parser
             from end in Token.EqualToValue(DiceNotationToken.Keyword, "end")
             select stmts.Length == 1 ? stmts[0] : new Block(stmts);
 
-        private static IExpression MakeBinary(OperatorType @operator, IExpression left, IExpression right)
+        private static IExpression MakeBinary(OperatorType @operator, IExpression left, IExpression right) =>
+            @operator switch
         {
-            return @operator switch
-            {
-                OperatorType.Addition => new Addition(left, right),
-                OperatorType.Subtraction => new Subtraction(left, right),
-                OperatorType.Multiplication => new Multiplication(left, right),
-                OperatorType.Division => new Division(left, right),
-                _ => throw new InvalidOperationException(),
-            };
-        }
+            OperatorType.Addition => new Addition(left, right),
+            OperatorType.Subtraction => new Subtraction(left, right),
+            OperatorType.Multiplication => new Multiplication(left, right),
+            OperatorType.Division => new Division(left, right),
+            OperatorType.Equal => new Equality(left, right),
+            OperatorType.NotEqual => new Equality(left, right, EqualityComparison.Inequality),
+            _ => throw new InvalidOperationException(),
+        };
 
         public static TokenListParser<DiceNotationToken, IStatement> Program =
             (from declarations in Declaration.Many()

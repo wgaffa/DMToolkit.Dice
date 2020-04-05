@@ -219,5 +219,50 @@ namespace DiceNotationParserTests
 
             return Convert.ToDouble(sw.ToString());
         }
+
+        public class EqualityTestCaseData : IEnumerable
+        {
+            public IEnumerator GetEnumerator()
+            {
+                yield return new TestCaseData("print(0 == 0);")
+                    .Returns("true");
+                yield return new TestCaseData("print(5.2 != 5.0);")
+                    .Returns("true");
+                yield return new TestCaseData("int x = 5; int y = 5; print(x == y);")
+                    .Returns("true");
+                yield return new TestCaseData("int x = 7; print(x == 5);")
+                    .Returns("false");
+                yield return new TestCaseData("print(7 != 7);")
+                    .Returns("false");
+            }
+        }
+
+        [TestCaseSource(typeof(EqualityTestCaseData))]
+        public string Evaluate_ShouldReturnCorrectOutput(string input)
+        {
+            var tokenlist = new DiceNotationTokenizer().Tokenize(input);
+            var expression = DiceNotationParser.Program.Parse(tokenlist);
+
+            var configuration = new Configuration()
+            {
+                DiceRoller = _mockRoller.Object,
+                SymbolTable = _symbolTable,
+            };
+
+            var semantic = new SemanticAnalyzer(configuration);
+            var ast = semantic.Analyze(expression);
+
+            using StringWriter sw = new StringWriter();
+            Console.SetOut(sw);
+
+            var interpreter = new DiceNotationInterpreter(configuration);
+            ast.OnError(e => throw new Exception($"{e.Count} errors during semantic analyze"))
+                .OnSuccess(expr =>
+                interpreter.Interpret(
+                    expr,
+                    new VariableSetup()));
+
+            return sw.ToString().Trim();
+        }
     }
 }
