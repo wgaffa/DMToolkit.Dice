@@ -45,6 +45,18 @@ namespace GenDot
             return _counter++;
         }
 
+        private int Visit(Return ret)
+        {
+            int id = _counter++;
+            _body.Append(Node(id, ret));
+
+            int exprId = Visit((dynamic)ret.Expression);
+
+            _body.Append(Link(id, exprId));
+
+            return id;
+        }
+
         private int Visit(ExpressionStatement expr)
         {
             int id = _counter++;
