@@ -33,5 +33,10 @@ namespace Wgaffa.DMToolkit.Types
         {
             return 0;
         }
+
+        public override string ToString()
+        {
+            return "()";
+        }
     }
 }

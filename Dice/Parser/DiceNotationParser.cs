@@ -127,7 +127,7 @@ namespace Wgaffa.DMToolkit.Parser
         private static readonly TokenListParser<DiceNotationToken, IExpression> FunctionCall =
             from identifier in Token.EqualTo(DiceNotationToken.Identifier).Apply(Identifier.CStyle)
             from lparen in Token.EqualTo(DiceNotationToken.LParen)
-            from expr in Expr.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
+            from expr in Expression.ManyDelimitedBy(Token.EqualTo(DiceNotationToken.Comma))
             from rparen in Token.EqualTo(DiceNotationToken.RParen)
             select (IExpression)new FunctionCall(identifier.ToStringValue(), expr);
 
